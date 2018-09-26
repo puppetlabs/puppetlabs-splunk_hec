@@ -86,7 +86,7 @@ Requirements
 * Puppet or Puppet Enterprise
 * Splunk
 
-This was tested on Puppet Enterprise 2018.1.4, using stock gems of yaml, json, net::https
+This was tested on both Puppet Enterprise 2018.1.4 & Puppet 6, using stock gems of yaml, json, net::https
 
 Installation & Usage
 --------------------
