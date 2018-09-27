@@ -31,6 +31,8 @@ Puppet::Reports.register_report(:splunk_hec) do
 
     splunk_server = splunkhec['server']
     splunk_token  = splunkhec['token']
+    # adds timeout, 2x value because of open and read timeout options
+    splunk_timeout = splunkhec['timeout'] || 2
 
     #  create header here
     #header = "Authorization: Splunk #{splunk_token}"
@@ -41,6 +43,9 @@ Puppet::Reports.register_report(:splunk_hec) do
     request.body = splunk_event.to_json
 
     client = Net::HTTP.new(splunk_server, '8088')
+    client.open_timeout = splunk_timeout
+    client.read_timeout = splunk_timeout
+
     client.use_ssl = true
     client.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
