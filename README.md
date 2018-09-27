@@ -97,7 +97,9 @@ Installation & Usage
 
 3. Run `puppet agent -t` or `puppet plugin download` if you wish to grab the processor without a full puppet agent run
 
-4. Create a `/etc/puppetlabs/puppet/splunkhec.yaml` (see examples directory for one) adding your Splunk Server & Token from step 1 (port remains default at 8088 at this time). You can add 'timeout' as an optional parameter, default value is 2 for both open and read sessions, so take value x2 for real world use
+4. Create a `/etc/puppetlabs/puppet/splunkhec.yaml` (see examples directory for one) adding your Splunk Server & Token from step 1
+- You can add 'timeout' as an optional parameter, default value is 2 for both open and read sessions, so take value x2 for real world use
+- The same is true for port, defaults to 8088 if none provided
 
 5. Add `splunk_hec` to `/etc/puppetlabs/puppet/puppet.conf` reports line under the master's configuration block
 ```

@@ -31,18 +31,20 @@ Puppet::Reports.register_report(:splunk_hec) do
 
     splunk_server = splunkhec['server']
     splunk_token  = splunkhec['token']
+    # optionally set hec port
+    splunk_port = splunkhec['port'] || 8088
     # adds timeout, 2x value because of open and read timeout options
     splunk_timeout = splunkhec['timeout'] || 2
 
     #  create header here
     #header = "Authorization: Splunk #{splunk_token}"
 
-    request = Net::HTTP::Post.new("https://#{splunk_server}:8088/services/collector")
+    request = Net::HTTP::Post.new("https://#{splunk_server}:#{splunk_port}/services/collector")
     request.add_field("Authorization", "Splunk #{splunk_token}")
     request.add_field("Content-Type", "application/json")
     request.body = splunk_event.to_json
 
-    client = Net::HTTP.new(splunk_server, '8088')
+    client = Net::HTTP.new(splunk_server, splunk_port)
     client.open_timeout = splunk_timeout
     client.read_timeout = splunk_timeout
 
