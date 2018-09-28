@@ -97,9 +97,10 @@ Installation & Usage
 
 3. Run `puppet agent -t` or `puppet plugin download` if you wish to grab the processor without a full puppet agent run
 
-4. Create a `/etc/puppetlabs/puppet/splunkhec.yaml` (see examples directory for one) adding your Splunk Server & Token from step 1
-- You can add 'timeout' as an optional parameter, default value is 2 for both open and read sessions, so take value x2 for real world use
-- The same is true for port, defaults to 8088 if none provided
+4. Create a `/etc/puppetlabs/puppet/splunk_hec.yaml` (see examples directory for one) adding your Splunk Server & Token from step 1
+  - You can add 'timeout' as an optional parameter, default value is 2 for both open and read sessions, so take value x2 for real world use
+  - The same is true for port, defaults to 8088 if none provided
+  - Provide a 'puppetdb_callback_hostname' variable if the hostname that Splunk will use to lookup further information about a report is different than the puppetserver processing the reports (ie, multiple servers, load balancer, external dns name vs internal, etc.) Defaults to the certname of the puppetserver processing the report.
 
 5. Add `splunk_hec` to `/etc/puppetlabs/puppet/puppet.conf` reports line under the master's configuration block
 ```
@@ -117,8 +118,6 @@ reports = puppetdb,splunk_hec
 Known Issues
 ------------
 * No tests
-* Can't customize ports
-* No corresponding Custom Alert Actions exist in Splunk yet to use this data
 * Should probably have a module that just installs this
 
 

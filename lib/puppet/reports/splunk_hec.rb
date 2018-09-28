@@ -7,6 +7,19 @@ Puppet::Reports.register_report(:splunk_hec) do
   desc "Submits just a report summary to Splunk HEC endpoint"
   # Next, define and configure the report processor.
   def process
+
+    splunk_hec_config = YAML.load_file(Puppet[:confdir] + '/splunk_hec.yaml')
+
+    splunk_server = splunk_hec_config['server']
+    splunk_token  = splunk_hec_config['token']
+    # optionally set hec port
+    splunk_port = splunk_hec_config['port'] || 8088
+    # adds timeout, 2x value because of open and read timeout options
+    splunk_timeout = splunk_hec_config['timeout'] || 2
+    # since you can have multiple installs sending to splunk, this looks for a puppetdb server splunk
+    # can query to get more info. Defaults to the server processing report if none provided in config
+    puppetdb_callback_hostname = splunk_hec_config['puppetdb_callback_hostname'] || Puppet[:certname]
+
     splunk_event = {
       "host" => self.host,
       "event"  => {
@@ -23,18 +36,13 @@ Puppet::Reports.register_report(:splunk_hec) do
         "time" => self.time,
         "job_id" => self.job_id,
         "puppet_version" => self.puppet_version,
+        "certname" => self.host,
+        "puppetdb_callback_hostname" => puppetdb_callback_hostname,
         "report_format" => self.report_format
       },
     }
 
-    splunkhec = YAML.load_file(Puppet[:confdir] + '/splunkhec.yaml')
 
-    splunk_server = splunkhec['server']
-    splunk_token  = splunkhec['token']
-    # optionally set hec port
-    splunk_port = splunkhec['port'] || 8088
-    # adds timeout, 2x value because of open and read timeout options
-    splunk_timeout = splunkhec['timeout'] || 2
 
     #  create header here
     #header = "Authorization: Splunk #{splunk_token}"
