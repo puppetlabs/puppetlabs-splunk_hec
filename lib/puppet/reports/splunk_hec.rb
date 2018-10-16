@@ -20,6 +20,33 @@ Puppet::Reports.register_report(:splunk_hec) do
     # can query to get more info. Defaults to the server processing report if none provided in config
     puppetdb_callback_hostname = splunk_hec_config['puppetdb_callback_hostname'] || Puppet[:certname]
 
+    # pass simple metrics for report processing later
+    #  STATES = [:skipped, :failed, :failed_to_restart, :restarted, :changed, :out_of_sync, :scheduled, :corrective_change]
+    metrics = {
+      "time" => {
+        "config_retrievel" => "",
+        "total" => "",
+      },
+      "resources" => {
+        "skipped" => "",
+        "failed" => "",
+        "failed_to_restart" => "",
+        "restarted" => "",
+        "changed" => "",
+        "out_of_sync" => "",
+        "scheduled" => "",
+        "corrective_change",
+        "total" => "",
+
+      },
+      "changes" => "",
+    }
+
+    metrics['resources'].each_key { |key|
+      metrics['resources'][key] = self.metrics['resources'][key]
+    }
+
+
     splunk_event = {
       "host" => self.host,
       "event"  => {
@@ -38,8 +65,9 @@ Puppet::Reports.register_report(:splunk_hec) do
         "puppet_version" => self.puppet_version,
         "certname" => self.host,
         "puppetdb_callback_hostname" => puppetdb_callback_hostname,
-        "report_format" => self.report_format
-      },
+        "report_format" => self.report_format,
+        "metrics" => metrics
+      }
     }
 
 
