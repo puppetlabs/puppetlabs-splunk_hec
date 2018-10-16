@@ -1,6 +1,6 @@
 class splunk_hec (
   String $server,
-  Sensitive $token,
+  String $token,
   Optional[String] $puppetdb_callback_hostname,
   Optional[Integer] $port,
   Optional[Integer] $timeout,
