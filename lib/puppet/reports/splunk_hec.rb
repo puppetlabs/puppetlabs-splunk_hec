@@ -35,9 +35,8 @@ Puppet::Reports.register_report(:splunk_hec) do
         "changed" => "",
         "out_of_sync" => "",
         "scheduled" => "",
-        "corrective_change",
-        "total" => "",
-
+        "corrective_change" => "",
+        "total" => ""
       },
       "changes" => "",
     }
