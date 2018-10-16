@@ -1,0 +1,13 @@
+# managed by puppet
+---
+"server" : "<%= $splunk_hec::server -%>"
+"token" : "<%= $splunk_hec::token -%>"
+<% if defined($splunk_hec::port) -%>
+"token" : "<%= $splunk_hec::port -%>"
+<% } -%>
+<% if defined($splunk_hec::puppetdb_callback_hostname) -%>
+"token" : "<%= $splunk_hec::puppetdb_callback_hostname -%>"
+<% } -%>
+<% if defined($splunk_hec::timeout) -%>
+"token" : "<%= $splunk_hec::timeout -%>"
+<% } -%>
