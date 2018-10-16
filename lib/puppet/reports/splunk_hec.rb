@@ -24,8 +24,8 @@ Puppet::Reports.register_report(:splunk_hec) do
     #  STATES = [:skipped, :failed, :failed_to_restart, :restarted, :changed, :out_of_sync, :scheduled, :corrective_change]
     metrics = {
       "time" => {
-        "config_retrievel" => "",
-        "total" => "",
+        "config_retrievel" => self.metrics['time']['config_retrievel'],
+        "total" => self.metrics['time']['total'],
       },
       "resources" => {
         "skipped" => "",
@@ -38,7 +38,7 @@ Puppet::Reports.register_report(:splunk_hec) do
         "corrective_change" => "",
         "total" => ""
       },
-      "changes" => "",
+      "changes" => self.metrics['changes']['total'],
     }
 
     metrics['resources'].each_key { |key|
