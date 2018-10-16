@@ -1,3 +1,4 @@
+# Simple class to manage your splunk_hec report processor
 class splunk_hec (
   String $server,
   String $token,
@@ -5,7 +6,6 @@ class splunk_hec (
   Optional[Integer] $port,
   Optional[Integer] $timeout,
 ) {
-
   file { '/etc/puppetlabs/puppet/splunk_hec.yaml':
     ensure  => file,
     owner   => pe-puppet,
@@ -14,5 +14,4 @@ class splunk_hec (
     content => epp('splunk_hec/splunk_hec.yaml.epp'),
     notify  => Service['pe-puppetserver']
   }
-
 }
