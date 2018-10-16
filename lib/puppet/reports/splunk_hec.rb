@@ -27,6 +27,7 @@ Puppet::Reports.register_report(:splunk_hec) do
         "config_retrieval" => self.metrics['time']['config_retrieval'],
         "total" => self.metrics['time']['total'],
       },
+      "events" => {}
       "resources" => {
         "skipped" => "",
         "failed" => "",
@@ -45,6 +46,9 @@ Puppet::Reports.register_report(:splunk_hec) do
       metrics['resources'][key] = self.metrics['resources'][key]
     }
 
+    self.metrics['events'].each { |event|
+      metrics['events'][event[0]] = event[2]
+    }
 
     splunk_event = {
       "host" => self.host,
