@@ -65,8 +65,8 @@ Puppet::Reports.register_report(:splunk_hec) do
     request.body = splunk_event.to_json
 
     client = Net::HTTP.new(splunk_server, splunk_port)
-    client.open_timeout = splunk_timeout
-    client.read_timeout = splunk_timeout
+    client.open_timeout = splunk_timeout.to_i
+    client.read_timeout = splunk_timeout.to_i
 
     client.use_ssl = true
     client.verify_mode = OpenSSL::SSL::VERIFY_NONE
