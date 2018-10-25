@@ -2,9 +2,9 @@
 class splunk_hec (
   String $server,
   String $token,
-  Optional[String] $puppetdb_callback_hostname,
-  Optional[Integer] $port,
-  Optional[Integer] $timeout,
+  Optional[String] $puppetdb_callback_hostname = undef,
+  Optional[Integer] $port = undef,
+  Optional[Integer] $timeout = undef,
 ) {
   file { '/etc/puppetlabs/puppet/splunk_hec.yaml':
     ensure  => file,
