@@ -13,12 +13,12 @@ Puppet::Reports.register_report(:splunk_hec) do
     splunk_server = splunk_hec_config['server']
     splunk_token  = splunk_hec_config['token']
     # optionally set hec port
-    splunk_port = splunk_hec_config['port'] || '8088'
+    splunk_port = splunk_hec_config['port'] or '8088'
     # adds timeout, 2x value because of open and read timeout options
-    splunk_timeout = splunk_hec_config['timeout'] || '2'
+    splunk_timeout = splunk_hec_config['timeout'] or '2'
     # since you can have multiple installs sending to splunk, this looks for a puppetdb server splunk
     # can query to get more info. Defaults to the server processing report if none provided in config
-    puppetdb_callback_hostname = splunk_hec_config['puppetdb_callback_hostname'] || Puppet[:certname]
+    puppetdb_callback_hostname = splunk_hec_config['puppetdb_callback_hostname'] or Puppet[:certname]
 
     # pass simple metrics for report processing later
     #  STATES = [:skipped, :failed, :failed_to_restart, :restarted, :changed, :out_of_sync, :scheduled, :corrective_change]
