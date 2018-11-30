@@ -11,7 +11,6 @@ plan splunk_hec::deploy {
   $pcpmasters = $masters.map |$n| { "pcp://${n}" }
 
   run_command('/opt/puppetlabs/bin/puppet agent --onetime --no-usecacheonfailure --no-daemonize --no-splay', $pcpca, '_concurrency' => '1')
-  
   run_command('/opt/puppetlabs/bin/puppet agent --onetime --no-usecacheonfailure --no-daemonize --no-splay', $pcpmasters, '_concurrency' => '1')
 
 }

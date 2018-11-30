@@ -1,6 +1,7 @@
 require 'puppet'
 require 'yaml'
 require 'json'
+require 'date'
 require 'net/https'
 
 Puppet::Reports.register_report(:splunk_hec) do
@@ -18,7 +19,11 @@ Puppet::Reports.register_report(:splunk_hec) do
     splunk_timeout = splunk_hec_config['timeout'] || '2'
     # since you can have multiple installs sending to splunk, this looks for a puppetdb server splunk
     # can query to get more info. Defaults to the server processing report if none provided in config
-    puppetdb_callback_hostname = splunk_hec_config['puppetdb_callback_hostname'] or Puppet[:certname]
+    puppetdb_callback_hostname = splunk_hec_config['puppetdb_callback_hostname'] || Puppet[:certname]
+
+    # now we can create the event with the timestamp from the report
+    time = DateTime.parse("#{self.time}")
+    epoch = time.strftime('%Q').to_str.insert(-4, '.')
 
     # pass simple metrics for report processing later
     #  STATES = [:skipped, :failed, :failed_to_restart, :restarted, :changed, :out_of_sync, :scheduled, :corrective_change]
@@ -33,6 +38,7 @@ Puppet::Reports.register_report(:splunk_hec) do
 
     splunk_event = {
       "host" => self.host,
+      "time" => epoch,
       "event"  => {
         "status" => self.status,
         "corrective_change" => self.corrective_change,
