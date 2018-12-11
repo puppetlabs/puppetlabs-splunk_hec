@@ -4,7 +4,7 @@ puppet-splunk_hec
 Description
 -----------
 
-This is a report processor designed to send a report summary of useful information to the [Splunk HEC](http://docs.splunk.com/Documentation/Splunk/7.1.3/Data/UsetheHTTPEventCollector) service.
+This is a report processor designed to send a [Puppet report summary](https://puppet.com/docs/puppet/6.0/format_report.html) of useful information to the [Splunk HEC](http://docs.splunk.com/Documentation/Splunk/7.1.3/Data/UsetheHTTPEventCollector) service.
 
 This creates a single event for the hostname where the report originated from (ie, the agent in question) and the body of the event is structured like the example below:
 
