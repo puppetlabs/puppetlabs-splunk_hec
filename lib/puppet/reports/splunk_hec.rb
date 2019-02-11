@@ -76,12 +76,13 @@ Puppet::Reports.register_report(:splunk_hec) do
 
     client.use_ssl = true
 
-    if splunk_hec_config['ssl_verify'] != 'True'
+    if splunk_hec_config['ssl_verify'] != 'true'
       client.verify_mode = OpenSSL::SSL::VERIFY_NONE
     end
-    
-    if splunk_hec_config['ssl_certificate'] != Null
-      ssl_cert = File.join (Puppet[:confdir], 'splunk_hec', splunk_hec_config['ssl_certificate'])
+
+    if splunk_hec_config['ssl_certificate'] != nil
+      ssl_cert = splunk_hec_config['ssl_certificate']
+      client.verify_mode = OpenSSL::SSL::VERIFY_PEER
       client.ca_file = ssl_cert
     end
 

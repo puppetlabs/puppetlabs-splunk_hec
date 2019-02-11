@@ -4,81 +4,12 @@ puppet-splunk_hec
 Description
 -----------
 
-This is a report processor designed to send a report summary of useful information to the [Splunk HEC](http://docs.splunk.com/Documentation/Splunk/7.1.3/Data/UsetheHTTPEventCollector) service.
+This is a report processor designed to send a report summary of useful information to the [Splunk HTTP Endpoint Collector "HEC"](http://docs.splunk.com/Documentation/Splunk/latest/Data/UsetheHTTPEventCollector) service. These summaries are designed to be informative but also not too verbose to make logging a burden to the enderuser. The summaries are meant to be small but sufficient to determine if a puppet run was successful on a node, and to include metadata such as code-id,  transaction-id, and other details to allow for more detailed actions to be done.
 
-This creates a single event for the hostname where the report originated from (ie, the agent in question) and the body of the event is structured like the example below:
+It is best used the Splunk Addon [Puppet Report Viewer](https://github.com/mrzarquon/TA-puppet-report-viewer) which adds sourcetypes to make ingesting this data easier into Splunk (sourcetypes can be associated with specifc HEC tokens to make event viewing/processing easier). The Report Viewer also adds a custom alert action for Puppet Enterprise Users: using the data from a `puppet:summary` event, the Detailed Report Builder alert action will create a new event with the type of `puppet:detailed` containing information such as the node in questions facts, the resource_events from the node, and links to relavant reports in the Puppet Enterprise Console.
 
-```json
-{
-    "cached_catalog_status": "not_used",
-    "catalog_uuid": "5c9eda91-c652-4cf9-8ea3-ab14e3c0a3e7",
-    "code_id": "urn:puppet:code-id:1:f57e361d8de53fcf0b8f5ebcee42083a81b71ec6;production",
-    "configuration_version": "puppet-production-9f5fd3d7e6d",
-    "corrective_change": false,
-    "environment": "production",
-    "job_id": null,
-    "noop": false,
-    "noop_pending": false,
-    "puppet_version": "5.5.6",
-    "report_format": 10,
-    "status": "unchanged",
-    "time": "2018-09-26 22:47:16 UTC",
-    "transaction_uuid": "e9a8b3be-b0ce-49fc-a5ea-4d715533ad28"
-}
-```
+There are also two tasks included in this module, `splunk_hec:bolt_apply` and `splunk_hec:bolt_result` designed to provide similar data formats to allow for Bolt Plans to be written that submit data to Splunk.
 
-Once this exists as an event in Splunk, you can do a lot with it. The indexed size of the above example is 485 bytes. This size will remain consistent over every Puppet agent run, regardless of complexity of catalog or resources being managed. This makes calculating the impact of sending report summaries easy: given a 30 minute report interval, it is around 12 megabytes/year per agent reporting in you fleet. Depending on your archival needs, you can probably throw away the status: unchange events to reduce the footprint even more.
-
-Why is this useful? Because if you are using Puppet Enterprise, you can create a Custom Alert Action to retrieve more information about particular events, such as retrieving all the resource events from PuppetDB when a report summary shows up with a Corrective Change present. A curl request doing the equivalent is:
-
-```shell
-curl -s -X POST http://localhost:8080/pdb/query/v4/reports \
--H 'Content-Type:application/json' \
--d '{"query":["extract",["hash","certname","transaction_uuid","start_time","code_id","configuration_version","resource_events"],["=","transaction_uuid","6471334d-1f2b-46f3-a16c-2f6116abe057"]]}' | \
-python -m json.tool
-```
-
-Output:
-```json
-[
-    {
-        "certname": "splunk.c.splunk-217321.internal",
-        "code_id": "urn:puppet:code-id:1:f57e361d8de53fcf0b8f5ebcee42083a81b71ec6;production",
-        "configuration_version": "puppet-production-9f5fd3d7e6d",
-        "hash": "f53ef654072f7fd6b06fa7779a7dc08218221948",
-        "resource_events": {
-            "data": [
-                {
-                    "containing_class": "Ntp::Config",
-                    "containment_path": [
-                        "Stage[main]",
-                        "Ntp::Config",
-                        "File[/etc/ntp.conf]"
-                    ],
-                    "corrective_change": true,
-                    "file": "/etc/puppetlabs/code/environments/production/modules/ntp/manifests/config.pp",
-                    "line": 51,
-                    "message": "content changed '{md5}f9b570d3fe7da9e0234d52cbc0c2b94a' to '{md5}d51b2e5ec0a9f463047efb49555f65fe'",
-                    "new_value": "{md5}d51b2e5ec0a9f463047efb49555f65fe",
-                    "old_value": "{md5}f9b570d3fe7da9e0234d52cbc0c2b94a",
-                    "property": "content",
-                    "resource_title": "/etc/ntp.conf",
-                    "resource_type": "File",
-                    "status": "success",
-                    "timestamp": "2018-09-26T21:50:14.144+00:00"
-                }
-            ],
-            "href": "/pdb/query/v4/reports/f53ef654072f7fd6b06fa7779a7dc08218221948/events"
-        },
-        "start_time": "2018-09-26T21:50:09.924Z",
-        "transaction_uuid": "6471334d-1f2b-46f3-a16c-2f6116abe057"
-    }
-]
-```
-
-The result includes things like the hash, which can be used to create a link back to the Puppet Enterprise console, following the same format as: https://puppet.company.com/#/inspect/report/$reporthash/events
-
-Or just create another event in Splunk with the result, and create another Alert Action to open a ticket or run something in Phantom, or what have you.
 
 Requirements
 ------------
@@ -88,25 +19,35 @@ Requirements
 
 This was tested on both Puppet Enterprise 2018.1.4 & Puppet 6, using stock gems of yaml, json, net::https
 
-Installation & Usage
+Report Processor Installation & Usage
 --------------------
 
-1. Create a Splunk HEC Token (preferably named `puppet-report-summary`)
+The steps below will help one install and troubleshoot the report processor on a single Puppet Master, including manual steps to configure a puppet-server, and to use the included splunk_hec class.
 
-2. Install this module in the environment your Puppet Server's are using (problaby `production`)
+1. Create a Splunk HEC Token (preferably named `puppet:summary` and using the sourcetype `puppet:summary` from the Report Viewer addon). Follow the steps provided by Splunk's [Getting Data In Guide](http://docs.splunk.com/Documentation/Splunk/latest/Data/UsetheHTTPEventCollector) if you are new to HTTP Endpoint Collectors. Optionally install the [Puppet Report Viewer](https://github.com/mrzarquon/TA-puppet-report-viewer) Addon to pre-populate the installation with source:types as needed.
 
-3. Run `puppet agent -t` or `puppet plugin download` if you wish to grab the processor without a full puppet agent run
+2. Install this module in the environment your Puppet Server's are using (probably `production`)
+
+3. Run `puppet plugin download` on your Puppet Master to sync the new 
 
 4. Create a `/etc/puppetlabs/puppet/splunk_hec.yaml` (see examples directory for one) adding your Splunk Server & Token from step 1
   - You can add 'timeout' as an optional parameter, default value is 2 for both open and read sessions, so take value x2 for real world use
   - The same is true for port, defaults to 8088 if none provided
-  - Provide a 'puppetdb_callback_hostname' variable if the hostname that Splunk will use to lookup further information about a report is different than the puppetserver processing the reports (ie, multiple servers, load balancer, external dns name vs internal, etc.) Defaults to the certname of the puppetserver processing the report.
+  - Provide a 'puppetdb\_callback\_hostname' variable if the hostname that Splunk will use to lookup further information about a report is different than the puppetserver processing the reports (ie, multiple servers, load balancer, external dns name vs internal, etc.) Defaults to the certname of the puppetserver processing the report. This feature is yet to be enabled in the Puppet Report Viewer.
 
-5. Run `puppet apply -e 'notify { "hello world": }' --reports=splunk_hec` from the puppet server, this will load the report processor and test your configuration settings without actually modifying your puppet servers running configuration.
+  ```
+---
+"server" : "splunk-dev.testing.internal"
+"token" : "13311780-EC29-4DD0-A796-9F0CDC56F2AD"
+```
 
-6. Once you've validated your report is showing up in Splunk console, it is best to use the included splunk_hec class to classify your Masters and add the associated settings you used before.
+5. Run `puppet apply -e 'notify { "hello world": }' --reports=splunk_hec` from the puppet server, this will load the report processor and test your configuration settings without actually modifying your puppet servers running configuration. Use the search in 
 
-5. Add `splunk_hec` to `/etc/puppetlabs/puppet/puppet.conf` reports line under the master's configuration block
+6. Provide the working parameters / values to the splunk_hec class and use it in an profile or add it to the PE Masters subgroup of PE Infrastructure in the classification section of the console. Run puppet on the MoM first (because it is the Puppet Server all the other compile masters are using) before running puppet on the other compile masters. This will restart the puppet-server processor, so stagger the runs to prevent an outage.
+
+### Manual steps:
+
+- Add `splunk_hec` to `/etc/puppetlabs/puppet/puppet.conf` reports line under the master's configuration block
 ```
 [master]
 node_terminus = classifier
@@ -115,14 +56,52 @@ storeconfigs_backend = puppetdb
 reports = puppetdb,splunk_hec
 ```
 
-6. Restart the puppet server process for it to reload the configuration and the plugin
+- Restart the puppet server process for it to reload the configuration and the plugin
 
-7. Run `puppet agent -t` somewhere, if you are using the suggested name, use `source="http:puppet-report-summary"` in your splunk search field to show the reports as they arrive
+- Run `puppet agent -t` somewhere, if you are using the suggested name, use `source="http:puppet-report-summary"` in your splunk search field to show the reports as they arrive
+
+
+SSL Support
+-----------
+Configuring SSL support for this report processor and tasks requires that the Splunk HEC service being used has a [properly configured SSL certificate](https://docs.splunk.com/Documentation/Splunk/latest/Security/AboutsecuringyourSplunkconfigurationwithSSL). Once the HEC service has a valid SSL certificate, the CA will need to be made available to the report processor to load. One could add the CA to Puppet's trust, or just make the CA file available on the puppet-server (/etc/puppetlabs/puppet/splunk_hec/splunk_ca.cert works). Either option is supported.
+
+One can update the splunk_hec.yaml file with the below settings
+
+
+```
+"ssl_verify" : "true"
+"ssl_certificate" : "/etc/puppetlabs/puppet/splunk_hec/splunk_ca.cert"
+```
+
+Or create a profile that copies the splunk_ca.cert as part of invoking the splunk_hec class.
+
+```
+class profile::splunk_hec {
+  file { '/etc/puppetlabs/puppet/splunk_hec':
+    ensure => directory,
+    owner  => 'pe-puppet',
+    group  => 'pe-puppet',
+    mode   => 0644,
+  }
+  file { '/etc/puppetlabs/puppet/splunk_hec/splunk_ca.cert':
+    ensure => file,
+    owner  => 'pe-puppet',
+    group  => 'pe-puppet',
+    mode   => '0644',
+    source => 'puppet:///modules/profile/splunk_hec/splunk_ca.cert',
+  }
+}
+```
+
+
+
+
+
+
 
 Known Issues
 ------------
 * No tests
-* Should probably have a module that just installs this
 
 
 Author
