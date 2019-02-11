@@ -75,7 +75,15 @@ Puppet::Reports.register_report(:splunk_hec) do
     client.read_timeout = splunk_timeout.to_i
 
     client.use_ssl = true
-    client.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+    if splunk_hec_config['ssl_verify'] != 'True'
+      client.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    end
+    
+    if splunk_hec_config['ssl_certificate'] != Null
+      ssl_cert = File.join (Puppet[:confdir], 'splunk_hec', splunk_hec_config['ssl_certificate'])
+      client.ca_file = ssl_cert
+    end
 
     client.request(request)
 

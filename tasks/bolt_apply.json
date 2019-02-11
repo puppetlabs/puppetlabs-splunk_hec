@@ -1,0 +1,19 @@
+{
+  "description": "This task submits the a bolt apply report (and other data) to Splunk's HEC",
+  "input_method": "stdin",
+  "remote": true,
+  "parameters": {
+    "report": {
+      "description": "A hash of the report, the bulk of this will be used for the splunk event",
+      "type": "Hash"
+    },
+    "facts": {
+      "description": "A hash of facts, name => value",
+      "type": "Hash"
+    },
+    "host": {
+      "description": "Target's Identifying name, will use clientcert from facts if not provided",
+      "type": "Optional[String[1]]"
+    }
+  }
+}

@@ -102,6 +102,10 @@ Installation & Usage
   - The same is true for port, defaults to 8088 if none provided
   - Provide a 'puppetdb_callback_hostname' variable if the hostname that Splunk will use to lookup further information about a report is different than the puppetserver processing the reports (ie, multiple servers, load balancer, external dns name vs internal, etc.) Defaults to the certname of the puppetserver processing the report.
 
+5. Run `puppet apply -e 'notify { "hello world": }' --reports=splunk_hec` from the puppet server, this will load the report processor and test your configuration settings without actually modifying your puppet servers running configuration.
+
+6. Once you've validated your report is showing up in Splunk console, it is best to use the included splunk_hec class to classify your Masters and add the associated settings you used before.
+
 5. Add `splunk_hec` to `/etc/puppetlabs/puppet/puppet.conf` reports line under the master's configuration block
 ```
 [master]

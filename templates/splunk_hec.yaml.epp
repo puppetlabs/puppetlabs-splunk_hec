@@ -11,3 +11,9 @@
 <% if $splunk_hec::timeout { -%>
 "timeout" : "<%= $splunk_hec::timeout %>"
 <% } -%>
+<% if $splunk_hec::ssl_verify { -%>
+"ssl_verify" : "<%= $splunk_hec::ssl_verify %>"
+<% } -%>
+<% if $splunk_hec::ssl_certificate { -%>
+"ssl_certificate" : "<%= $splunk_hec::ssl_certificate %>"
+<% } -%>

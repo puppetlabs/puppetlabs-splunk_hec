@@ -1,0 +1,9 @@
+---
+nodes:
+  - name: splunk_bolt_apply
+    config:
+      transport: remote
+      remote:
+        hostname: <hostname>
+        token: <token>
+        port: 8088

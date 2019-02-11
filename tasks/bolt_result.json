@@ -1,0 +1,11 @@
+{
+  "description": "This task submits a bolt task result to Splunk's HEC",
+  "input_method": "stdin",
+  "remote": true,
+  "parameters": {
+    "result": {
+      "description": "The individual result from a result set",
+      "type": "Hash"
+    }
+  }
+}
