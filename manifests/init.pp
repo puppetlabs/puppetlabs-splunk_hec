@@ -20,7 +20,7 @@ class splunk_hec (
     }
 
     $ssl_download_server = "${server}:${ssl_port}"
-    $ssl_download_path = "/etc/puppetlabs/puppet/splunk_hec/${ssl_certificate}.pem"
+    $ssl_download_path = "/etc/puppetlabs/puppet/splunk_hec/${ssl_certificate}"
 
     file { '/etc/puppetlabs/puppet/splunk_hec/':
       ensure => directory,
