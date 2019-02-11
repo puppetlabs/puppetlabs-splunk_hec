@@ -5,8 +5,8 @@ class splunk_hec (
   Optional[String] $puppetdb_callback_hostname = undef,
   Optional[Integer] $port = undef,
   Optional[Integer] $timeout = undef,
-  Optional[Bool] $ssl_verify = False,
-  Optional[Bool] $ssl_download_cert = False,
+  Optional[Boolean] $ssl_verify = False,
+  Optional[Boolean] $ssl_download_cert = False,
   Optional[String] $ssl_certificate = undef,
 ) {
 
