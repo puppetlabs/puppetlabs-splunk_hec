@@ -4,6 +4,7 @@ require 'yaml'
 require 'json'
 require 'date'
 require 'net/https'
+require 'uri'
 
 params = JSON.parse(STDIN.read)
 
@@ -35,11 +36,14 @@ puts result
 #time = DateTime.parse(report['time'])
 #epoch = time.strftime('%Q').to_str.insert(-4, '.')
 
-host = result['target']
-puts host 
+uri = URI(result['target'])
+
+host = uri.host
+
+result['event_type'] = 'bolt_result'
 
 splunk_event = {
-  "host" => "#{host}",
+  "host" => host,
   "event"  => result,
 }
 

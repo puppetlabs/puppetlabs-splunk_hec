@@ -1,6 +1,6 @@
 ---
 nodes:
-  - name: splunk_bolt_apply
+  - name: splunk_hec
     config:
       transport: remote
       remote:

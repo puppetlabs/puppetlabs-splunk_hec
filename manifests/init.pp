@@ -8,7 +8,6 @@ class splunk_hec (
   Optional[Boolean] $ssl_verify = false,
   Optional[String] $ssl_certificate = undef,
 ) {
-
   file { '/etc/puppetlabs/puppet/splunk_hec.yaml':
     ensure  => file,
     owner   => pe-puppet,

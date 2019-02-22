@@ -20,8 +20,6 @@ end
 
 target = params['_target']
 
-puts target
-
 splunk_server = target['hostname']
 splunk_token  = target['token']
 
@@ -34,14 +32,18 @@ facts = params['facts']
 time = DateTime.parse(report['time'])
 epoch = time.strftime('%Q').to_str.insert(-4, '.')
 
-host = params['host'] || facts['clientcert']
-
 event = report
 
+hostname = report['host']
+
 event['facts'] = facts
+event['event_type'] = 'bolt_apply'
+
+#remove duplicate host from event body
+event.delete('host')
 
 splunk_event = {
-  "host" => host,
+  "host" => hostname,
   "time" => epoch,
   "event"  => event,
 }
