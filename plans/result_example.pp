@@ -1,5 +1,5 @@
 plan splunk_hec::result_example {
-  
+
   # An example of submitting an a task or functions results to splunk as a task itself
   # uses pcp/pe hosts 
 

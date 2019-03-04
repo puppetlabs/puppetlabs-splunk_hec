@@ -6,9 +6,9 @@ Description
 
 This is a report processor designed to send a report summary of useful information to the [Splunk HTTP Endpoint Collector "HEC"](http://docs.splunk.com/Documentation/Splunk/latest/Data/UsetheHTTPEventCollector) service. These summaries are designed to be informative but also not too verbose to make logging a burden to the enderuser. The summaries are meant to be small but sufficient to determine if a puppet run was successful on a node, and to include metadata such as code-id,  transaction-id, and other details to allow for more detailed actions to be done.
 
-It is best used the Splunk Addon [Puppet Report Viewer](https://github.com/mrzarquon/TA-puppet-report-viewer) which adds sourcetypes to make ingesting this data easier into Splunk (sourcetypes can be associated with specifc HEC tokens to make event viewing/processing easier). The Report Viewer also adds a custom alert action for Puppet Enterprise Users: using the data from a `puppet:summary` event, the Detailed Report Builder alert action will create a new event with the type of `puppet:detailed` containing information such as the node in questions facts, the resource_events from the node, and links to relavant reports in the Puppet Enterprise Console.
+It is best used the Splunk Addon [Puppet Report Viewer](https://github.com/mrzarquon/TA-puppet-report-viewer) which adds sourcetypes to make ingesting this data easier into Splunk (sourcetypes can be associated with specifc HEC tokens to make event viewing/processing easier). The Report Viewer also adds an actionable alert for Puppet Enterprise Users: using the data from a `puppet:summary` event, the Detailed Report Builder actionable alert will create a new event with the type of `puppet:detailed` containing information such as the node in questions facts, the resource_events from the node, and links to relavant reports in the Puppet Enterprise Console.
 
-There are also two tasks included in this module, `splunk_hec:bolt_apply` and `splunk_hec:bolt_result` designed to provide similar data formats to allow for Bolt Plans to be written that submit data to Splunk.
+There are also two tasks included in this module, `splunk_hec:bolt_apply` and `splunk_hec:bolt_result` designed to provide similar data formats to allow for Bolt Plans to be written that submit data to Splunk. Also included are plans showing example useage of the tasks.
 
 
 Requirements
@@ -24,13 +24,15 @@ Report Processor Installation & Usage
 
 The steps below will help one install and troubleshoot the report processor on a single Puppet Master, including manual steps to configure a puppet-server, and to use the included splunk_hec class.
 
-1. Create a Splunk HEC Token (preferably named `puppet:summary` and using the sourcetype `puppet:summary` from the Report Viewer addon). Follow the steps provided by Splunk's [Getting Data In Guide](http://docs.splunk.com/Documentation/Splunk/latest/Data/UsetheHTTPEventCollector) if you are new to HTTP Endpoint Collectors. Optionally install the [Puppet Report Viewer](https://github.com/mrzarquon/TA-puppet-report-viewer) Addon to pre-populate the installation with source:types as needed.
+1. Install the Puppet Report Viewer Addon in Splunk. This will import the needed sourcetypes that make setting up the HEC easier in the next steps, and also some overview dashboards that make it a lot easier to see if you're getting reports into Splunk.
 
-2. Install this module in the environment your Puppet Server's are using (probably `production`)
+2. Create a Splunk HEC Token (preferably named `puppet:summary` and using the sourcetype `puppet:summary` from the Report Viewer addon). Follow the steps provided by Splunk's [Getting Data In Guide](http://docs.splunk.com/Documentation/Splunk/latest/Data/UsetheHTTPEventCollector) if you are new to HTTP Endpoint Collectors.
 
-3. Run `puppet plugin download` on your Puppet Master to sync the new 
+3. Install this module in the environment your Puppet Server's are using (probably `production`)
 
-4. Create a `/etc/puppetlabs/puppet/splunk_hec.yaml` (see examples directory for one) adding your Splunk Server & Token from step 1
+4. Run `puppet plugin download` on your Puppet Master to sync the new 
+
+5. Create a `/etc/puppetlabs/puppet/splunk_hec.yaml` (see examples directory for one) adding your Splunk Server & Token from step 1
   - You can add 'timeout' as an optional parameter, default value is 2 for both open and read sessions, so take value x2 for real world use
   - The same is true for port, defaults to 8088 if none provided
   - Provide a 'puppetdb\_callback\_hostname' variable if the hostname that Splunk will use to lookup further information about a report is different than the puppetserver processing the reports (ie, multiple servers, load balancer, external dns name vs internal, etc.) Defaults to the certname of the puppetserver processing the report. This feature is yet to be enabled in the Puppet Report Viewer.
@@ -41,9 +43,9 @@ The steps below will help one install and troubleshoot the report processor on a
 "token" : "13311780-EC29-4DD0-A796-9F0CDC56F2AD"
 ```
 
-5. Run `puppet apply -e 'notify { "hello world": }' --reports=splunk_hec` from the puppet server, this will load the report processor and test your configuration settings without actually modifying your puppet servers running configuration. Use the search in 
+6. Run `puppet apply -e 'notify { "hello world": }' --reports=splunk_hec` from the puppet server, this will load the report processor and test your configuration settings without actually modifying your puppet servers running configuration. Use the search in 
 
-6. Provide the working parameters / values to the splunk_hec class and use it in an profile or add it to the PE Masters subgroup of PE Infrastructure in the classification section of the console. Run puppet on the MoM first (because it is the Puppet Server all the other compile masters are using) before running puppet on the other compile masters. This will restart the puppet-server processor, so stagger the runs to prevent an outage.
+7. Provide the working parameters / values to the splunk_hec class and use it in a profile or add it to the PE Masters subgroup of PE Infrastructure in the classification section of the console. Run puppet on the MoM first (because it is the Puppet Server all the other compile masters are using) before running puppet on the other compile masters. This will restart the puppet-server processor, so stagger the runs to prevent an outage.
 
 ### Manual steps:
 
@@ -63,7 +65,7 @@ reports = puppetdb,splunk_hec
 
 SSL Support
 -----------
-Configuring SSL support for this report processor and tasks requires that the Splunk HEC service being used has a [properly configured SSL certificate](https://docs.splunk.com/Documentation/Splunk/latest/Security/AboutsecuringyourSplunkconfigurationwithSSL). Once the HEC service has a valid SSL certificate, the CA will need to be made available to the report processor to load. One could add the CA to Puppet's trust, or just make the CA file available on the puppet-server (/etc/puppetlabs/puppet/splunk_hec/splunk_ca.cert works). Either option is supported.
+Configuring SSL support for this report processor and tasks requires that the Splunk HEC service being used has a [properly configured SSL certificate](https://docs.splunk.com/Documentation/Splunk/latest/Security/AboutsecuringyourSplunkconfigurationwithSSL). Once the HEC service has a valid SSL certificate, the CA will need to be made available to the report processor to load. One could add the CA to Puppet's trust, or just make the CA file available on the puppet-server (/etc/puppetlabs/puppet/splunk\_hec/splunk\_ca.cert works). Either option is supported.
 
 One can update the splunk_hec.yaml file with the below settings
 
@@ -123,7 +125,8 @@ See the plans/ directory for working examples of apply and result usage.
 
 Known Issues
 ------------
-* No tests
+* SSL Validation is under active development and behavior may change
+* Automated testing could use work
 
 
 Author

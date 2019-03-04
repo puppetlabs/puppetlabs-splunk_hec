@@ -39,6 +39,14 @@ hostname = report['host']
 event['facts'] = facts
 event['event_type'] = 'bolt_apply'
 
+if params['plan_guid'] != nil
+  event['plan_guid'] = params['plan_guid']
+end
+
+if params['plan_name'] != nil
+  event['plan_name'] = params['plan_name']
+end
+
 #remove duplicate host from event body
 event.delete('host')
 
