@@ -1,10 +1,10 @@
 {
-  "name": "mrzarquon-splunk_hec",
-  "version": "0.1.0",
-  "author": "Chris Barker",
-  "summary": "",
+  "name": "puppetlabs-splunk_hec",
+  "version": "0.4.0",
+  "author": "Puppet, Inc.",
+  "summary": "Puppet report processor using Splunk HEC",
   "license": "Apache-2.0",
-  "source": "",
+  "source": "https://github.com/puppetlabs/splunk_hec",
   "dependencies": [
 
   ],
@@ -12,7 +12,7 @@
     {
       "operatingsystem": "CentOS",
       "operatingsystemrelease": [
-        "7"
+        "7","6"
       ]
     },
     {
@@ -24,13 +24,13 @@
     {
       "operatingsystem": "RedHat",
       "operatingsystemrelease": [
-        "7"
+        "7","6"
       ]
     },
     {
       "operatingsystem": "Scientific",
       "operatingsystemrelease": [
-        "7"
+        "7","6"
       ]
     },
     {
