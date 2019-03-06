@@ -43,7 +43,7 @@ The steps below will help one install and troubleshoot the report processor on a
 "token" : "13311780-EC29-4DD0-A796-9F0CDC56F2AD"
 ```
 
-6. Run `puppet apply -e 'notify { "hello world": }' --reports=splunk_hec` from the puppet server, this will load the report processor and test your configuration settings without actually modifying your puppet servers running configuration. Use the search in 
+6. Run `puppet apply -e 'notify { "hello world": }' --reports=splunk_hec` from the puppet server, this will load the report processor and test your configuration settings without actually modifying your puppet servers running configuration. If you are using the Puppet Report Viewer app in Splunk, you will see the page update with new data. If not, you will want to perform a search by the sourcetype you provided with your HEC configuration.
 
 7. Provide the working parameters / values to the splunk_hec class and use it in a profile or add it to the PE Masters subgroup of PE Infrastructure in the classification section of the console. Run puppet on the MoM first (because it is the Puppet Server all the other compile masters are using) before running puppet on the other compile masters. This will restart the puppet-server processor, so stagger the runs to prevent an outage.
 
