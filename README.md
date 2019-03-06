@@ -6,7 +6,7 @@ Description
 
 This is a report processor designed to send a report summary of useful information to the [Splunk HTTP Endpoint Collector "HEC"](http://docs.splunk.com/Documentation/Splunk/latest/Data/UsetheHTTPEventCollector) service. These summaries are designed to be informative but also not too verbose to make logging a burden to the enderuser. The summaries are meant to be small but sufficient to determine if a puppet run was successful on a node, and to include metadata such as code-id,  transaction-id, and other details to allow for more detailed actions to be done.
 
-It is best used the Splunk Addon [Puppet Report Viewer](https://github.com/mrzarquon/TA-puppet-report-viewer) which adds sourcetypes to make ingesting this data easier into Splunk (sourcetypes can be associated with specifc HEC tokens to make event viewing/processing easier). The Report Viewer also adds an actionable alert for Puppet Enterprise Users: using the data from a `puppet:summary` event, the Detailed Report Builder actionable alert will create a new event with the type of `puppet:detailed` containing information such as the node in questions facts, the resource_events from the node, and links to relavant reports in the Puppet Enterprise Console.
+It is best used the Splunk Addon [Puppet Report Viewer](https://splunkbase.splunk.com/app/4413/) which adds sourcetypes to make ingesting this data easier into Splunk (sourcetypes can be associated with specifc HEC tokens to make event viewing/processing easier). The Report Viewer also adds an actionable alert for Puppet Enterprise Users: using the data from a `puppet:summary` event, the Detailed Report Builder actionable alert will create a new event with the type of `puppet:detailed` containing information such as the node in questions facts, the resource_events from the node, and links to relavant reports in the Puppet Enterprise Console.
 
 There are also two tasks included in this module, `splunk_hec:bolt_apply` and `splunk_hec:bolt_result` designed to provide similar data formats to allow for Bolt Plans to be written that submit data to Splunk. Also included are plans showing example useage of the tasks.
 
@@ -43,7 +43,7 @@ The steps below will help one install and troubleshoot the report processor on a
 "token" : "13311780-EC29-4DD0-A796-9F0CDC56F2AD"
 ```
 
-6. Run `puppet apply -e 'notify { "hello world": }' --reports=splunk_hec` from the puppet server, this will load the report processor and test your configuration settings without actually modifying your puppet servers running configuration. Use the search in 
+6. Run `puppet apply -e 'notify { "hello world": }' --reports=splunk_hec` from the puppet server, this will load the report processor and test your configuration settings without actually modifying your puppet servers running configuration. If you are using the Puppet Report Viewer app in Splunk, you will see the page update with new data. If not, you will want to perform a search by the sourcetype you provided with your HEC configuration.
 
 7. Provide the working parameters / values to the splunk_hec class and use it in a profile or add it to the PE Masters subgroup of PE Infrastructure in the classification section of the console. Run puppet on the MoM first (because it is the Puppet Server all the other compile masters are using) before running puppet on the other compile masters. This will restart the puppet-server processor, so stagger the runs to prevent an outage.
 
