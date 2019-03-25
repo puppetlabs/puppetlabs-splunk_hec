@@ -32,6 +32,8 @@ The steps below will help one install and troubleshoot the report processor on a
 
 4. Run `puppet plugin download` on your Puppet Master to sync the new 
 
+(Step 5 and 6 are for testing/troubleshooting your configuration settings. Otherwise you can skip to step 7)
+
 5. Create a `/etc/puppetlabs/puppet/splunk_hec.yaml` (see examples directory for one) adding your Splunk Server & Token from step 1
   - You can add 'timeout' as an optional parameter, default value is 2 for both open and read sessions, so take value x2 for real world use
   - The same is true for port, defaults to 8088 if none provided
