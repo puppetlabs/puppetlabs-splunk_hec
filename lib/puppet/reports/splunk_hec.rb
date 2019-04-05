@@ -30,6 +30,8 @@ Puppet::Reports.register_report(:splunk_hec) do
     metrics = {
       "time" => {
         "config_retrieval" => self.metrics['time']['config_retrieval'],
+        "fact_generation" => self.metrics['time']['fact_generation'],
+        "catalog_application" => self.metrics['time']['catalog_application'],
         "total" => self.metrics['time']['total'],
       },
       "resources" => self.metrics['resources']['total'],
