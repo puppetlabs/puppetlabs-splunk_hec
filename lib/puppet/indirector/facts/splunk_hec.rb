@@ -12,10 +12,19 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Puppetdb
 
   def save(request)
     begin
+
+      facts = request.instance.dup
+      facts.values = facts.values.dup
+      facts.values[:trusted] = get_trusted_info(request.node)
+      facts.values[:environment] = request.options[:environment] || request.environment.to_s
+      facts.values[:producer] = Puppet[:node_name_value]
+
+      facts.values.delete('_puppet_inventory_1')
+
       splunk_event = {
-        "host" => request.key,
+        "host" => facts.name,
         "sourcetype" => "puppet:facts",
-        "event"  => request.instance.values
+        "event"  => facts.values
       }
 
       splunk_hec_config = YAML.load_file(Puppet[:confdir] + '/splunk_hec.yaml')
