@@ -1,4 +1,5 @@
 require 'puppet/indirector/facts/puppetdb'
+require 'puppet/indirector/terminus'
 require 'yaml'
 require 'json'
 require 'date'
@@ -39,6 +40,8 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Puppetdb
       client.use_ssl = true
 
       client.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+      Puppet.info "Submitting facts as #{splunk_event.to_json}"
 
       Puppet.info "Submitting facts to Splunk at #{splunk_server}"
       client.request(request)
