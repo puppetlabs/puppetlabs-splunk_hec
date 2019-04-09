@@ -1,3 +1,5 @@
+require 'puppet'
+require 'puppet/util'
 require 'puppet/indirector/facts/puppetdb'
 require 'puppet/indirector/terminus'
 require 'yaml'
