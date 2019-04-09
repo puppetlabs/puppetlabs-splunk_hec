@@ -23,6 +23,9 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Puppetdb
       facts.values[:producer] = Puppet[:node_name_value]
 
       facts.values.delete('_puppet_inventory_1')
+      facts.values.delete('gce')
+      facts.values.delete('ec2_metadata')
+      facts.values.delete('ec2_userdata')
 
       splunk_event = {
         "host" => facts.name,
