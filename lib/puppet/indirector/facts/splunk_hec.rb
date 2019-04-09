@@ -11,6 +11,9 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Puppetdb
 
 
   def save(request)
+    # puppetdb goes first
+    super(request)
+
     begin
 
       facts = request.instance.dup
@@ -56,6 +59,5 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Puppetdb
       Puppet.err "Could not send facts to Satellite: #{e}\n#{e.backtrace}"
     end
 
-    super(request)
   end
 end
