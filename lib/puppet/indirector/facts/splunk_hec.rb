@@ -27,10 +27,22 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Puppetdb
         facts.values.delete('ec2_metadata')
         facts.values.delete('ec2_userdata')
 
+        pruned_facts = {}
+
+        to_keep = ['os','ssh','dmi','disks','memory','mountpoints','partitions','processors','system_uptime','load_averages','puppetversion','fqdn']
+
+        to_keep.each do | fact |
+          pruned_facts["#{fact}"] = facts.values["#{fact}"]
+        end
+
+        pruned_facts['trusted'] = get_trusted_info(request.node)
+        pruned_facts['environment'] = request.options[:environment] || request.environment.to_s
+        pruned_facts['producer'] = Puppet[:node_name_value]
+
         splunk_event = {
           "host" => facts.name,
           "sourcetype" => "puppet:facts",
-          "event"  => facts.values
+          "event"  => pruned_facts,
         }
 
         splunk_hec_config = YAML.load_file(Puppet[:confdir] + '/splunk_hec.yaml')
