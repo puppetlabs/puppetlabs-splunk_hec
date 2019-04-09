@@ -1,12 +1,8 @@
-require 'puppet'
-require 'puppet/util'
 require 'puppet/indirector/facts/puppetdb'
-require 'puppet/indirector/terminus'
 require 'yaml'
 require 'json'
 require 'date'
 require 'net/https'
-require 'net/http'
 
 # satellite.rb
 class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Puppetdb
@@ -31,10 +27,10 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Puppetdb
       # adds timeout, 2x value because of open and read timeout options
       splunk_timeout = splunk_hec_config['timeout'] || '2'
 
-      request = Net::HTTP::Post.new("https://#{splunk_server}:#{splunk_port}/services/collector")
-      request.add_field("Authorization", "Splunk #{splunk_token}")
-      request.add_field("Content-Type", "application/json")
-      request.body = splunk_event.to_json
+      splunk_request = Net::HTTP::Post.new("https://#{splunk_server}:#{splunk_port}/services/collector")
+      splunk_request.add_field("Authorization", "Splunk #{splunk_token}")
+      splunk_request.add_field("Content-Type", "application/json")
+      splunk_request.body = splunk_event.to_json
 
       client = Net::HTTP.new(splunk_server, splunk_port)
       client.open_timeout = splunk_timeout.to_i
@@ -47,7 +43,7 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Puppetdb
       Puppet.info "Submitting facts as #{splunk_event.to_json}"
 
       Puppet.info "Submitting facts to Splunk at #{splunk_server}"
-      response = client.request(request)
+      response = client.request(splunk_request)
 
       Puppet.info "Submitting facts to Splunk at #{response.to_json}"
 
