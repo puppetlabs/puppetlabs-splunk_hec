@@ -1,4 +1,8 @@
 require 'puppet/indirector/facts/puppetdb'
+require 'yaml'
+require 'json'
+require 'date'
+require 'net/https'
 
 # satellite.rb
 class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Puppetdb
