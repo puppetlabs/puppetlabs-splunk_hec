@@ -6,6 +6,7 @@ require 'yaml'
 require 'json'
 require 'date'
 require 'net/https'
+require 'net/http'
 
 # satellite.rb
 class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Puppetdb
