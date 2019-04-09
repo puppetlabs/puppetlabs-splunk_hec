@@ -44,7 +44,9 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Puppetdb
       Puppet.info "Submitting facts as #{splunk_event.to_json}"
 
       Puppet.info "Submitting facts to Splunk at #{splunk_server}"
-      client.request(request)
+      response = client.request(request)
+
+      Puppet.info "Submitting facts to Splunk at #{response.to_json}"
 
     rescue StandardError => e
       Puppet.err "Could not send facts to Satellite: #{e}\n#{e.backtrace}"
