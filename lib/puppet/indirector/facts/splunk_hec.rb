@@ -38,17 +38,9 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Puppetdb
 
       client.use_ssl = true
 
-      if splunk_hec_config['ssl_verify'] != 'true'
-        client.verify_mode = OpenSSL::SSL::VERIFY_NONE
-      end
+      client.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
-      if splunk_hec_config['ssl_certificate'] != nil && splunk_hec_config['ssl_verify'] == 'true'
-        ssl_cert = File.join(Puppet[:confdir], "splunk_hec", splunk_hec_config['ssl_certificate'])
-        client.verify_mode = OpenSSL::SSL::VERIFY_PEER
-        client.ca_file = ssl_cert
-      end
-
-      Puppet.info "Submitting facts to Satellite at #{satellite_url}"
+      Puppet.info "Submitting facts to Splunk at #{splunk_server}"
       client.request(request)
 
     rescue StandardError => e
