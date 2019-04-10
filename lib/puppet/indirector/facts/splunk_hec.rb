@@ -18,14 +18,6 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Puppetdb
       begin
         facts = request.instance.dup
         facts.values = facts.values.dup
-        facts.values[:trusted] = get_trusted_info(request.node)
-        facts.values[:environment] = request.options[:environment] || request.environment.to_s
-        facts.values[:producer] = Puppet[:node_name_value]
-
-        facts.values.delete('_puppet_inventory_1')
-        facts.values.delete('gce')
-        facts.values.delete('ec2_metadata')
-        facts.values.delete('ec2_userdata')
 
         pruned_facts = {}
 
