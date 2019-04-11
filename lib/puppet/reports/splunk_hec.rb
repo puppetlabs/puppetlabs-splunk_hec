@@ -7,7 +7,7 @@ Puppet::Reports.register_report(:splunk_hec) do
   include Puppet::Util::Splunk_hec
   def process
     # now we can create the event with the timestamp from the report
-    time = DateTime.parse(self.time)
+    time = DateTime.parse("#{self.time}")
     epoch = time.strftime('%Q').to_str.insert(-4, '.')
 
     # pass simple metrics for report processing later
@@ -47,7 +47,7 @@ Puppet::Reports.register_report(:splunk_hec) do
       }
     }
     
-    Puppet.info "Submitting report to Splunk at #{splunk_server}"
+    Puppet.info "Submitting report to Splunk at #{splunk_url}"
     submit_request event
 
   rescue StandardError => e

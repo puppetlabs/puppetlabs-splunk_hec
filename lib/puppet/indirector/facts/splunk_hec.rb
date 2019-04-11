@@ -46,7 +46,7 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Puppetdb
           "event"  => facts,
         }
 
-        Puppet.info "Submitting facts to Splunk at #{splunk_server}"
+        Puppet.info "Submitting facts to Splunk at #{splunk_url}"
         submit_request event
 
       rescue StandardError => e
