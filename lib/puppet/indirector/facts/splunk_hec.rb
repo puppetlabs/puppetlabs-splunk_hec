@@ -6,6 +6,7 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Puppetdb
   desc "Save facts to Splunk over HEC and PuppetDB.
        It uses PuppetDB to retrieve facts for catalog compilation."
 
+  include Puppet::Util::Splunk_hec
 
   def save(request)
     # puppetdb goes first
