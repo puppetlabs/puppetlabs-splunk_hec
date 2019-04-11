@@ -23,8 +23,6 @@ Puppet::Reports.register_report(:splunk_hec) do
       "changes" => self.metrics['changes']['total'],
     }
 
-    puppetdb_hostname = puppetdb_callback_hostname
-
     event = {
       "host" => self.host,
       "time" => epoch,
@@ -43,7 +41,7 @@ Puppet::Reports.register_report(:splunk_hec) do
         "job_id" => self.job_id,
         "puppet_version" => self.puppet_version,
         "certname" => self.host,
-        "puppetdb_callback_hostname" => puppetdb_hostname,
+        "puppetdb_callback_hostname" => puppetdb_callback_hostname,
         "report_format" => self.report_format,
         "metrics" => metrics
       }
