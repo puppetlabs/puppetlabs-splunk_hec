@@ -24,6 +24,7 @@ This was tested on both Puppet Enterprise 2018.1.4 & Puppet 6, using stock gems 
 Report Processor Installation & Usage
 --------------------
 
+
 The steps below will help install and troubleshoot the report processor on a single Puppet Master, including manual steps to configure a puppet-server, and to use the included splunk_hec class. Because one is modifying production machines, these steps allow you to validate your settings before deploying the changes live.
 
 1. Install the Puppet Report Viewer Addon in Splunk. This will import the needed sourcetypes that make setting up the HEC easier in the next steps, and also some overview dashboards that make it a lot easier to see if you're sending Puppet run reports into Splunk.
