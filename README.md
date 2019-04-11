@@ -52,6 +52,7 @@ The steps below will help install and troubleshoot the report processor on a sin
 ### Manual steps:
 
 - Add `splunk_hec` to `/etc/puppetlabs/puppet/puppet.conf` reports line under the master's configuration block
+
 ```
 [master]
 node_terminus = classifier
