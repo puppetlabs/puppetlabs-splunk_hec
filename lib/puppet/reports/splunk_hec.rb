@@ -40,7 +40,7 @@ Puppet::Reports.register_report(:splunk_hec) do
           "job_id" => self.job_id,
           "puppet_version" => self.puppet_version,
           "certname" => self.host,
-          "puppetdb_callback_hostname" => settings['puppetdb_callback_hostname'] || Puppet[:certname]
+          "puppetdb_callback_hostname" => settings['puppetdb_callback_hostname'] || Puppet[:certname],
           "report_format" => self.report_format,
           "metrics" => metrics
         }
