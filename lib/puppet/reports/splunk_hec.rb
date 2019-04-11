@@ -26,6 +26,7 @@ Puppet::Reports.register_report(:splunk_hec) do
     event = {
       "host" => self.host,
       "time" => epoch,
+      "sourcetype" => "puppet:summary",
       "event"  => {
         "status" => self.status,
         "corrective_change" => self.corrective_change,
@@ -42,7 +43,7 @@ Puppet::Reports.register_report(:splunk_hec) do
         "puppet_version" => self.puppet_version,
         "certname" => self.host,
         "producer" => Puppet[:certname],
-        "puppetdb_callback_hostname" => puppetdb_callback_hostname,
+        "pe_console" => pe_console,
         "report_format" => self.report_format,
         "metrics" => metrics
       }

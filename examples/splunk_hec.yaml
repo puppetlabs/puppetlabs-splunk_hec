@@ -1,5 +1,5 @@
 # managed by puppet
 ---
 "server" : "splunk-dev.foo.bar.com"
-"token" : "9BEFBCD1-47B2-4A74-90FF-2098EEBE4EE3"
-"puppetdb_callback_hostname": "puppetdb.foo.bar.com"
+"url" : "9BEFBCD1-47B2-4A74-90FF-2098EEBE4EE3"
+"pe_console": "puppetdb.foo.bar.com"
