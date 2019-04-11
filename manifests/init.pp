@@ -29,5 +29,6 @@ class splunk_hec (
     group   => pe-puppet,
     mode    => '0640',
     content => epp('splunk_hec/splunk_hec.yaml.epp'),
+    notify  => Service['pe-puppetserver'],
   }
 }
