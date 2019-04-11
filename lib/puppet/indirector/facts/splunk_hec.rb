@@ -39,6 +39,7 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Puppetdb
         facts['trusted'] = get_trusted_info(request.node)
         facts['environment'] = request.options[:environment] || request.environment.to_s
         facts['producer'] = Puppet[:node_name_value]
+        facts['puppetdb_callback_hostname'] = puppetdb_callback_hostname
 
         event = {
           "host" => host,
