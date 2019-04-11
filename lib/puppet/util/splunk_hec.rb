@@ -56,7 +56,7 @@ module Puppet::Util::Splunk_hec
     settings['url'] || raise(Puppet::Error, 'Must provide url parameter to splunk class')
   end
   
-  def puppetdb_callback_hostname
-    settings['puppetdb_callback_hostname'] || Puppet[:certname]
+  def pe_console
+    settings['pe_console'] || Puppet[:certname]
   end
 end

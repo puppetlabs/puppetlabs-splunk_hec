@@ -6,8 +6,8 @@
 <% $splunk_hec::collect_facts.each |$fact| {-%>
         - <%= $fact %>
 <% } -%>
-<% if $splunk_hec::puppetdb_callback_hostname{ -%>
-"puppetdb_callback_hostname" : "<%= $splunk_hec::puppetdb_callback_hostname %>"
+<% if $splunk_hec::pe_console{ -%>
+"pe_console" : "<%= $splunk_hec::pe_console %>"
 <% } -%>
 <% if $splunk_hec::timeout { -%>
 "timeout" : "<%= $splunk_hec::timeout %>"
