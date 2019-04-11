@@ -1,7 +1,7 @@
 require 'puppet/indirector/facts/puppetdb'
 require 'puppet/util/splunk_hec'
 
-# satellite.rb
+# splunk_hec.rb
 class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Puppetdb
   desc "Save facts to Splunk over HEC and PuppetDB.
        It uses PuppetDB to retrieve facts for catalog compilation."
@@ -18,7 +18,15 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Puppetdb
 
         facts = {}
 
-        hardcoded = ['os','memory','puppetversion','system_uptime','load_averages','ipaddress','fqdn']
+        hardcoded = [
+          'os',
+          'memory',
+          'puppetversion',
+          'system_uptime',
+          'load_averages',
+          'ipaddress',
+          'fqdn'
+        ]
 
         # lets ensure user provided fact names are downcased
         users = settings['facts'].map(&:downcase)
