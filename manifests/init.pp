@@ -4,8 +4,8 @@
 class splunk_hec (
   String $url,
   String $token,
-  Array $facts = ["dmi","disks","partitions","processors","networking"],
-  Boolean $enable_reports = False,
+  Array $collect_facts = ["dmi","disks","partitions","processors","networking"],
+  Boolean $enable_reports = false,
   String $reports = "puppetdb,splunk_hec",
   Optional[String] $puppetdb_callback_hostname = undef,
   Optional[Integer] $timeout = undef,

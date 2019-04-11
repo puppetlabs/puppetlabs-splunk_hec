@@ -3,7 +3,7 @@
 "url" : "<%= $splunk_hec::real_url %>"
 "token" : "<%= $splunk_hec::token %>"
 "facts" :
-<% $splunk_hec::facts.each |$fact| {-%>
+<% $splunk_hec::collect_facts.each |$fact| {-%>
         - <%= $fact %>
 <% } -%>
 <% if $splunk_hec::puppetdb_callback_hostname{ -%>
