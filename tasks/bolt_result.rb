@@ -8,15 +8,15 @@ require 'uri'
 
 params = JSON.parse(STDIN.read)
 
-def make_error (msg)
+def make_error(msg)
   error = {
-    "_error" => {
-      "kind" => "execution error",
-      "msg"  => msg,
-      "details" => {}
-    }
+    '_error' => {
+      'kind' => 'execution error',
+      'msg'  => msg,
+      'details' => {},
+    },
   }
-  return error
+  error
 end
 
 target = params['_target']
@@ -30,11 +30,11 @@ result = params['result']
 
 puts result
 
-#facts = params['facts']
+# facts = params['facts']
 
 # now we can create the event with the timestamp from the report
-#time = DateTime.parse(report['time'])
-#epoch = time.strftime('%Q').to_str.insert(-4, '.')
+# time = DateTime.parse(report['time'])
+# epoch = time.strftime('%Q').to_str.insert(-4, '.')
 
 uri = URI(result['target'])
 
@@ -43,16 +43,16 @@ host = uri.host
 result['event_type'] = 'bolt_result'
 
 splunk_event = {
-  "host" => host,
-  "event"  => result,
+  'host' => host,
+  'event' => result,
 }
 
 #  create header here
-#header = "Authorization: Splunk #{splunk_token}"
+# header = "Authorization: Splunk #{splunk_token}"
 
 request = Net::HTTP::Post.new("https://#{splunk_server}:#{splunk_port}/services/collector")
-request.add_field("Authorization", "Splunk #{splunk_token}")
-request.add_field("Content-Type", "application/json")
+request.add_field('Authorization', "Splunk #{splunk_token}")
+request.add_field('Content-Type', 'application/json')
 request.body = splunk_event.to_json
 
 client = Net::HTTP.new(splunk_server, splunk_port)

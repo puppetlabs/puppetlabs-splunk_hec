@@ -25,7 +25,7 @@ module Puppet::Util::Splunk_hec
     if http.use_ssl?
       if settings['ssl_ca'] && !settings['ssl_ca'].empty?
         Puppet.info "Will verify #{splunk_url} SSL identity"
-        ssl_ca = File.join(Puppet[:confdir], "splunk_hec", settings['ssl_ca'])
+        ssl_ca = File.join(Puppet[:confdir], 'splunk_hec', settings['ssl_ca'])
         http.ca_file = ssl_ca
         raise Puppet::Error, "CA file #{ssl_ca} does not exist" unless File.exist? ssl_ca
 
@@ -42,9 +42,9 @@ module Puppet::Util::Splunk_hec
   def submit_request(body)
     http = create_http
     token = settings['token'] || raise(Puppet::Error, 'Must provide token parameter to splunk class')
-    req = Net::HTTP::Post.new("#{@uri.path}")
-    req.add_field("Authorization", "Splunk #{token}")
-    req.add_field("Content-Type", "application/json")
+    req = Net::HTTP::Post.new(@uri.path.to_str)
+    req.add_field('Authorization', "Splunk #{token}")
+    req.add_field('Content-Type', 'application/json')
     req.content_type = 'application/json'
     req.body = body.to_json
     http.request(req)
@@ -55,7 +55,7 @@ module Puppet::Util::Splunk_hec
   def splunk_url
     settings['url'] || raise(Puppet::Error, 'Must provide url parameter to splunk class')
   end
-  
+
   def pe_console
     settings['pe_console'] || Puppet[:certname]
   end

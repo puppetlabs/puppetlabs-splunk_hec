@@ -12,12 +12,10 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Puppetdb
     # puppetdb goes first
     super(request)
 
-    profile("splunk_facts#save", [:splunk, :facts, :save, request.key]) do
+    profile('splunk_facts#save', [:splunk, :facts, :save, request.key]) do
       begin
         host = request.instance.name.dup
         incoming_facts = request.instance.values.dup
-
-        facts = {}
 
         hardcoded = [
           'os',
@@ -26,7 +24,7 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Puppetdb
           'system_uptime',
           'load_averages',
           'ipaddress',
-          'fqdn'
+          'fqdn',
         ]
 
         # lets ensure user provided fact names are downcased
@@ -34,7 +32,7 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Puppetdb
 
         keep = (hardcoded + users).uniq
 
-        facts = incoming_facts.select{ |k,v| keep.include?(k) }
+        facts = incoming_facts.select { |k, _v| keep.include?(k) }
 
         facts['trusted'] = get_trusted_info(request.node)
         facts['environment'] = request.options[:environment] || request.environment.to_s
@@ -42,18 +40,16 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Puppetdb
         facts['pe_console'] = pe_console
 
         event = {
-          "host" => host,
-          "sourcetype" => "puppet:facts",
-          "event"  => facts,
+          'host' => host,
+          'sourcetype' => 'puppet:facts',
+          'event' => facts,
         }
 
         Puppet.info "Submitting facts to Splunk at #{splunk_url}"
         submit_request event
-
       rescue StandardError => e
         Puppet.err "Could not send facts to Satellite: #{e}\n#{e.backtrace}"
       end
     end
-
   end
 end
