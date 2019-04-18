@@ -21,7 +21,7 @@ Puppet::Reports.register_report(:splunk_hec) do
       },
       'resources' => {
         'total' => self.metrics['resources']['total'],
-      ],
+      },
       'changes' => {
         'total' => self.metrics['changes']['total'],
       },
