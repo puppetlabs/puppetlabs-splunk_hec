@@ -7,8 +7,8 @@ Puppet::Reports.register_report(:splunk_hec) do
   include Puppet::Util::Splunk_hec
   def process
     # now we can create the event with the timestamp from the report
-    time = DateTime.parse(self.time.to_str)
-    epoch = time.strftime('%Q').to_str.insert(-4, '.')
+    time = DateTime.parse(self.time.to_s)
+    epoch = time.strftime('%Q').to_s.insert(-4, '.')
 
     # pass simple metrics for report processing later
     #  STATES = [:skipped, :failed, :failed_to_restart, :restarted, :changed, :out_of_sync, :scheduled, :corrective_change]
