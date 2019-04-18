@@ -19,8 +19,12 @@ Puppet::Reports.register_report(:splunk_hec) do
         'catalog_application' => self.metrics['time']['catalog_application'],
         'total' => self.metrics['time']['total'],
       },
-      'resources' => self.metrics['resources']['total'],
-      'changes' => self.metrics['changes']['total'],
+      'resources' => {
+        'total' => self.metrics['resources']['total'],
+      ],
+      'changes' => {
+        'total' => self.metrics['changes']['total'],
+      },
     }
 
     event = {
@@ -28,24 +32,24 @@ Puppet::Reports.register_report(:splunk_hec) do
       'time' => epoch,
       'sourcetype' => 'puppet:summary',
       'event' => {
-        'status' => status,
+        'cached_catalog_status' =>  cached_catalog_status,
+        'catalog_uuid' => catalog_uuid,
+        'certname' => host,
+        'code_id' => code_id,
+        'configuration_version' => configuration_version,
         'corrective_change' => corrective_change,
+        'environment' => environment,
+        'job_id' => job_id,
+        'metrics' => metrics,
         'noop' => noop,
         'noop_pending' => noop_pending,
-        'environment' => environment,
-        'configuration_version' => configuration_version,
-        'transaction_uuid' => transaction_uuid,
-        'catalog_uuid' => catalog_uuid,
-        'cached_catalog_status' =>  cached_catalog_status,
-        'code_id' => code_id,
-        'time' => time,
-        'job_id' => job_id,
-        'puppet_version' => puppet_version,
-        'certname' => host,
-        'producer' => Puppet[:certname],
         'pe_console' => pe_console,
+        'producer' => Puppet[:certname],
+        'puppet_version' => puppet_version,
         'report_format' => report_format,
-        'metrics' => metrics,
+        'status' => status,
+        'time' => time,
+        'transaction_uuid' => transaction_uuid,
       },
     }
 
