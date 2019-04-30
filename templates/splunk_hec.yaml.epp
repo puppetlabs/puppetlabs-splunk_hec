@@ -1,19 +1,17 @@
 # managed by puppet
 ---
-"server" : "<%= $splunk_hec::server %>"
+"url" : "<%= $splunk_hec::url %>"
 "token" : "<%= $splunk_hec::token %>"
-<% if $splunk_hec::port { -%>
-"port" : "<%= $splunk_hec::port %>"
+"facts" :
+<% $splunk_hec::collect_facts.each |$fact| {-%>
+        - <%= $fact %>
 <% } -%>
-<% if $splunk_hec::puppetdb_callback_hostname { -%>
-"puppetdb_callback_hostname" : "<%= $splunk_hec::puppetdb_callback_hostname %>"
+<% if $splunk_hec::pe_console{ -%>
+"pe_console" : "<%= $splunk_hec::pe_console %>"
 <% } -%>
 <% if $splunk_hec::timeout { -%>
 "timeout" : "<%= $splunk_hec::timeout %>"
 <% } -%>
-<% if $splunk_hec::ssl_verify { -%>
-"ssl_verify" : "<%= $splunk_hec::ssl_verify %>"
-<% } -%>
-<% if $splunk_hec::ssl_certificate { -%>
-"ssl_certificate" : "<%= $splunk_hec::ssl_certificate %>"
+<% if $splunk_hec::ssl_ca { -%>
+"ssl_ca" : "<%= $splunk_hec::ssl_ca %>"
 <% } -%>

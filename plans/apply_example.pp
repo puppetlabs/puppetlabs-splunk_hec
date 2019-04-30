@@ -13,6 +13,7 @@ plan splunk_hec::apply_example (
   apply_prep ($pcpca)
 
   $results = apply ($pcpca) {
+    include ntp
     notify {"hello config test":}
 
   }
