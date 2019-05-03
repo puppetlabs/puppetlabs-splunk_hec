@@ -16,7 +16,7 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Puppetdb
       begin
         host = request.instance.name.dup
         incoming_facts = request.instance.values.dup
-        transaction_uuid = request.transaction_uuid.dup
+        transaction_uuid = request.options.transaction_uuid.dup
 
         hardcoded = [
           'os',
@@ -39,7 +39,7 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Puppetdb
         facts['environment'] = request.options[:environment] || request.environment.to_s
         facts['producer'] = Puppet[:certname]
         facts['pe_console'] = pe_console
-        facts['transaction_uuid'] = 'transaction_uuid'
+        facts['transaction_uuid'] = transaction_uuid
 
         event = {
           'host' => host,
@@ -50,7 +50,7 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Puppetdb
         Puppet.info "Submitting facts to Splunk at #{splunk_url}"
         submit_request event
       rescue StandardError => e
-        Puppet.err "Could not send facts to Satellite: #{e}\n#{e.backtrace}"
+        Puppet.err "Could not send facts to Splunk: #{e}\n#{e.backtrace}"
       end
     end
   end
