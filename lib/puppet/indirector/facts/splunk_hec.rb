@@ -16,7 +16,7 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Puppetdb
       begin
         host = request.instance.name.dup
         incoming_facts = request.instance.values.dup
-        transaction_uuid = request.options.transaction_uuid
+        transaction_uuid = request.options[:transaction_uuid]
 
         hardcoded = [
           'os',
