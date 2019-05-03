@@ -16,6 +16,15 @@ class Puppet::Application::Splunk_hec < Puppet::Application
 
   option('--pe_metrics')
 
+  def get_name(servername)
+    if servername.to_s == '127-0-0-1'
+      name = Puppet[:certname].to_s
+    else
+      name = servername
+    end
+    name.to_s
+  end
+
   def send_pe_metrics(data, sourcetype)
     timestamp = sourcetypetime(data['timestamp'])
     event_template = {
@@ -24,10 +33,11 @@ class Puppet::Application::Splunk_hec < Puppet::Application
       'event' => {},
     }
     data['servers'].keys.each do |server|
+      name = get_name(server.to_s)
       content = data['servers'][server.to_s]
       content.keys.each do |serv|
         event = event_template.clone
-        event['host'] = server
+        event['host'] = name
         event['event'] = content[serv.to_s]
         event['event']['pe_service'] = serv.to_s
         Puppet.info "Submitting metrics to Splunk at #{splunk_url}"
