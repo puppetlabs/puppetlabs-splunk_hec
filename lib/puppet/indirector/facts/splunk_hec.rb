@@ -39,7 +39,7 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Puppetdb
         facts['environment'] = request.options[:environment] || request.environment.to_s
         facts['producer'] = Puppet[:certname]
         facts['pe_console'] = pe_console
-        facts['transaction_uuid'] = transaction_uuid
+        facts['transaction_uuid'] = 'transaction_uuid'
 
         event = {
           'host' => host,
