@@ -5,6 +5,7 @@ require 'net/https'
 require 'uri'
 require 'yaml'
 require 'json'
+require 'time'
 
 # splunk_hec.rb
 module Puppet::Util::Splunk_hec
@@ -58,5 +59,11 @@ module Puppet::Util::Splunk_hec
 
   def pe_console
     settings['pe_console'] || Puppet[:certname]
+  end
+
+  # standard function to make sure we're using the same time format our sourcetypes are set to parse
+  def sourcetypetime(timestamp)
+    time = Time.parse(timestamp)
+    "%10.3f" % time.to_f
   end
 end

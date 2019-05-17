@@ -1,0 +1,601 @@
+{
+  "timestamp": "2019-05-03T02:59:33Z",
+  "servers": {
+    "puppet-c-splunk-217321-internal": {
+      "orchestrator": {
+        "broker-service": {
+          "service_version": "1.5.3",
+          "service_status_version": 1,
+          "detail_level": "debug",
+          "state": "running",
+          "status": {
+            "metrics": {
+              "puppetlabs.pcp.on-close": {
+                "rates": {
+                  "1": 2.788760636356196e-20,
+                  "5": 3.3877101432950975e-05,
+                  "15": 0.011065951062135926,
+                  "total": 1
+                },
+                "mean": 417353931.0,
+                "std-dev": 0.0,
+                "percentiles": {
+                  "0.75": 417353931.0,
+                  "0.95": 417353931.0,
+                  "0.99": 417353931.0,
+                  "0.999": 417353931.0,
+                  "1.0": 417353931.0
+                },
+                "largest": 417353931,
+                "smallest": 417353931
+              },
+              "puppetlabs.pcp.on-connect": {
+                "rates": {
+                  "1": 6.888187206729161e-20,
+                  "5": 4.0696306647189904e-05,
+                  "15": 0.011763559299922392,
+                  "total": 12
+                },
+                "mean": 41894024.417897455,
+                "std-dev": 109757370.42593586,
+                "percentiles": {
+                  "0.75": 28301604.0,
+                  "0.95": 491414497.0,
+                  "0.99": 491414497.0,
+                  "0.999": 491414497.0,
+                  "1.0": 491414497.0
+                },
+                "largest": 491414497,
+                "smallest": 4684587
+              },
+              "puppetlabs.pcp.on-message": {
+                "rates": {
+                  "1": 2.81218054725494e-07,
+                  "5": 0.002505776531083986,
+                  "15": 0.005911137972860372,
+                  "total": 22
+                },
+                "mean": 2758247.0595337525,
+                "std-dev": 1528318.9077125278,
+                "percentiles": {
+                  "0.75": 3784909.0,
+                  "0.95": 4057499.0,
+                  "0.99": 4543275.0,
+                  "0.999": 4543275.0,
+                  "1.0": 50167287.0
+                },
+                "largest": 50167287,
+                "smallest": 424824
+              },
+              "puppetlabs.pcp.on-send": {
+                "rates": {
+                  "1": 2.8121805472550845e-07,
+                  "5": 0.0025082327356744194,
+                  "15": 0.006163991430922259,
+                  "total": 26
+                },
+                "mean": 349634.0596412754,
+                "std-dev": 87947.06774548466,
+                "percentiles": {
+                  "0.75": 385273.0,
+                  "0.95": 471062.0,
+                  "0.99": 539459.0,
+                  "0.999": 539459.0,
+                  "1.0": 30715567.0
+                },
+                "largest": 30715567,
+                "smallest": 189908
+              }
+            },
+            "threads": {
+              "ThreadCount": 93,
+              "ObjectMonitorUsageSupported": true,
+              "PeakThreadCount": 99,
+              "ThreadAllocatedMemoryEnabled": true,
+              "ThreadContentionMonitoringSupported": true,
+              "DaemonThreadCount": 18,
+              "CurrentThreadCpuTime": 1260545,
+              "ThreadCpuTimeEnabled": true,
+              "ThreadCpuTimeSupported": true,
+              "SynchronizerUsageSupported": true,
+              "TotalStartedThreadCount": 365,
+              "ThreadAllocatedMemorySupported": true,
+              "ThreadContentionMonitoringEnabled": false,
+              "CurrentThreadUserTime": 0,
+              "CurrentThreadCpuTimeSupported": true
+            },
+            "memory": {
+              "Verbose": true,
+              "ObjectPendingFinalizationCount": 0,
+              "HeapMemoryUsage": {
+                "committed": 725090304,
+                "init": 738197504,
+                "max": 725090304,
+                "used": 109287864
+              },
+              "NonHeapMemoryUsage": {
+                "committed": 155369472,
+                "init": 2555904,
+                "max": -1,
+                "used": 152582728
+              }
+            }
+          },
+          "active_alerts": [
+
+          ]
+        },
+        "orchestrator-service": {
+          "service_version": "2019.1.0.62",
+          "service_status_version": 1,
+          "detail_level": "debug",
+          "state": "running",
+          "status": {
+            "db_up": true,
+            "classifier_up": true,
+            "rbac_up": true,
+            "puppetserver_up": true,
+            "puppetdb_up": true,
+            "pxp_up": true,
+            "replication": {
+              "mode": "source",
+              "status": "none"
+            },
+            "metrics": {
+              "routes": {
+                "routes": {
+                  "orchestrator-v1-tasks-:module-:task-name": {
+                    "route-id": "orchestrator-v1-tasks-:module-:task-name",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  "orchestrator-v1-tasks-:module-:task-name-permitted": {
+                    "route-id": "orchestrator-v1-tasks-:module-:task-name-permitted",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  "orchestrator-v1-jobs-:job-id-nodes": {
+                    "route-id": "orchestrator-v1-jobs-:job-id-nodes",
+                    "count": 5,
+                    "mean": 56,
+                    "aggregate": 280
+                  },
+                  "orchestrator-v1-scheduled_jobs": {
+                    "route-id": "orchestrator-v1-scheduled_jobs",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  "orchestrator-v1-environments-:environment": {
+                    "route-id": "orchestrator-v1-environments-:environment",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  "orchestrator-v1-environments": {
+                    "route-id": "orchestrator-v1-environments",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  "orchestrator-v1-environments-:environment-applications": {
+                    "route-id": "orchestrator-v1-environments-:environment-applications",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  "other": {
+                    "route-id": "other",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  "orchestrator-v1-plan_jobs-:job-id-events": {
+                    "route-id": "orchestrator-v1-plan_jobs-:job-id-events",
+                    "count": 6264,
+                    "mean": 18,
+                    "aggregate": 112752
+                  },
+                  "orchestrator-v1-scheduled_jobs-:job-id": {
+                    "route-id": "orchestrator-v1-scheduled_jobs-:job-id",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  "orchestrator-v1-usage": {
+                    "route-id": "orchestrator-v1-usage",
+                    "count": 1,
+                    "mean": 1272,
+                    "aggregate": 1272
+                  },
+                  "orchestrator-v1-inventory-:node": {
+                    "route-id": "orchestrator-v1-inventory-:node",
+                    "count": 1,
+                    "mean": 102,
+                    "aggregate": 102
+                  },
+                  "orchestrator-v1-tasks": {
+                    "route-id": "orchestrator-v1-tasks",
+                    "count": 2,
+                    "mean": 206,
+                    "aggregate": 412
+                  },
+                  "orchestrator-v1-internal-:command-name": {
+                    "route-id": "orchestrator-v1-internal-:command-name",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  "orchestrator-v1-jobs-:job-id-report": {
+                    "route-id": "orchestrator-v1-jobs-:job-id-report",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  "orchestrator-v1-dumplings-/1-9_d*/": {
+                    "route-id": "orchestrator-v1-dumplings-/1-9_d*/",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  "total": {
+                    "route-id": "total",
+                    "count": 6527,
+                    "mean": 18,
+                    "aggregate": 117486
+                  },
+                  "orchestrator-v1-plan_jobs-:job-id": {
+                    "route-id": "orchestrator-v1-plan_jobs-:job-id",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  "orchestrator-v1-jobs-:job-id-catalog": {
+                    "route-id": "orchestrator-v1-jobs-:job-id-catalog",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  "orchestrator-v1-jobs": {
+                    "route-id": "orchestrator-v1-jobs",
+                    "count": 4,
+                    "mean": 84,
+                    "aggregate": 336
+                  },
+                  "orchestrator-v1-jobs-:job-id": {
+                    "route-id": "orchestrator-v1-jobs-:job-id",
+                    "count": 14,
+                    "mean": 57,
+                    "aggregate": 798
+                  },
+                  "orchestrator-v1-swagger_json": {
+                    "route-id": "orchestrator-v1-swagger_json",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  "orchestrator-v1-command-:command-name": {
+                    "route-id": "orchestrator-v1-command-:command-name",
+                    "count": 4,
+                    "mean": 476,
+                    "aggregate": 1904
+                  },
+                  "orchestrator-v1-plan_jobs": {
+                    "route-id": "orchestrator-v1-plan_jobs",
+                    "count": 17,
+                    "mean": 47,
+                    "aggregate": 799
+                  },
+                  "orchestrator-v1-dumplings": {
+                    "route-id": "orchestrator-v1-dumplings",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  "/*/": {
+                    "route-id": "/*/",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  "orchestrator-v1-environments-:environment-instances": {
+                    "route-id": "orchestrator-v1-environments-:environment-instances",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  "orchestrator-v1-//": {
+                    "route-id": "orchestrator-v1-//",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  "orchestrator-v1-status": {
+                    "route-id": "orchestrator-v1-status",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  "orchestrator-v1-jobs-:job-id-events": {
+                    "route-id": "orchestrator-v1-jobs-:job-id-events",
+                    "count": 214,
+                    "mean": 38,
+                    "aggregate": 8132
+                  },
+                  "orchestrator-v1-inventory": {
+                    "route-id": "orchestrator-v1-inventory",
+                    "count": 1,
+                    "mean": 88,
+                    "aggregate": 88
+                  }
+                },
+                "sorted-routes": [
+                  {
+                    "route-id": "total",
+                    "count": 6527,
+                    "mean": 18,
+                    "aggregate": 117486
+                  },
+                  {
+                    "route-id": "orchestrator-v1-plan_jobs-:job-id-events",
+                    "count": 6264,
+                    "mean": 18,
+                    "aggregate": 112752
+                  },
+                  {
+                    "route-id": "orchestrator-v1-jobs-:job-id-events",
+                    "count": 214,
+                    "mean": 38,
+                    "aggregate": 8132
+                  },
+                  {
+                    "route-id": "orchestrator-v1-command-:command-name",
+                    "count": 4,
+                    "mean": 476,
+                    "aggregate": 1904
+                  },
+                  {
+                    "route-id": "orchestrator-v1-usage",
+                    "count": 1,
+                    "mean": 1272,
+                    "aggregate": 1272
+                  },
+                  {
+                    "route-id": "orchestrator-v1-plan_jobs",
+                    "count": 17,
+                    "mean": 47,
+                    "aggregate": 799
+                  },
+                  {
+                    "route-id": "orchestrator-v1-jobs-:job-id",
+                    "count": 14,
+                    "mean": 57,
+                    "aggregate": 798
+                  },
+                  {
+                    "route-id": "orchestrator-v1-tasks",
+                    "count": 2,
+                    "mean": 206,
+                    "aggregate": 412
+                  },
+                  {
+                    "route-id": "orchestrator-v1-jobs",
+                    "count": 4,
+                    "mean": 84,
+                    "aggregate": 336
+                  },
+                  {
+                    "route-id": "orchestrator-v1-jobs-:job-id-nodes",
+                    "count": 5,
+                    "mean": 56,
+                    "aggregate": 280
+                  },
+                  {
+                    "route-id": "orchestrator-v1-inventory-:node",
+                    "count": 1,
+                    "mean": 102,
+                    "aggregate": 102
+                  },
+                  {
+                    "route-id": "orchestrator-v1-inventory",
+                    "count": 1,
+                    "mean": 88,
+                    "aggregate": 88
+                  },
+                  {
+                    "route-id": "orchestrator-v1-tasks-:module-:task-name",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  {
+                    "route-id": "orchestrator-v1-tasks-:module-:task-name-permitted",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  {
+                    "route-id": "orchestrator-v1-scheduled_jobs",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  {
+                    "route-id": "orchestrator-v1-environments-:environment",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  {
+                    "route-id": "orchestrator-v1-environments",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  {
+                    "route-id": "orchestrator-v1-environments-:environment-applications",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  {
+                    "route-id": "other",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  {
+                    "route-id": "orchestrator-v1-scheduled_jobs-:job-id",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  {
+                    "route-id": "orchestrator-v1-internal-:command-name",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  {
+                    "route-id": "orchestrator-v1-jobs-:job-id-report",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  {
+                    "route-id": "orchestrator-v1-dumplings-/1-9_d*/",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  {
+                    "route-id": "orchestrator-v1-plan_jobs-:job-id",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  {
+                    "route-id": "orchestrator-v1-jobs-:job-id-catalog",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  {
+                    "route-id": "orchestrator-v1-swagger_json",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  {
+                    "route-id": "orchestrator-v1-dumplings",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  {
+                    "route-id": "/*/",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  {
+                    "route-id": "orchestrator-v1-environments-:environment-instances",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  {
+                    "route-id": "orchestrator-v1-//",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  },
+                  {
+                    "route-id": "orchestrator-v1-status",
+                    "count": 0,
+                    "mean": 0,
+                    "aggregate": 0
+                  }
+                ]
+              },
+              "app": {
+                "deploy-queue.length": 0,
+                "jobs-created": 3,
+                "puppet-run-time": 0.0
+              }
+            }
+          },
+          "active_alerts": [
+
+          ]
+        },
+        "status-service": {
+          "service_version": "1.1.0",
+          "service_status_version": 1,
+          "detail_level": "debug",
+          "state": "running",
+          "status": {
+            "experimental": {
+              "jvm-metrics": {
+                "cpu-usage": 1.5996801,
+                "up-time-ms": 2632100,
+                "gc-cpu-usage": 0.0,
+                "threading": {
+                  "thread-count": 90,
+                  "peak-thread-count": 99
+                },
+                "heap-memory": {
+                  "committed": 725090304,
+                  "init": 738197504,
+                  "max": 725090304,
+                  "used": 108667120
+                },
+                "gc-stats": {
+                  "PS Scavenge": {
+                    "count": 57,
+                    "total-time-ms": 1504,
+                    "last-gc-info": {
+                      "duration-ms": 11
+                    }
+                  },
+                  "PS MarkSweep": {
+                    "count": 3,
+                    "total-time-ms": 503,
+                    "last-gc-info": {
+                      "duration-ms": 287
+                    }
+                  }
+                },
+                "start-time-ms": 1556849741982,
+                "file-descriptors": {
+                  "used": 165,
+                  "max": 100000
+                },
+                "non-heap-memory": {
+                  "committed": 155369472,
+                  "init": 2555904,
+                  "max": -1,
+                  "used": 152588464
+                }
+              }
+            }
+          },
+          "active_alerts": [
+
+          ]
+        },
+        "error": [
+
+        ],
+        "error_count": 0,
+        "api-query-start": "2019-05-03T02:59:33Z",
+        "api-query-duration": 0.299507934
+      }
+    },
+    "foo":{
+      "bar": {}
+    }
+  }
+}
