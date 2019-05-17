@@ -66,5 +66,4 @@ module Puppet::Util::Splunk_hec
     time = Time.parse(timestamp)
     "%10.3f" % time.to_f
   end
-
 end
