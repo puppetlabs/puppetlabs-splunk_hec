@@ -55,6 +55,10 @@ Puppet::Reports.register_report(:splunk_hec) do
 
     Puppet.info "Submitting report to Splunk at #{splunk_url}"
     submit_request event
+    if record_event
+      store_event event
+    end
+
   rescue StandardError => e
     Puppet.err "Could not send report to Splunk: #{e}\n#{e.backtrace}"
   end

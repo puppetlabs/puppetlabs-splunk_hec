@@ -1,5 +1,6 @@
 require 'puppet'
 require 'puppet/util'
+require 'fileutils'
 require 'net/http'
 require 'net/https'
 require 'uri'
@@ -51,6 +52,32 @@ module Puppet::Util::Splunk_hec
     http.request(req)
   end
 
+  def store_event(event)
+    host = event['host']
+    epoch = event['time']
+
+    timestamp = Time.at(epoch).to_datetime
+
+    filename = timestamp.strftime("%F-%H-%M-%S-%L") + '.json'
+
+    dir = File.join(Puppet[:reportdir], host)
+
+    if ! Puppet::FileSystem.exist?(dir)
+      FileUtils.mkdir_p(dir)
+      FileUtils.chmod_R(0750, dir)
+    end
+
+    file = File.join(dir, filename)
+
+    begin
+      File.open(file,"w") do |f|
+        f.write(event.to_json)
+      end
+    rescue => detail
+       Puppet.log_exception(detail, "Could not write report for #{host} at #{file}: #{detail}")
+    end
+  end
+
   private
 
   def splunk_url
@@ -59,6 +86,15 @@ module Puppet::Util::Splunk_hec
 
   def pe_console
     settings['pe_console'] || Puppet[:certname]
+  end
+
+  def record_event
+    if settings['record_event'] == 'True'
+      result = true
+    else
+      result = false
+    end
+    result
   end
 
   # standard function to make sure we're using the same time format our sourcetypes are set to parse
