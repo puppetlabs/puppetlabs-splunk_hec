@@ -54,7 +54,7 @@ module Puppet::Util::Splunk_hec
 
   def store_event(event)
     host = event['host']
-    epoch = event['time']
+    epoch = event['time'].to_f
 
     timestamp = Time.at(epoch).to_datetime
 
@@ -89,7 +89,7 @@ module Puppet::Util::Splunk_hec
   end
 
   def record_event
-    if settings['record_event'] == 'True'
+    if settings['record_event'] == 'true'
       result = true
     else
       result = false

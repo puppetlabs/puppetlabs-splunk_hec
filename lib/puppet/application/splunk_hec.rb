@@ -16,6 +16,8 @@ class Puppet::Application::Splunk_hec < Puppet::Application
 
   option('--pe_metrics')
 
+  option('--saved_report')
+
   def get_name(servername)
     if servername.to_s == '127-0-0-1'
       name = Puppet[:certname].to_s
@@ -46,6 +48,10 @@ class Puppet::Application::Splunk_hec < Puppet::Application
     end
   end
 
+  def upload_report(data, sourcetype)
+    submit_request(data)
+  end
+
   def main
     data = JSON.parse(STDIN.read)
 
@@ -54,6 +60,11 @@ class Puppet::Application::Splunk_hec < Puppet::Application
     if options[:pe_metrics]
       send_pe_metrics(data, sourcetype)
     end
+    
+    if options[:saved_report]
+      upload_report(data, sourcetype)
+    end
+
   end
 end
 
