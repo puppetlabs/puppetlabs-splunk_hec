@@ -6,6 +6,7 @@ class splunk_hec (
   String $token,
   Array $collect_facts = ["dmi","disks","partitions","processors","networking"],
   Boolean $enable_reports = false,
+  Boolean $record_event = false,
   String $reports = "puppetdb,splunk_hec",
   Optional[String] $pe_console = undef,
   Optional[Integer] $timeout = undef,
