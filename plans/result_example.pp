@@ -18,7 +18,7 @@ plan splunk_hec::result_example {
         value => $result.value,
         target => $result.target.name,
       }
-      run_task("splunk_hec::bolt_result", 'splunk_hec', result => $result_hash)
+      run_task('splunk_hec::bolt_result', 'splunk_hec', result => $result_hash)
     } else {
       notice("${node} errored with a message: ${result.error}")
     }

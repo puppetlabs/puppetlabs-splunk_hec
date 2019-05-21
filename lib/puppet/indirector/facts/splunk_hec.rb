@@ -1,6 +1,7 @@
 require 'puppet/indirector/facts/puppetdb'
 require 'puppet/util/splunk_hec'
 
+# rubocop:disable Style/ClassAndModuleCamelCase
 # splunk_hec.rb
 class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Puppetdb
   desc "Save facts to Splunk over HEC and PuppetDB.

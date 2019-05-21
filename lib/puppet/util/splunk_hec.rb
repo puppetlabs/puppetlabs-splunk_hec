@@ -8,13 +8,14 @@ require 'yaml'
 require 'json'
 require 'time'
 
+# rubocop:disable Style/ClassAndModuleCamelCase
 # splunk_hec.rb
 module Puppet::Util::Splunk_hec
   def settings
     return @settings if @settings
-    $settings_file = Puppet[:confdir] + '/splunk_hec.yaml'
+    @settings_file = Puppet[:confdir] + '/splunk_hec.yaml'
 
-    @settings = YAML.load_file($settings_file)
+    @settings = YAML.load_file(@settings_file)
   end
 
   def create_http
@@ -58,23 +59,23 @@ module Puppet::Util::Splunk_hec
 
     timestamp = Time.at(epoch).to_datetime
 
-    filename = timestamp.strftime("%F-%H-%M-%S-%L") + '.json'
+    filename = timestamp.strftime('%F-%H-%M-%S-%L') + '.json'
 
     dir = File.join(Puppet[:reportdir], host)
 
-    if ! Puppet::FileSystem.exist?(dir)
+    unless Puppet::FileSystem.exist?(dir)
       FileUtils.mkdir_p(dir)
-      FileUtils.chmod_R(0750, dir)
+      FileUtils.chmod_R(0o750, dir)
     end
 
     file = File.join(dir, filename)
 
     begin
-      File.open(file,"w") do |f|
+      File.open(file, 'w') do |f|
         f.write(event.to_json)
       end
     rescue => detail
-       Puppet.log_exception(detail, "Could not write report for #{host} at #{file}: #{detail}")
+      Puppet.log_exception(detail, "Could not write report for #{host} at #{file}: #{detail}")
     end
   end
 
@@ -89,17 +90,17 @@ module Puppet::Util::Splunk_hec
   end
 
   def record_event
-    if settings['record_event'] == 'true'
-      result = true
-    else
-      result = false
-    end
+    result = if settings['record_event'] == 'true'
+               true
+             else
+               false
+             end
     result
   end
 
   # standard function to make sure we're using the same time format our sourcetypes are set to parse
   def sourcetypetime(timestamp)
     time = Time.parse(timestamp)
-    "%10.3f" % time.to_f
+    '%10.3f' % time.to_f
   end
 end
