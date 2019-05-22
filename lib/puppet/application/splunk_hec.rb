@@ -1,6 +1,8 @@
 require 'puppet/application'
 require 'puppet/util/splunk_hec'
 
+# rubocop:disable Style/ClassAndModuleCamelCase
+# splunk_hec.rb
 class Puppet::Application::Splunk_hec < Puppet::Application
   include Puppet::Util::Splunk_hec
 
@@ -19,11 +21,11 @@ class Puppet::Application::Splunk_hec < Puppet::Application
   option('--saved_report')
 
   def get_name(servername)
-    if servername.to_s == '127-0-0-1'
-      name = Puppet[:certname].to_s
-    else
-      name = servername
-    end
+    name = if servername.to_s == '127-0-0-1'
+             Puppet[:certname].to_s
+           else
+             servername
+           end
     name.to_s
   end
 
@@ -48,25 +50,14 @@ class Puppet::Application::Splunk_hec < Puppet::Application
     end
   end
 
-  def upload_report(data, sourcetype)
+  def upload_report(data, _sourcetype)
     submit_request(data)
   end
 
   def main
     data = JSON.parse(STDIN.read)
-
     sourcetype = options[:sourcetype].to_s
-
-    if options[:pe_metrics]
-      send_pe_metrics(data, sourcetype)
-    end
-    
-    if options[:saved_report]
-      upload_report(data, sourcetype)
-    end
-
+    send_pe_metrics(data, sourcetype) if options[:pe_metrics]
+    upload_report(data, sourcetype) if options[:saved_report]
   end
 end
-
-
-
