@@ -42,8 +42,11 @@ module Puppet::Util::Splunk_hec
   end
 
   def submit_request(body)
+    # we want users to be able to provide different tokens per sourcetype if they want
+    token_type = body['sourcetype'].split(':')[1]
+    token_name = "token_#{token_type}"
     http = create_http
-    token = settings['token'] || raise(Puppet::Error, 'Must provide token parameter to splunk class')
+    token = settings[token_name] || settings['token'] || raise(Puppet::Error, 'Must provide token parameter to splunk class')
     req = Net::HTTP::Post.new(@uri.path.to_str)
     req.add_field('Authorization', "Splunk #{token}")
     req.add_field('Content-Type', 'application/json')

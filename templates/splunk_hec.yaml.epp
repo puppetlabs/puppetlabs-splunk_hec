@@ -18,3 +18,15 @@
 <% if $splunk_hec::record_event { -%>
 "record_event" : "<%= $splunk_hec::record_event %>"
 <% } -%>
+<% if $splunk_hec::token_summary { -%>
+"token_summary" : "<%= $splunk_hec::token_summary %>"
+<% } -%>
+<% if $splunk_hec::token_detailed { -%>
+"token_detailed" : "<%= $splunk_hec::token_detailed %>"
+<% } -%>
+<% if $splunk_hec::token_facts { -%>
+"token_facts" : "<%= $splunk_hec::token_facts %>"
+<% } -%>
+<% if $splunk_hec::token_metrics { -%>
+"token_metrics" : "<%= $splunk_hec::token_metrics %>"
+<% } -%>
