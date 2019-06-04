@@ -53,7 +53,7 @@ Puppet::Reports.register_report(:splunk_hec) do
       },
     }
 
-    Puppet.info "Submitting report to Splunk at #{splunk_url}"
+    Puppet.info "Submitting report to Splunk at #{get_splunk_url('summary')}"
     submit_request event
     if record_event
       store_event event

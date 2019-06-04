@@ -47,7 +47,7 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Puppetdb
           'event' => facts,
         }
 
-        Puppet.info "Submitting facts to Splunk at #{splunk_url}"
+        Puppet.info "Submitting facts to Splunk at #{get_splunk_url('facts')}"
         submit_request event
       rescue StandardError => e
         Puppet.err "Could not send facts to Splunk: #{e}\n#{e.backtrace}"
