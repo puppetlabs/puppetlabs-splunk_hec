@@ -21,12 +21,18 @@
 <% if $splunk_hec::token_summary { -%>
 "token_summary" : "<%= $splunk_hec::token_summary %>"
 <% } -%>
-<% if $splunk_hec::token_detailed { -%>
-"token_detailed" : "<%= $splunk_hec::token_detailed %>"
-<% } -%>
 <% if $splunk_hec::token_facts { -%>
 "token_facts" : "<%= $splunk_hec::token_facts %>"
 <% } -%>
 <% if $splunk_hec::token_metrics { -%>
 "token_metrics" : "<%= $splunk_hec::token_metrics %>"
+<% } -%>
+<% if $splunk_hec::url_summary { -%>
+"url_summary" : "<%= $splunk_hec::url_summary %>"
+<% } -%>
+<% if $splunk_hec::url_facts { -%>
+"url_facts" : "<%= $splunk_hec::url_facts %>"
+<% } -%>
+<% if $splunk_hec::url_metrics { -%>
+"url_metrics" : "<%= $splunk_hec::url_metrics %>"
 <% } -%>

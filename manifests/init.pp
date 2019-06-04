@@ -12,9 +12,11 @@ class splunk_hec (
   Optional[Integer] $timeout = undef,
   Optional[String] $ssl_ca = undef,
   Optional[String] $token_summary = undef,
-  Optional[String] $token_detailed = undef,
   Optional[String] $token_facts = undef,
   Optional[String] $token_metrics = undef,
+  Optional[String] $url_summary = undef,
+  Optional[String] $url_facts = undef,
+  Optional[String] $url_metrics = undef,
 ) {
 
   if $enable_reports {
