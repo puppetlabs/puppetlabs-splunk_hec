@@ -1,6 +1,10 @@
 puppet-splunk_hec
 ==============
 
+Breaking Changes
+-----------
+- splunk_hec::url parameter now expects a full URI of https://servername:8088/services/collector
+
 Description
 -----------
 
@@ -57,6 +61,8 @@ The steps below will help install and troubleshoot the report processor on a sin
 	- From the `Parameter name` select atleast `url` and `token` and provide the same attributes from the testing configuration file
 	- Optionally set `enable_reports` to `true` if there isn't another component managing the servers reports setting, otherwise manually add `splunk_hec` to the settings as described in the manual steps
 	- Commit changes and run Puppet. It is best to navigate to the PE Certificate Authority Classification gorup and run Puppet there first, before running Puppet on the remaining machines
+
+9. For Inventory support in the Puppet Report Viewer, see 
 
 ### Manual steps:
 
