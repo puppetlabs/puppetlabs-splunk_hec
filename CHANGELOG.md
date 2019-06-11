@@ -28,7 +28,7 @@ These should not affect the functionality of the module.
 ### Fixed
 - Minor fixes to output dialog
 
-### Broke
+### Changed
 - url parameter now expects a full URI of https://servername:8088/services/collector
 
 ## 0.4.1
