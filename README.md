@@ -4,6 +4,7 @@ puppet-splunk_hec
 Breaking Changes
 -----------
 - splunk_hec::url parameter now expects a full URI of https://servername:8088/services/collector
+- Switches to the fact terminus cache setting via routes.yaml to ensure compatibility with CD4PE
 
 Description
 -----------
@@ -116,7 +117,14 @@ Fact Terminus Support
 
 The `splunk_hec` module provides a fact terminus that will send a configurable set of facts to the same HEC that the report processor is using, however as a `puppet:facts` sourcetype. This populates the Details and Inventory tabs in the Puppet Report Viewer. 
 
-- In the PE Master configuration group, add the parameter setting `facts_terminus` and set it to `splunk_hec`.
+- Create a custom splunk_routes.yaml file to override where facts are cached 
+```yaml
+master:
+  facts:
+    terminus: puppetdb
+    cache: splunk_hec
+```
+- Set this routes file instead of the default one with `pupept config set route_file /etc/puppetlabs/puppet/splunk_routes.yaml --section master`
 - To configure which facts to collect (such as custom facts) add the `collect_facts` parameter in the `splunk_hec` class and modify the array of facts presented. The following facts are collected regardless to ensure the functionality of the Puppet Report Viever:
 
 ```
