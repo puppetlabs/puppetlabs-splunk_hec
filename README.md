@@ -124,7 +124,7 @@ master:
     terminus: puppetdb
     cache: splunk_hec
 ```
-- Set this routes file instead of the default one with `pupept config set route_file /etc/puppetlabs/puppet/splunk_routes.yaml --section master`
+- Set this routes file instead of the default one with `puppet config set route_file /etc/puppetlabs/puppet/splunk_routes.yaml --section master`
 - To configure which facts to collect (such as custom facts) add the `collect_facts` parameter in the `splunk_hec` class and modify the array of facts presented. The following facts are collected regardless to ensure the functionality of the Puppet Report Viever:
 
 ```
