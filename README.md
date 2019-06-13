@@ -193,6 +193,10 @@ Known Issues
 * Automated testing could use work
 
 
-Author
+Authors
 ------
+P.uppet I.ntegrations E.ngineering Team
 Chris Barker <cbarker@puppet.com>
+Helen Campbell <helen@puppet.com>
+Greg Hardy <greg.hardy@puppet.com>
+Bryan Jen <bryan.jen@puppet.com>
