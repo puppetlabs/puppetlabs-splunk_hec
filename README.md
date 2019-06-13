@@ -4,7 +4,7 @@ puppet-splunk_hec
 Breaking Changes
 -----------
 - splunk_hec::url parameter now expects a full URI of https://servername:8088/services/collector
-- Switches to the fact terminus cache setting via routes.yaml to ensure compatibility with CD4PE
+- Switches to the fact terminus cache setting via routes.yaml to ensure compatibility with CD4PE, see Fact Terminus Support for guides on how to change it. Prior to deploying this module, remove the setting `facts_terminus` from the `puppet_enterprise::profile::master` class in the `PE Master` node group in your environment if you set it in previous revisions of this module. It will prevent PE from operating normally if left on.
 
 Description
 -----------
@@ -117,14 +117,9 @@ Fact Terminus Support
 
 The `splunk_hec` module provides a fact terminus that will send a configurable set of facts to the same HEC that the report processor is using, however as a `puppet:facts` sourcetype. This populates the Details and Inventory tabs in the Puppet Report Viewer. 
 
-- Create a custom splunk_routes.yaml file to override where facts are cached 
-```yaml
-master:
-  facts:
-    terminus: puppetdb
-    cache: splunk_hec
-```
-- Set this routes file instead of the default one with `puppet config set route_file /etc/puppetlabs/puppet/splunk_routes.yaml --section master`
+- Set the parameter `splunk_hec::manage_routes` to `true`. In the PE console, this would be by adding `manage_routes` in the `Classification -> PE Infrastructure -> Master -> Configuration` view under the `splunk_hec`
+- Run Puppet on the machines in that node group
+- PE PuppetServer will restart once the new routes.yaml is deployed and configured.
 - To configure which facts to collect (such as custom facts) add the `collect_facts` parameter in the `splunk_hec` class and modify the array of facts presented. The following facts are collected regardless to ensure the functionality of the Puppet Report Viever:
 
 ```
@@ -139,6 +134,20 @@ master:
 'producer'
 'environment'
 ```
+
+### Advanced Settings:
+
+The splunk_hec module also supports customizing the `fact_terminus` and `facts_cache_terminus` names in the custom routes.yaml it deploys. If you are using a different facts_terminus (ie, not PuppetDB), you will want to set that parameter.
+
+If you are already using a custom routes.yaml, these are the equivalent instructions of what the splunk_hec module does, the most important setting is configuring `cache: splunk_hec`
+- Create a custom splunk_routes.yaml file to override where facts are cached 
+```yaml
+master:
+  facts:
+    terminus: puppetdb
+    cache: splunk_hec
+```
+- Set this routes file instead of the default one with `puppet config set route_file /etc/puppetlabs/puppet/splunk_routes.yaml --section master`
 
 
 Tasks
