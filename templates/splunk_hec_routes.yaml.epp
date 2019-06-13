@@ -1,0 +1,6 @@
+# managed by puppet splunk_hec module
+---
+master:
+  facts:
+    terminus: "<%= $splunk_hec::facts_terminus %>"
+    cache: "<%= $splunk_hec::facts_cache_terminus %>"
