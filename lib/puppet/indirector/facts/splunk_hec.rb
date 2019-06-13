@@ -9,7 +9,7 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Yaml
        It uses PuppetDB to retrieve facts for catalog compilation."
 
   include Puppet::Util::Splunk_hec
-  
+
   def get_trusted_info(node)
     trusted = Puppet.lookup(:trusted_information) do
       Puppet::Context::TrustedInformation.local(node)
@@ -18,7 +18,7 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Yaml
   end
 
   def profile(message, metric_id, &block)
-    message = "Splunk_hec: " + message
+    message = 'Splunk_hec: ' + message
     arity = Puppet::Util::Profiler.method(:profile).arity
     case arity
     when 1
@@ -27,7 +27,7 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Yaml
       Puppet::Util::Profiler.profile(message, metric_id, &block)
     end
   end
-  
+
   def save(request)
     # yaml cache goes first
     super(request)
