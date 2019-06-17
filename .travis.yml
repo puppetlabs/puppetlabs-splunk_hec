@@ -47,7 +47,7 @@ deploy:
   provider: puppetforge
   user: puppet
   password:
-    secure: ""
+    secure: "$SECURE_PASS"
   on:
     tags: true
     all_branches: true
