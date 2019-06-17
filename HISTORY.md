@@ -4,12 +4,14 @@ All notable changes to this project will be documented in this file.
 Each new release typically also includes the latest pdk-template defaults.
 These should not affect the functionality of the module and are considered general maintenance.
 
-## 0.6.0 (2019/06/13)
+## 0.6.0
+(2019/06/13)
 
 ### Changed
 - The splunk_hec module now supports customizing the `fact_terminus` and `facts_cache_terminus` names in the custom routes.yaml it deploys. If you are using a different facts_terminus (ie, not PuppetDB), you will want to set that parameter. Please note that this will come with a breaking change in functionality - Switches to the fact terminus cache setting via routes.yaml to ensure compatibility with CD4PE, see Fact Terminus Support for guides on how to change it.
 
-## 0.5.0 (2019/06/11)
+## 0.5.0
+(2019/06/11)
 
 ### Added
 - Advanced configuration for puppet:summary, puppet:facts and puppet:metrics to allow for the support of multiple indexes
