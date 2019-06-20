@@ -30,7 +30,8 @@ Gemfile:
   user: "puppetlabs"
   secure: "$SECURE_PASS"
   before_deploy:
-    - "pdk build"
+    - "bundle install --path=.bundle/gems"
+    - "bundle exec pdk build"
 
 Rakefile:
   requires:
