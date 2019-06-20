@@ -43,7 +43,8 @@ branches:
 notifications:
   email: false
 before_deploy:
-  - pdk build
+  - bundle install --path=.bundle/gems
+  - bundle exec pdk build
 deploy:
   provider: puppetforge
   user: puppetlabs
