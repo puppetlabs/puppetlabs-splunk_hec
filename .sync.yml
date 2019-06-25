@@ -19,6 +19,8 @@ Gemfile:
           - mingw
           - x64_mingw
         condition: "ENV['PUPPET_GEM_VERSION'].nil? or ENV['PUPPET_GEM_VERSION'] !~ %r{ 5}"
+    ':release':
+      - gem: 'pdk'
   optional:
     ':development':
       - gem: 'github_changelog_generator'
@@ -27,10 +29,12 @@ Gemfile:
         condition: "Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new('2.2.2')"
 
 .travis.yml:
+  global_env:
+    - PUPPET_GEM_VERSION="~> 6.0"
   user: "puppetlabs"
   secure: "$SECURE_PASS"
   before_deploy:
-    - "bundle install --path=.bundle/gems"
+    - "bundle install --with release"
     - "bundle exec pdk build"
 
 Rakefile:
