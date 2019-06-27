@@ -233,10 +233,20 @@ Known Issues
 * SSL Validation is under active development and behavior may change
 * Automated testing could use work
 
+Release Process
+------------
+This module is hooked up with an automatic release process using travis. To provoke a release simply check the module out locally, tag with the new release version, then travis will promote the build to the forge.
+
+Example:
+```
+git tag -a v0.7.0 -m "0.7.0 Feature Release"
+git push upstream --tags
+```
 
 Authors
 ------
 P.uppet I.ntegrations E.ngineering Team
+
 Chris Barker <cbarker@puppet.com>
 Helen Campbell <helen@puppet.com>
 Greg Hardy <greg.hardy@puppet.com>
