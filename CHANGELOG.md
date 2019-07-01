@@ -2,7 +2,15 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
-## [v0.7.0](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v0.7.0) (2019-06-17)
+## [v0.7.1](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v0.7.1) (2019-07-01)
+
+[Full Changelog](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v0.7.0...v0.7.1)
+
+### Fixed
+
+- Fixes metrics uploading on splunk\_hec application [\#30](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/30) ([mrzarquon](https://github.com/mrzarquon))
+
+## [v0.7.0](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v0.7.0) (2019-06-25)
 
 [Full Changelog](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/0.6.0...v0.7.0)
 
