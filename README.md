@@ -237,7 +237,13 @@ Release Process
 ------------
 This module is hooked up with an automatic release process using travis. To provoke a release simply check the module out locally, tag with the new release version, then travis will promote the build to the forge.
 
-Example:
+Full process to prepare for a release:
+
+Update metadata.json to reflect new module release version (0.7.0)
+Run `bundle exec rake changelog` to update the CHANGELOG automatically
+Submit PR for changes
+
+Create Tag on target version:
 ```
 git tag -a v0.7.0 -m "0.7.0 Feature Release"
 git push upstream --tags
