@@ -20,7 +20,7 @@ class Puppet::Application::Splunk_hec < Puppet::Application
 
   option('--saved_report')
 
-  option('--debug','-d')
+  option('--debug', '-d')
 
   def get_name(servername)
     name = if servername.to_s == '127-0-0-1'
