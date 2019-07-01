@@ -20,6 +20,8 @@ class Puppet::Application::Splunk_hec < Puppet::Application
 
   option('--saved_report')
 
+  option('--debug', '-d')
+
   def get_name(servername)
     name = if servername.to_s == '127-0-0-1'
              Puppet[:certname].to_s
@@ -44,7 +46,7 @@ class Puppet::Application::Splunk_hec < Puppet::Application
         event['host'] = name
         event['event'] = content[serv.to_s]
         event['event']['pe_service'] = serv.to_s
-        Puppet.info "Submitting metrics to Splunk at #{splunk_url}"
+        Puppet.info 'Submitting metrics to Splunk'
         submit_request(event)
       end
     end
