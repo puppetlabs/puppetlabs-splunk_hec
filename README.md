@@ -1,11 +1,6 @@
 puppet-splunk_hec
 ==============
 
-Breaking Changes
------------
-- 0.5.0 splunk_hec::url parameter now expects a full URI of https://servername:8088/services/collector
-- 0.5.0 -> 0.6.0 Switches to the fact terminus cache setting via routes.yaml to ensure compatibility with CD4PE, see Fact Terminus Support for guides on how to change it. Prior to deploying this module, remove the setting `facts_terminus` from the `puppet_enterprise::profile::master` class in the `PE Master` node group in your environment if you set it in previous revisions of this module (olders than 0.6.0). It will prevent PE from operating normally if left on.
-
 Description
 -----------
 
@@ -232,6 +227,13 @@ Known Issues
 ------------
 * SSL Validation is under active development and behavior may change
 * Automated testing could use work
+
+Breaking Changes
+-----------
+- 0.5.0 splunk_hec::url parameter now expects a full URI of https://servername:8088/services/collector
+- 0.5.0 -> 0.6.0 Switches to the fact terminus cache setting via routes.yaml to ensure compatibility with CD4PE, see Fact Terminus Support for guides on how to change it. Prior to deploying this module, remove the setting `facts_terminus` from the `puppet_enterprise::profile::master` class in the `PE Master` node group in your environment if you set it in previous revisions of this module (olders than 0.6.0). It will prevent PE from operating normally if left on.
+
+
 
 Release Process
 ------------
