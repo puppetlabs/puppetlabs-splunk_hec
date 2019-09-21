@@ -27,6 +27,12 @@ Puppet::Reports.register_report(:splunk_hec) do
       },
     }
 
+    # puppet 4 compatibility, code_id and job_id were added in puppet 5
+    if report_format.to_i < 7
+      job_id = nil
+      code_id = nil
+    end
+
     event = {
       'host' => host,
       'time' => epoch,
