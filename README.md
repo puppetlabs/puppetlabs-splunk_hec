@@ -24,6 +24,7 @@ This was tested on both Puppet Enterprise 2018.1.4 & Puppet 6, using stock gems 
 Report Processor Installation & Usage
 --------------------
 
+__If you are installing this module using a control-repo, you must have splunk_hec in your production environment's Puppetfile so the puppetserver process can load the libraries it needs properly. You can then create a feature branch to enable them and test the configuration, but the libraries must be in production otherwise the feature branch wont work as expected.__
 
 The steps below will help install and troubleshoot the report processor on a single Puppet Master, including manual steps to configure a puppet-server, and to use the included splunk_hec class. Because one is modifying production machines, these steps allow you to validate your settings before deploying the changes live.
 
