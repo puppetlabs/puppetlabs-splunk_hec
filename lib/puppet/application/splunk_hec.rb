@@ -57,9 +57,15 @@ class Puppet::Application::Splunk_hec < Puppet::Application
   end
 
   def main
-    data = JSON.parse(STDIN.read)
+    datainput = STDIN.read
+    cleaned = datainput.gsub("\n}{\n","\n},{\n")
+    cleaned = cleaned.insert(0, '[')
+    cleaned = cleaned.insert(-1,']')
+    data = JSON.parse(cleaned)
     sourcetype = options[:sourcetype].to_s
-    send_pe_metrics(data, sourcetype) if options[:pe_metrics]
-    upload_report(data, sourcetype) if options[:saved_report]
+    data.each do |server|
+      send_pe_metrics(server, sourcetype) if options[:pe_metrics]
+      upload_report(server, sourcetype) if options[:saved_report]
+    end
   end
 end
