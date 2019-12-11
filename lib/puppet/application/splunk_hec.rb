@@ -57,7 +57,13 @@ class Puppet::Application::Splunk_hec < Puppet::Application
   end
 
   def main
-    datainput = STDIN.read
+    begin
+      datainput = STDIN.read
+    rescue Exception => e  
+      Puppet.info "Unable to parse STDIN, is it text?"
+      Puppet.info e.message
+      Puppet.info e.backtrace.inspect
+    end
     cleaned = datainput.gsub("\n}{\n","\n},{\n")
     cleaned = cleaned.insert(0, '[')
     cleaned = cleaned.insert(-1,']')
