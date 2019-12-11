@@ -59,18 +59,18 @@ class Puppet::Application::Splunk_hec < Puppet::Application
   def main
     begin
       datainput = STDIN.read
-    rescue StandardError => e  
-      Puppet.info "Unable to parse STDIN, is it text?"
+    rescue StandardError => e
+      Puppet.info 'Unable to parse STDIN, is it text?'
       Puppet.info e.message
       Puppet.info e.backtrace.inspect
     end
-    cleaned = datainput.gsub("\n}{\n","\n},{\n")
+    cleaned = datainput.gsub("\n}{\n", "\n},{\n")
     cleaned = cleaned.insert(0, '[')
-    cleaned = cleaned.insert(-1,']')
+    cleaned = cleaned.insert(-1, ']')
     begin
       data = JSON.parse(cleaned)
-    rescue StandardError => e  
-      Puppet.info "Unable to parse json from stdin"
+    rescue StandardError => e
+      Puppet.info 'Unable to parse json from stdin'
       Puppet.info e.message
       Puppet.info e.backtrace.inspect
     end
