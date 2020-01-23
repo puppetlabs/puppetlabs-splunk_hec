@@ -37,14 +37,14 @@
 "url_metrics" : "<%= $splunk_hec::url_metrics %>"
 <% } -%>
 <% if $splunk_hec::include_logs_status { -%>
-"include_logs" : "<%= $splunk_hec::include_logs_status %>"
+"include_logs_status" : "<%= $splunk_hec::include_logs_status %>"
 <% } -%>
 <% if $splunk_hec::include_logs_catalog_failure { -%>
-"include_logs" : "<%= $splunk_hec::include_logs_catalog_failure %>"
+"include_logs_catalog_failure" : "<%= $splunk_hec::include_logs_catalog_failure %>"
 <% } -%>
 <% if $splunk_hec::include_resources_status { -%>
-"include_logs" : "<%= $splunk_hec::include_resources_status %>"
+"include_resources_status" : "<%= $splunk_hec::include_resources_status %>"
 <% } -%>
 <% if $splunk_hec::include_resources_corrective_change { -%>
-"include_logs" : "<%= $splunk_hec::include_resources_corrective_change %>"
+"include_resources_corrective_change" : "<%= $splunk_hec::include_resources_corrective_change %>"
 <% } -%>
