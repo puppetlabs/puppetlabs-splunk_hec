@@ -74,7 +74,7 @@ Puppet::Reports.register_report(:splunk_hec) do
       end
     end
 
-    if [ settings['include_resources_corrective_change'] && corrective_change ] && add_resources == false
+    if settings['include_resources_corrective_change'] && corrective_change
       add_resources = true
     end
 
