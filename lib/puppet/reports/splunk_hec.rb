@@ -53,7 +53,7 @@ Puppet::Reports.register_report(:splunk_hec) do
       },
     }
 
-    if defined?(include_logs_status)
+    if include_logs_status != false
       if include_logs_status.include? status
        event['event']['logs'] = self.logs
       end
