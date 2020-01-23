@@ -59,7 +59,7 @@ Puppet::Reports.register_report(:splunk_hec) do
       end
     end
 
-    if include_logs_catalog_failure && [ catalog_uuid == undef OR catalog_uuid == '']
+    if include_logs_catalog_failure && catalog_uuid == ''
       event['event']['logs'] = self.logs
     end
 
