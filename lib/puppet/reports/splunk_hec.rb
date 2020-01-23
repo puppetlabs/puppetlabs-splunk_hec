@@ -59,19 +59,26 @@ Puppet::Reports.register_report(:splunk_hec) do
        event['event']['logs'] = self.logs
       end
     end
-    
-    if settings['include_resources_status']
-      include_resources_status = settings['include_resources_status']
-      if include_resources_status.include? status
-        event['event']['resource_events'] = resource_statuses.select {|k, v| v.events.count > 0}
-      end
-    end
 
     if settings['include_logs_catalog_failure'] && catalog_uuid == ''
       event['event']['logs'] = self.logs
+    end    
+
+    # the i'm tired way to prevent doing this twice
+    add_resources = false
+
+    if settings['include_resources_status']
+      include_resources_status = settings['include_resources_status']
+      if include_resources_status.include? status
+        add_resources = true
+      end
     end
 
-    if settings['include_resources_corrective_change'] && corrective_change
+    if [ settings['include_resources_corrective_change'] && corrective_change ] && add_resources == false
+      add_resources = true
+    end
+
+    if add_resources
       event['event']['resource_events'] = resource_statuses.select {|k, v| v.events.count > 0}
     end
 
