@@ -94,23 +94,6 @@ module Puppet::Util::Splunk_hec
     settings['pe_console'] || Puppet[:certname]
   end
 
-  def include_logs_status
-    settings['include_logs_status'] || false
-  end
-
-  def include_logs_catalog_failure
-    settings['include_logs_catalog_failure'] || false
-  end
-
-  def include_resources_status
-    settings['include_resources_status'] || false
-  end
-
-  def include_resources_corrective_change
-    settings['include_resources_corrective_change'] || false
-  end
-
-
   def record_event
     result = if settings['record_event'] == 'true'
                true

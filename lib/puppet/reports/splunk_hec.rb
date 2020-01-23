@@ -53,18 +53,19 @@ Puppet::Reports.register_report(:splunk_hec) do
       },
     }
 
-    if include_logs_status != false
+    if settings['include_logs_status']
+      include_logs_status = settings['include_logs_status']
       if include_logs_status.include? status
        event['event']['logs'] = self.logs
       end
     end
 
-    if include_logs_catalog_failure && catalog_uuid == ''
+    if settings['include_logs_catalog_failure'] && catalog_uuid == ''
       event['event']['logs'] = self.logs
     end
 
-    if include_resources_corrective_change && corrective_change
-      event['event']['resource_statuses'] = self.resource_statuses
+    if settings['include_resources_corrective_change'] && corrective_change
+      event['event']['resource_events'] = self.resource_statuses
     end
 
     Puppet.info "Submitting report to Splunk at #{get_splunk_url('summary')}"
