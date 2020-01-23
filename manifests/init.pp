@@ -20,6 +20,11 @@ class splunk_hec (
   Optional[String] $url_summary = undef,
   Optional[String] $url_facts = undef,
   Optional[String] $url_metrics = undef,
+  Optional[Array] $include_logs_status = undef,
+  Optional[Boolean] $include_logs_catalog_failure = false,
+  Optional[Array] $include_resources_status = undef,
+  Optional[Boolean] $include_resources_corrective_change = false,
+
 ) {
 
   if $enable_reports {
