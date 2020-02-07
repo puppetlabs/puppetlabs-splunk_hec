@@ -4,11 +4,11 @@ puppet-splunk_hec
 Description
 -----------
 
-Puppet collects a wide variety of useful information about the servers it manages. When you have key Puppet data in Splunk, you can save time and make richer analyses. For example you can have Splunk send an alert if Puppet sees unexpected change on a server. To make this possible this is a Puppet report processor designed to send a report summary of useful information to the [Splunk HTTP Endpoint Collector "HEC"](http://docs.splunk.com/Documentation/Splunk/latest/Data/UsetheHTTPEventCollector) service. These summaries are designed to be informative but also not too verbose to make logging a burden to the end user. The summaries are meant to be small but sufficient to determine if a Puppet run was successful on a node, and to include metadata such as code-id, transaction-id, and other details to allow for more detailed actions to be done.
+This is a report processor & fact terminus for Puppet to submit data to Splunk's logging system using Splunk's [HTTP Event Collector](https://docs.splunk.com/Documentation/Splunk/8.0.1/Data/UsetheHTTPEventCollector) service. There is a complimentary app in SplunkBase called [Puppet Report Viewer](https://splunkbase.splunk.com/app/4413/) that generates useful dashboards and makes searching this data easier. That app should be installed before configuring this module.
 
-It is best used with the [Puppet Report Viewer](https://splunkbase.splunk.com/app/4413/) Splunk addon that adds sourcetypes to make ingesting this data easier into Splunk. Sourcetypes can also be associated with specifc HEC tokens to make event viewing/processing easier. 
+Previous versions of this module required that Splunk connect back to Puppet to retrieve information such as logs or resource events, because this module could only send a small amount of data. It is now possible to include that data in reports based on specific conditions (Puppet Agent Run failure, compilation failure, change, etc.) See [Customized Reporting](#customized-reporting) for details on using that.
 
-Because Puppet and Bolt excel at taking action, the Report Viewer also adds an actionable alert for Puppet Enterprise users. Using the data from a `puppet:summary` event, the Detailed Report Builder actionable alert will create a new event with the type of `puppet:detailed`. These events contain information such as the node in questions, its facts, the resource_events from the node, and links to relevant reports in the Puppet Enterprise Console.
+Enabling this module is as simple as classifying your Puppet Server's with it and setting the Splunk HEC URL along with the token provided by Splunk. This module sends data to Splunk by modifying your report processor settings and indirector routes.yaml see the [tl,dr;](#installation-short-version) if that doesn't scare you. If it does, read the [longer instructions](#installation-long-version).
 
 There are two Tasks included in this module, `splunk_hec:bolt_apply` and `splunk_hec:bolt_result` that provide similar data for Bolt Plans to submit data to Splunk. Also included are Plans showing example useage of the Tasks.
 
@@ -21,14 +21,32 @@ Requirements
 
 This was tested on both Puppet Enterprise 2018.1.4 & Puppet 6, using stock gems of yaml, json, net::https
 
-Report Processor Installation & Usage
+Installation Short Version
+--------------------
+
+This assumes you are using Puppet Enterprise
+
+1. Create an HEC token in Splunk, using the `puppet:summary` sourcetype, do not enable `indexer acknowledgement`
+2. Add the class `splunk_hec` to the PE Infrastructure -> PE Masters node group under Classification
+3. Enable these parameters:
+```
+enable_reports = true
+manage_routes = true
+token = something like F5129FC8-7272-442B-983C-203F013C1948
+url = something like https://splunk-8.splunk.internal:8088/services/collector
+```
+4. Hit save
+5. Run Puppet on the node group, this will cause a restart of the Puppet-Server service
+6. Log into the Splunk Console, search `index=* sourcetype=puppet:summary` and if everything was done properly, you should see the reports (and soon facts) from the systems in your Puppet environment
+
+Installation Long Version
 --------------------
 
 __If you are installing this module using a control-repo, you must have splunk_hec in your production environment's Puppetfile so the puppetserver process can load the libraries it needs properly. You can then create a feature branch to enable them and test the configuration, but the libraries must be in production otherwise the feature branch wont work as expected.__
 
-The steps below will help install and troubleshoot the report processor on a single Puppet Master, including manual steps to configure a puppet-server, and to use the included splunk_hec class. Because one is modifying production machines, these steps allow you to validate your settings before deploying the changes live.
+The steps below will help install and troubleshoot the report processor on a single Puppet Master, including manual steps to configure a puppet-server, and to use the included splunk_hec class. Because one is modifying production machines, these steps allow you to validate your settings before deploying the changes live. See the tl,dr; instructions for 
 
-1. Install the Puppet Report Viewer Addon in Splunk. This will import the needed sourcetypes that make setting up the HEC easier in the next steps, and also some overview dashboards that make it a lot easier to see if you're sending Puppet run reports into Splunk.
+1. Install the Puppet Report Viewer Addon in Splunk. This will import the needed sourcetypes to configure Splunk's HTTP Endpoint Collector (HEC) and provide a dashboard that will show the reports once they are sent to Splunk.
 
 2. Create a Splunk HEC Token or use an existing one that sends to main index and does not have acknowledgement enabled. Follow the steps provided by Splunk's [Getting Data In Guide](http://docs.splunk.com/Documentation/Splunk/latest/Data/UsetheHTTPEventCollector) if you are new to HTTP Endpoint Collectors.
 
@@ -59,7 +77,7 @@ The steps below will help install and troubleshoot the report processor on a sin
 	- Optionally set `enable_reports` to `true` if there isn't another component managing the servers reports setting, otherwise manually add `splunk_hec` to the settings as described in the manual steps
 	- Commit changes and run Puppet. It is best to navigate to the PE Certificate Authority Classification gorup and run Puppet there first, before running Puppet on the remaining machines
 
-9. For Inventory support in the Puppet Report Viewer, see 
+9. For Inventory support in the Puppet Report Viewer, see the [Fact Terminus Support](#fact-terminus-support)
 
 ### Manual steps:
 
@@ -108,6 +126,32 @@ class profile::splunk_hec {
 }
 ```
 
+Customized Reporting
+----------
+As of 0.8.0 and later the report processor can be configured to include Logs and Resource Events along with the existing summary data. Because this data varies between runs and agents in Puppet, it is difficult to predict how much data one will use in Splunk as a result. However this removes the need for configuring the Detailed Report Generation alerts in Splunk to retrieve that information, which is useful for large installations that need to retrieve a large amount of data. You can now just send the information from Puppet directly.
+
+Add one or more of these parameters based on the desired outcome, these apply to the state of the puppet runs, one cannot filter by facts on which nodes these are in effect for. So one can get `logs when a puppet run fails`, but not `logs when a windows server puppet run fails`. By default none of these are enabled.
+
+##### include_logs_status
+
+Array: Determines if [logs](https://puppet.com/docs/puppet/latest/format_report.html#puppet::util::log) should be included based on the return status of the puppet agent run. The can be none, one, or any of the following: `failed changed unchanged`
+
+##### include_logs_catalog_failure
+
+Boolean: Include logs if a catalog fails to compile. This is a more specific type of failure that indicates a serverside issue. Values: `true false`
+
+##### include_logs_corrective_change
+
+Boolean: Include logs if a there is a corrective change (a PE only feature) - indicating drift was detected from the last time puppet ran on the system. Values: `true false`
+
+##### include_resources_status
+
+Array: Determines if [resource events](https://puppet.com/docs/puppet/latest/format_report.html#puppet::resource::status) should be included based on the return status of the puppet agent run. Note: this only includes resources whose status is not `unchanged` - not the entire catalog. The can be none, one, or any of the following: `failed changed unchanged`
+
+##### include_resources_corrective_change
+
+Boolean: Include resource events if a there is a corrective change (a PE only feature) - indicating drift was detected from the last time puppet ran on the system. Values: `true false`
+
 Fact Terminus Support
 -----------
 
@@ -131,7 +175,8 @@ The `splunk_hec` module provides a fact terminus that will send a configurable s
 'environment'
 ```
 
-### Advanced Settings:
+Advanced Settings:
+-----------
 
 The splunk_hec module also supports customizing the `fact_terminus` and `facts_cache_terminus` names in the custom routes.yaml it deploys. If you are using a different facts_terminus (ie, not PuppetDB), you will want to set that parameter.
 
@@ -226,6 +271,7 @@ For troubleshooting detailed reports and display issues in the Splunk Console, p
 
 Known Issues
 ------------
+* Integration with puppet_metrics_collection only works on version 5.2.0 currently, waiting on 5.4.0 release
 * SSL Validation is under active development and behavior may change
 * Automated testing could use work
 
