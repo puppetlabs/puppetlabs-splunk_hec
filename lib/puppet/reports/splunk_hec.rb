@@ -53,6 +53,45 @@ Puppet::Reports.register_report(:splunk_hec) do
       },
     }
 
+    include_logs = false
+
+    if settings['include_logs_status']
+      include_logs_status = settings['include_logs_status']
+      if include_logs_status.include? status
+        include_logs = true
+      end
+    end
+
+    if settings['include_logs_catalog_failure'] && catalog_uuid.to_s.strip.empty?
+      include_logs = true
+    end
+
+    if settings['include_logs_corrective_change'] && corrective_change
+      include_logs = true
+    end
+
+    if include_logs
+      event['event']['logs'] = logs
+    end
+
+    # the i'm tired way to prevent doing this twice
+    add_resources = false
+
+    if settings['include_resources_status']
+      include_resources_status = settings['include_resources_status']
+      if include_resources_status.include? status
+        add_resources = true
+      end
+    end
+
+    if settings['include_resources_corrective_change'] && corrective_change
+      add_resources = true
+    end
+
+    if add_resources
+      event['event']['resource_events'] = resource_statuses.select { |_k, v| v.events.count > 0 }
+    end
+
     Puppet.info "Submitting report to Splunk at #{get_splunk_url('summary')}"
     submit_request event
     if record_event

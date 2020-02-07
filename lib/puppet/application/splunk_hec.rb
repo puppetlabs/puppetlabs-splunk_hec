@@ -57,6 +57,10 @@ class Puppet::Application::Splunk_hec < Puppet::Application
   end
 
   def main
+    # This is waiting for > 5.3.0 version of metrics collector
+    # data = STDIN.lines.map {|l| JSON.parse(l)}
+    #
+    # Below works for metrics collection < 5.3.0
     begin
       datainput = STDIN.read
     rescue StandardError => e
