@@ -62,7 +62,7 @@ Puppet::Reports.register_report(:splunk_hec) do
       end
     end
 
-    if settings['include_logs_catalog_failure'] && [ catalog_uuid.nil? || catalog_uuid.empty? ]
+    if settings['include_logs_catalog_failure'] && catalog_uuid.to_s.strip.empty?
       include_logs = true
     end
 
@@ -71,7 +71,7 @@ Puppet::Reports.register_report(:splunk_hec) do
     end
 
     if include_logs
-      event['event']['logs'] = self.logs
+      event['event']['logs'] = logs
     end
 
     # the i'm tired way to prevent doing this twice
@@ -89,7 +89,7 @@ Puppet::Reports.register_report(:splunk_hec) do
     end
 
     if add_resources
-      event['event']['resource_events'] = resource_statuses.select {|k, v| v.events.count > 0}
+      event['event']['resource_events'] = resource_statuses.select { |_k, v| v.events.count > 0 }
     end
 
     Puppet.info "Submitting report to Splunk at #{get_splunk_url('summary')}"
