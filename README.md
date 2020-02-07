@@ -175,6 +175,11 @@ The `splunk_hec` module provides a fact terminus that will send a configurable s
 'environment'
 ```
 
+Puppet Metrics Collector Support
+-----------
+
+This module can forward metrics collected by the [Puppet Metrics Collector](https://forge.puppet.com/puppetlabs/puppet_metrics_collector) module. To enable this, once reporting is working with this module and the Metrics Collector module is installed, set the `metrics_server_type` parameter in the puppet_metrics_collector to Splunk. For more information refer to the modules [documentation](https://forge.puppet.com/puppetlabs/puppet_metrics_collector#metrics-server-parameters). As of this writing, there is a breaking change in 5.3.0, so splunk_hec requires 5.2.0 if one wants to send metric data to Splunk.
+
 Advanced Settings:
 -----------
 
