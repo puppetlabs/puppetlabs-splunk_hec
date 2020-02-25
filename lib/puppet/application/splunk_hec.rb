@@ -68,20 +68,51 @@ class Puppet::Application::Splunk_hec < Puppet::Application
       Puppet.info e.message
       Puppet.info e.backtrace.inspect
     end
-    cleaned = datainput.gsub("\n}{\n", "\n},{\n")
-    cleaned = cleaned.insert(0, '[')
-    cleaned = cleaned.insert(-1, ']')
-    begin
-      data = JSON.parse(cleaned)
-    rescue StandardError => e
-      Puppet.info 'Unable to parse json from stdin'
-      Puppet.info e.message
-      Puppet.info e.backtrace.inspect
-    end
+
+    data = if datainput.start_with?("{\n")
+             # Pretty-printed output produced by puppet_metrics_collector
+             # prior to the 5.3.0 release
+             parse_legacy_metrics(datainput)
+           else
+             parse_metrics(datainput)
+           end
+
     sourcetype = options[:sourcetype].to_s
     data.each do |server|
       send_pe_metrics(server, sourcetype) if options[:pe_metrics]
       upload_report(server, sourcetype) if options[:saved_report]
     end
+  end
+
+  def parse_metrics(input)
+    result = begin
+               input.lines.map { |l| JSON.parse(l) }
+             rescue StandardError => e
+               Puppet.info 'Unable to parse json from stdin'
+               Puppet.info e.message
+               Puppet.info e.backtrace.inspect
+
+               []
+             end
+
+    result
+  end
+
+  def parse_legacy_metrics(input)
+    cleaned = input.gsub("\n}{\n", "\n},{\n")
+    cleaned = cleaned.insert(0, '[')
+    cleaned = cleaned.insert(-1, ']')
+
+    result = begin
+               JSON.parse(cleaned)
+             rescue StandardError => e
+               Puppet.info 'Unable to parse json from stdin'
+               Puppet.info e.message
+               Puppet.info e.backtrace.inspect
+
+               []
+             end
+
+    result
   end
 end
