@@ -95,7 +95,15 @@ Puppet::Reports.register_report(:splunk_hec) do
     end
 
     if add_resources
-      event['event']['resource_events'] = resource_statuses.select { |_k, v| v.events.count > 0 }
+      resource_events_hash = resource_statuses.select { |_k, v| v.events.count > 0 }
+      # We may want to return this as a hash or an array. Splunk deals better
+      # with arrays but we need to give people the choice so as to not break
+      # existing reports
+      event['event']['resource_events'] = if settings['summary_resources_format'] == 'array'
+                                            resource_events_hash.map { |_k, v| v }
+                                          else
+                                            resource_events_hash
+                                          end
     end
 
     Puppet.info "Submitting report to Splunk at #{get_splunk_url('summary')}"
