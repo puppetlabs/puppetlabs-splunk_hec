@@ -1,1 +1,2 @@
 --relative
+--no-double_quoted_strings-check
