@@ -107,7 +107,7 @@ See the `plans/` directory for working examples of apply and result usage.
 
 ## Known Issues
 ------------
-* Integration with puppet_metrics_collection only works on version 5.2.0 currently, waiting on 5.4.0 release
+* Integration with puppet_metrics_collection only works on version >= 6.0.0
 * SSL Validation is under active development and behavior may change
 * Automated testing could use work
 
@@ -122,7 +122,7 @@ This module is hooked up with an automatic release process using travis. To prov
 
 Full process to prepare for a release:
 
-Update metadata.json to reflect new module release version (0.7.0)
+Update metadata.json to reflect new module release version (0.8.0)
 Run `bundle exec rake changelog` to update the CHANGELOG automatically
 Submit PR for changes
 
