@@ -17,7 +17,7 @@ puppet-splunk_hec
 
 This is a report processor & fact terminus for Puppet to submit data to Splunk's logging system using Splunk's [HTTP Event Collector](https://docs.splunk.com/Documentation/Splunk/8.0.1/Data/UsetheHTTPEventCollector) service. There is a complimentary app in SplunkBase called [Puppet Report Viewer](https://splunkbase.splunk.com/app/4413/) that generates useful dashboards and makes searching this data easier. The Puppet Report Viewer app should be installed in Splunk before configuring this module.
 
-It is possible to only include data in reports based on specific conditions (Puppet Agent Run failure, compilation failure, change, etc.) See [Customized Reporting](#customized-reporting) for details on using that.
+It is possible to only include data in reports based on specific conditions (Puppet Agent Run failure, compilation failure, change, etc.) See Customized-Reporting in the [Advanced Topics](#advanced-topics) section for details on using that.
 
 Enabling this module is as simple as classifying your Puppet Servers with spluk_hec and setting the Splunk HEC URL along with the token provided by Splunk. This module sends data to Splunk by modifying your report processor settings and indirector routes.yaml.
 
@@ -96,14 +96,14 @@ See the `plans/` directory for working examples of apply and result usage.
 
 ## Advanced Topics
 ------------
-* [Custom Installation](docs/custom_installation.md)
-* [Advanced Puppet Configuration](docs/advanced_puppet_configuration.md)
-* [Advanced Splunk Configuration](docs/advanced_splunk_configuration.md)
-* [Customized Reporting](docs/customized_reporting.md)
-* [Fact Terminus Support](docs/fact_terminus_support.md)
-* [Puppet Metrics Collection](docs/puppet_metrics_collector_support.md)
-* [SSL Support](docs/ssl_support.md)
-* [Troublshooting and Verification](docs/troubleshooting_and_verification.md)
+* [Custom Installation](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/v0.8.1/docs/custom_installation.md)
+* [Advanced Puppet Configuration](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/v0.8.1/docs/advanced_puppet_configuration.md)
+* [Advanced Splunk Configuration](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/v0.8.1/docs/advanced_splunk_configuration.md)
+* [Customized Reporting](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/v0.8.1/docs/customized_reporting.md)
+* [Fact Terminus Support](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/v0.8.1/docs/fact_terminus_support.md)
+* [Puppet Metrics Collection](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/v0.8.1/docs/puppet_metrics_collector_support.md)
+* [SSL Support](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/v0.8.1/docs/ssl_support.md)
+* [Troublshooting and Verification](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/v0.8.1/docs/troubleshooting_and_verification.md)
 
 ## Known Issues
 ------------
@@ -122,13 +122,13 @@ This module is hooked up with an automatic release process using travis. To prov
 
 Full process to prepare for a release:
 
-Update metadata.json to reflect new module release version (0.8.0)
+Update metadata.json to reflect new module release version (0.8.1)
 Run `bundle exec rake changelog` to update the CHANGELOG automatically
 Submit PR for changes
 
 Create Tag on target version:
 ```
-git tag -a v0.7.0 -m "0.7.0 Feature Release"
+git tag -a v0.8.1 -m "0.8.1 Feature Release"
 git push upstream --tags
 ```
 
