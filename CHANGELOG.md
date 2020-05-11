@@ -2,22 +2,23 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## [v0.8.1](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v0.8.1) (2020-05-11)
+
+[Full Changelog](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v0.8.0...v0.8.1)
+
+### Fixed
+
+- Replace relative docs links with static links [\#45](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/45) ([gsparks](https://github.com/gsparks))
+
 ## [v0.8.0](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v0.8.0) (2020-05-07)
 
 [Full Changelog](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v0.7.1...v0.8.0)
 
 ### Fixed
 
-- Move the breaking changes to known issues section in readme [\#33](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/33) ([HelenCampbell](https://github.com/HelenCampbell))
-
-### UNCATEGORIZED PRS; GO LABEL THEM
-
-- \(PIE-265\) refactor docs [\#43](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/43) ([gsparks](https://github.com/gsparks))
 - fix single quote issue in classifier [\#42](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/42) ([mrzarquon](https://github.com/mrzarquon))
 - \(PIE-178\) Parse line-delimited JSON metrics [\#39](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/39) ([Sharpie](https://github.com/Sharpie))
-- Enable extra data [\#38](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/38) ([mrzarquon](https://github.com/mrzarquon))
 - PIE-178 Multiple Metrics in stdin [\#36](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/36) ([mrzarquon](https://github.com/mrzarquon))
-- \(maint\) Add CODEOWNERS file [\#35](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/35) ([bmjen](https://github.com/bmjen))
 
 ## [v0.7.1](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v0.7.1) (2019-07-01)
 
