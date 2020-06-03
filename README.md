@@ -118,7 +118,7 @@ See the `plans/` directory for working examples of apply and result usage.
 
 ## Release Process
 ------------
-This module is hooked up with an automatic release process using travis. To provoke a release simply check the module out locally, tag with the new release version, then travis will promote the build to the forge.
+This module is hooked up with an automatic release process using github actions. To provoke a release simply check the module out locally, tag with the new release version, then github will promote the build to the forge.
 
 Full process to prepare for a release:
 
