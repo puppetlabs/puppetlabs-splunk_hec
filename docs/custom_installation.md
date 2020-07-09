@@ -34,7 +34,7 @@ The steps below will help install and troubleshoot the report processor on a sin
 	- Press Refresh to ensure the splunk_hec class is loaded
 	- Add new class `splunk_hec`
 	- From the `Parameter name` select atleast `url` and `token` and provide the same attributes from the testing configuration file
-	- Optionally set `enable_reports` to `true` if there isn't another component managing the servers reports setting, otherwise manually add `splunk_hec` to the settings as described in the manual steps
+	- Optionally set `enable_reports` to `true` if there isn't another component managing the servers reports setting, otherwise manually add `splunk_hec` to the settings as described in the manual steps. Note that if `enable_reports` is set to `true`, then you can have the module automatically add the `splunk_hec` report processor to the servers reports setting by setting the `reports` parameter to the empty string, `''`.
 	- Commit changes and run Puppet. It is best to navigate to the PE Certificate Authority Classification gorup and run Puppet there first, before running Puppet on the remaining machines
 
 9. For Inventory support in the Puppet Report Viewer, see the [Fact Terminus Support](fact_terminus_support.md)

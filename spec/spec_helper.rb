@@ -1,3 +1,10 @@
+RSpec.configure do |c|
+  # Use rspec mocks instead of mocha as per https://github.com/puppetlabs/puppetlabs_spec_helper#mock_with
+  # This configuration must be specified before the puppetlabs_spec_helper gem is loaded to avoid
+  # the deprecation warning.
+  c.mock_with :rspec
+end
+
 require 'puppetlabs_spec_helper/module_spec_helper'
 require 'rspec-puppet-facts'
 
