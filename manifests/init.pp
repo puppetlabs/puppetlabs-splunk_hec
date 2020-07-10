@@ -1,6 +1,8 @@
 # Simple class to manage your splunk_hec connectivity
 # note if you manage enable_reports, it will default to puppetdb,splunk_hec
 # if you wish to add other reports, you can do so with the reports param
+# note that you can have the module automatically add the splunk_hec reports
+# processor by setting reports to '', the empty string.
 class splunk_hec (
   String $url,
   String $token,
@@ -29,12 +31,41 @@ class splunk_hec (
 ) {
 
   if $enable_reports {
+    if $reports != '' {
+      notify { "reports param deprecation warning" :
+        message  => "The 'reports' parameter is being deprecated in favor of having the module automatically add the 'splunk_hec' setting to puppet.conf. You can enable this behavior by setting 'reports' to '', the empty string, but please keep in mind that the 'reports' parameter will be removed in a future release.",
+        loglevel =>  'warning',
+      }
+      $reports_setting = $reports
+    } else {
+      # $reports == '' so we dynamically calculate the reports
+      # setting. Idea here is that if the user already included
+      # the 'splunk_hec' report processor, we return the setting as-is.
+      # Otherwise, we return the setting _with_ the report processor included.
+      #
+      # Note: much of this code was inspired by https://github.com/puppetlabs/puppet/blob/6.16.0/lib/puppet/transaction/report.rb.
+      # Also we use inline_template because $settings::reports != Puppet[:reports] and we want Puppet[:reports] since that's
+      # what the report processor code (transaction/report.rb) uses.
+      $raw_reports_setting = inline_template('<%= Puppet[:reports] %>')
+      if $raw_reports_setting == 'none' {
+        $reports_setting = 'splunk_hec'
+      } else {
+        $reports_array = split(regsubst($raw_reports_setting, /(^\s+)|(\s+$)/, '', 'G'), /\s*,\s*/)
+        if 'splunk_hec' in $reports_array {
+          # Use the raw setting so that Puppet won't mark it as changed
+          $reports_setting = $raw_reports_setting
+        } else {
+          $reports_setting = join($reports_array + ['splunk_hec'], ', ')
+        }
+      }
+    }
+
     pe_ini_setting {'enable splunk_hec':
       ensure  => present,
       path    => '/etc/puppetlabs/puppet/puppet.conf',
       section => 'master',
       setting => 'reports',
-      value   => $reports,
+      value   => $reports_setting,
       notify  => Service['pe-puppetserver'],
     }
   }
