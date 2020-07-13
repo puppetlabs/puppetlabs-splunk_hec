@@ -9,6 +9,7 @@ AllCops:
   - "./**/*.rb"
   Exclude:
   - bin/*
+  - ruby/**/*
   - ".vendor/**/*"
   - "**/Gemfile"
   - "**/Rakefile"

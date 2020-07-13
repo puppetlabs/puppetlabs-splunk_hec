@@ -1,4 +1,5 @@
 {
+  "sourcetype": "non-existant_sourcetype"
   "timestamp": "2019-05-03T02:59:33Z",
   "servers": {
     "puppet-c-splunk-217321-internal": {
