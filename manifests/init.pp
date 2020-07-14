@@ -36,37 +36,27 @@ class splunk_hec (
         message  => "The 'reports' parameter is being deprecated in favor of having the module automatically add the 'splunk_hec' setting to puppet.conf. You can enable this behavior by setting 'reports' to '', the empty string, but please keep in mind that the 'reports' parameter will be removed in a future release.",
         loglevel =>  'warning',
       }
-      $reports_setting = $reports
-    } else {
-      # $reports == '' so we dynamically calculate the reports
-      # setting. Idea here is that if the user already included
-      # the 'splunk_hec' report processor, we return the setting as-is.
-      # Otherwise, we return the setting _with_ the report processor included.
-      #
-      # Note: much of this code was inspired by https://github.com/puppetlabs/puppet/blob/6.16.0/lib/puppet/transaction/report.rb.
-      # Also we use inline_template because $settings::reports != Puppet[:reports] and we want Puppet[:reports] since that's
-      # what the report processor code (transaction/report.rb) uses.
-      $raw_reports_setting = inline_template('<%= Puppet[:reports] %>')
-      if $raw_reports_setting == 'none' {
-        $reports_setting = 'splunk_hec'
-      } else {
-        $reports_array = split(regsubst($raw_reports_setting, /(^\s+)|(\s+$)/, '', 'G'), /\s*,\s*/)
-        if 'splunk_hec' in $reports_array {
-          # Use the raw setting so that Puppet won't mark it as changed
-          $reports_setting = $raw_reports_setting
-        } else {
-          $reports_setting = join($reports_array + ['splunk_hec'], ', ')
-        }
-      }
-    }
 
-    pe_ini_setting {'enable splunk_hec':
-      ensure  => present,
-      path    => '/etc/puppetlabs/puppet/puppet.conf',
-      section => 'master',
-      setting => 'reports',
-      value   => $reports_setting,
-      notify  => Service['pe-puppetserver'],
+      pe_ini_setting {'enable splunk_hec':
+        ensure  => present,
+        path    => '/etc/puppetlabs/puppet/puppet.conf',
+        section => 'master',
+        setting => 'reports',
+        value   => $reports,
+        notify  => Service['pe-puppetserver'],
+      }
+    } else {
+      # The subsetting resource automatically adds the 'splunk_hec' report
+      # processor to the reports setting if it hasn't yet been added there.
+      pe_ini_subsetting { 'enable splunk_hec':
+        ensure               => present,
+        path                 => '/etc/puppetlabs/puppet/puppet.conf',
+        section              => 'master',
+        setting              => 'reports',
+        subsetting           => 'splunk_hec',
+        subsetting_separator => ',',
+        notify               => Service['pe-puppetserver'],
+      }
     }
   }
 

@@ -27,6 +27,24 @@ describe 'splunk_hec' do
         value   => $value,
       }
     }
+
+    # Ditto for pe_ini_subsetting
+    define pe_ini_subsetting (
+      Optional[Any] $ensure               = undef,
+      Optional[Any] $path                 = undef,
+      Optional[Any] $section              = undef,
+      Optional[Any] $setting              = undef,
+      Optional[Any] $subsetting           = undef,
+      Optional[Any] $subsetting_separator = undef,
+    ) {
+      ini_subsetting { $title:
+        ensure               => $ensure,
+        path                 => $path,
+        section              => $section,
+        subsetting           => $subsetting,
+        subsetting_separator => $subsetting_separator,
+      }
+    }
     MANIFEST
   end
   let(:params) do
@@ -43,7 +61,8 @@ describe 'splunk_hec' do
       p
     end
 
-    it { is_expected.not_to contain_pe_ini_setting('enable splunk hec') }
+    it { is_expected.to have_pe_ini_setting_resource_count(0) }
+    it { is_expected.to have_pe_ini_subsetting_resource_count(0) }
   end
 
   context 'enable_reports is true' do
@@ -55,6 +74,7 @@ describe 'splunk_hec' do
 
     context "sets 'reports' setting to 'puppetdb,splunk_hec' (default behavior)" do
       it { is_expected.to contain_pe_ini_setting('enable splunk_hec').with_value('puppetdb,splunk_hec') }
+      it { is_expected.to have_pe_ini_subsetting_resource_count(0) }
     end
 
     context "set 'reports' setting to $reports if $reports != ''" do
@@ -66,48 +86,18 @@ describe 'splunk_hec' do
 
       it { is_expected.to contain_notify('reports param deprecation warning') }
       it { is_expected.to contain_pe_ini_setting('enable splunk_hec').with_value('foo,bar,baz') }
+      it { is_expected.to have_pe_ini_subsetting_resource_count(0) }
     end
 
-    context "dynamically calculates the 'reports' setting if $reports == ''" do
+    context "automatically includes the 'splunk_hec' processor if $reports == ''" do
       let(:params) do
         p = super()
         p['reports'] = ''
         p
       end
 
-      # rspec-puppet caches the catalog in each test based on the params/facts.
-      # To clear the cache, we have to test each value in its own context block so
-      # that we can properly reset the params/facts. Since the params shouldn't
-      # change in each test, we'll be resetting the facts instead.
-      values = {
-        'none'                           => 'splunk_hec',
-        'foo'                            => 'foo, splunk_hec',
-        'foo, bar, baz'                  => 'foo, bar, baz, splunk_hec',
-        '  foo  '                        => 'foo, splunk_hec',
-        'foo  , bar  , baz'              => 'foo, bar, baz, splunk_hec',
-        'splunk_hec'                     => 'splunk_hec',
-        '  splunk_hec  '                 => '  splunk_hec  ',
-        'foo, splunk_hec'                => 'foo, splunk_hec',
-        '  foo, splunk_hec  '            => '  foo, splunk_hec  ',
-        'foo  , bar  , baz,  splunk_hec' => 'foo  , bar  , baz,  splunk_hec',
-        'foo, splunk_hec, bar'           => 'foo, splunk_hec, bar',
-      }
-      values.each do |value, expected_setting_value|
-        context "when setting = '#{value}'" do
-          let(:facts) do
-            # This is enough to reset the facts
-            {
-              '_report_settings_value' => value,
-            }
-          end
-
-          it do
-            allow(Puppet).to receive(:[]).with(anything).and_call_original
-            allow(Puppet).to receive(:[]).with(:reports).and_return(value)
-            is_expected.to contain_pe_ini_setting('enable splunk_hec').with_value(expected_setting_value)
-          end
-        end
-      end
+      it { is_expected.to contain_pe_ini_subsetting('enable splunk_hec').with_subsetting('splunk_hec') }
+      it { is_expected.to have_pe_ini_setting_resource_count(0) }
     end
   end
 end
