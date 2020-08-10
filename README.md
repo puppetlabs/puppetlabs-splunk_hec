@@ -104,6 +104,7 @@ See the `plans/` directory for working examples of apply and result usage.
 * [Puppet Metrics Collection](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/v0.8.1/docs/puppet_metrics_collector_support.md)
 * [SSL Support](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/v0.8.1/docs/ssl_support.md)
 * [Troublshooting and Verification](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/v0.8.1/docs/troubleshooting_and_verification.md)
+* [Running the Tests](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/v0.8.1/docs/running_the_tests.md)
 
 ## Known Issues
 ------------
