@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
-        check: ['syntax lint metadata_lint check:symlinks check:git_ignore check:dot_underscore check:test_file rubocop']
+        check: ['syntax lint metadata_lint check:symlinks check:git_ignore check:dot_underscore check:test_file rubocop parallel_spec']
         ruby_version: [2.5.x]
         puppet_gem_version: [~> 6.0]
     steps:
