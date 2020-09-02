@@ -1,0 +1,15 @@
+{
+    "description": "This task submits data to a given Splunk HEC token and sourcetype.",
+    "input_method": "stdin",
+    "remote": true,
+    "parameters": {
+      "sourcetype": {
+        "description": "The Splunk sourcetype that the data will be indexed under.",
+        "type": "String"
+      },
+      "payload": {
+        "description": "The data to be submitted to Splunk.",
+        "type": "Hash"
+      }
+    }
+  }
