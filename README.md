@@ -48,8 +48,8 @@ Instructions assume you are using Puppet Enterprise. For Open Source Puppet inst
     6. Add the `main` index
     7. Set the Default Index to `main`
     8. Click Review and then Submit\
-When complete the hec token should look something like this
-![hec_token](docs/images/hec_token.png)
+When complete the hec token should look something like this\
+![hec_token](https://raw.githubusercontent.com/puppetlabs/puppetlabs-splunk_hec/v0.8.1/docs/images/hec_token.png)
 3. Add the class `splunk_hec` to the PE Infrastructure -> PE Masters node group under Classification
     1. Install the `splunk_hec` module on your Puppet master
         * `puppet module install puppetlabs-splunk_hec --version 0.7.1`
@@ -66,7 +66,7 @@ When complete the hec token should look something like this
     5. Hit save
     6. Run Puppet on the node group, this will cause a restart of the Puppet-Server service
 4. Configure the Splunk Puppet Report Viewer with your HEC token like so\
-![Puppet Report Viwer config](docs/images/puppet_report_viewer_config.png)
+![Puppet Report Viewer config](https://raw.githubusercontent.com/puppetlabs/puppetlabs-splunk_hec/v0.8.1/docs/images/puppet_report_viewer_config.png)
 5. Log into the Splunk Console, search `index=* sourcetype=puppet:summary` and if everything was done properly, you should see the reports (and soon facts) from the systems in your Puppet environment
 
 ## Tasks
