@@ -1,30 +1,42 @@
 name: release
 
 on:
- push:
-  tags:
-    - v[0-9]+.[0-9]+.[0-9]+
+ workflow_dispatch:
 
 jobs:
   release:
-    env:
-      BLACKSMITH_FORGE_USERNAME: puppetlabs
-      BLACKSMITH_FORGE_PASSWORD: {{ env.FORGE_API_KEY }}
     runs-on: ubuntu-latest
     steps:
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: 2.5.3
+
     - name: Update Rubygems
       run: gem update --system 3.1.0
-    - name: Get latest tag
-      run: echo ::set-env name=RELEASE_VERSION::$(echo ${GITHUB_REF:10})
+
     - name: Clone repository
       uses: actions/checkout@v2
       with:
-        ref: ${{ env.RELEASE_VERSION }}
-    - name: Release
+        ref: ${{ env.GITHUB_REF }}
+        # Needed to fetch all the tags
+        fetch-depth: 0
+
+    - name: Tag repository
+      run: |
+        module_version=$(cat metadata.json | jq '.version' -r)
+        tag="v${module_version}"
+        if git rev-parse "${tag}" >/dev/null 2>&1; then
+          echo "Module's already been tagged; skipping to the Forge publish step";
+        else
+          git tag ${tag}
+          git push -f --tags
+        fi
+
+    - name: Publish module to the forge
+      env:
+        BLACKSMITH_FORGE_USERNAME: {{ secrets.FORGE_USERNAME }}
+        BLACKSMITH_FORGE_PASSWORD: {{ secrets.FORGE_PASSWORD }}
       run: | 
         bundle install --with release
         bundle exec rake module:build

@@ -1,0 +1,61 @@
+name: release_prep
+
+on:
+  workflow_dispatch:
+    inputs:
+      module_version:
+        required: true
+
+jobs:
+  release_prep:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Extract branch name
+      run: echo ::set-env name=GITHUB_BRANCH::$(echo ${GITHUB_REF#refs/heads/})
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 2.5.3
+
+    - name: Update Rubygems
+      run: gem update --system 3.1.0
+
+    - name: Clone repository
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ env.GITHUB_BRANCH }}
+        # Needed to fetch all the tags
+        fetch-depth: 0
+
+    - name: Get most recent tag
+      id: most_recent_tag
+      uses: "WyriHaximus/github-action-get-previous-tag@master"
+      # An error in this step likely means that a most recent tag doesn't exist.
+      # This just means that our job corresponds to the first release, so continuing
+      # on error is OK.
+      continue-on-error: true
+
+    - name: Calculate the release prep commit's COMMIT_TITLE, COMMIT_BODY_MAIN, COMMIT_BODY_NOTE
+      run: |
+        echo ::set-env name=COMMIT_TITLE::$(echo 'Release prep to ${{ github.event.inputs.module_version }}')
+        echo ::set-env name=COMMIT_BODY_MAIN::$(echo -n 'You will need to manually update the \`CHANGELOG.md\` file. First, checkout this PR on your local machine via something like \`git fetch upstream; git checkout upstream/release_prep\`. Then, once you have updated the \`CHANGELOG.md\` file, \`git commit --amend\` your update, then push your changes to this PR via something like \`git push --set-upstream upstream.\`')
+        if [ ! -z '${{ steps.most_recent_tag.outputs.tag  }}' ]; then
+          echo ::set-env name=COMMIT_BODY_NOTE::$(echo -n "${commit_body} **Note:** You can use https://github.com/${{ github.repository }}/compare/${{ steps.most_recent_tag.outputs.tag  }}...${{ env.GITHUB_BRANCH }} to see all the new commits that have landed since the previous release.")
+        fi
+
+    - name: Generate the release prep commit
+      run: |
+        git checkout -b release_prep
+        bundle install --with release_prep
+        pdk release prep --version=${{ github.event.inputs.module_version }} --skip-changelog
+        git add .
+        git -c user.name=${{ github.actor }} -c user.email=${{ github.actor }}@users.noreply.github.com commit -m "${{ env.COMMIT_TITLE }}" -m "${{ env.COMMIT_BODY_MAIN }}" -m '' -m '${{ env.COMMIT_BODY_NOTE }}'
+        git push --set-upstream origin release_prep --force
+
+    - name: Generate the release prep PR
+      uses: repo-sync/pull-request@v2
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        source_branch: 'release_prep'
+        destination_branch: ${{ env.GITHUB_BRANCH }}
