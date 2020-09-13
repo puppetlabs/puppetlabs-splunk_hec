@@ -1,6 +1,6 @@
 require 'puppet/indirector/facts/yaml'
 require 'puppet/util/profiler'
-require 'puppet/util/splunk_hec'
+require File.dirname(__FILE__) + '/../../util/splunk_hec.rb'
 
 # rubocop:disable Style/ClassAndModuleCamelCase
 # splunk_hec.rb

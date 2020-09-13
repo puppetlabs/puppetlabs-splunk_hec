@@ -1,4 +1,4 @@
-require 'puppet/util/splunk_hec'
+require File.dirname(__FILE__) + '/../util/splunk_hec.rb'
 
 Puppet::Reports.register_report(:splunk_hec) do
   desc 'Submits just a report summary to Splunk HEC endpoint'
