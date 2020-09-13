@@ -6,6 +6,7 @@
 class splunk_hec (
   String $url,
   String $token,
+  Boolean $puppet_enterprise = true,
   Array $collect_facts = ["dmi","disks","partitions","processors","networking"],
   Boolean $enable_reports = false,
   Boolean $record_event = false,
@@ -30,6 +31,23 @@ class splunk_hec (
 
 ) {
 
+  # Account for the differences in Puppet Enterprise and open source
+  if $puppet_enterprise {
+    $ini_setting    = 'pe_ini_setting'
+    $ini_subsetting = 'pe_ini_subsetting'
+    $service        = 'pe-puppetserver'
+    $owner          = 'pe-puppet'
+    $group          = 'pe-puppet'
+  } else {
+    # Open source requires `puppetlabs/inifile` module for `ini_setting` and
+    # `ini_subsetting` types
+    $ini_setting    = 'ini_setting'
+    $ini_subsetting = 'ini_subsetting'
+    $service        = 'puppetserver'
+    $owner          = 'puppet'
+    $group          = 'puppet'
+  }
+
   if $enable_reports {
     if $reports != '' {
       notify { "reports param deprecation warning" :
@@ -37,25 +55,25 @@ class splunk_hec (
         loglevel =>  'warning',
       }
 
-      pe_ini_setting {'enable splunk_hec':
+      Resource[$ini_setting] {'enable splunk_hec':
         ensure  => present,
         path    => '/etc/puppetlabs/puppet/puppet.conf',
         section => 'master',
         setting => 'reports',
         value   => $reports,
-        notify  => Service['pe-puppetserver'],
+        notify  => Service[$service],
       }
     } else {
       # The subsetting resource automatically adds the 'splunk_hec' report
       # processor to the reports setting if it hasn't yet been added there.
-      pe_ini_subsetting { 'enable splunk_hec':
+      Resource[$ini_subsetting] { 'enable splunk_hec':
         ensure               => present,
         path                 => '/etc/puppetlabs/puppet/puppet.conf',
         section              => 'master',
         setting              => 'reports',
         subsetting           => 'splunk_hec',
         subsetting_separator => ',',
-        notify               => Service['pe-puppetserver'],
+        notify               => Service[$service],
       }
     }
   }
@@ -63,29 +81,29 @@ class splunk_hec (
   if $manage_routes {
     file { '/etc/puppetlabs/puppet/splunk_hec_routes.yaml':
       ensure  => file,
-      owner   => pe-puppet,
-      group   => pe-puppet,
+      owner   => $owner,
+      group   => $group,
       mode    => '0640',
       content => epp('splunk_hec/splunk_hec_routes.yaml.epp'),
-      notify  => Service['pe-puppetserver'],
+      notify  => Service[$service],
     }
-    pe_ini_setting {'enable splunk_hec_routes.yaml':
+    Resource[$ini_setting] {'enable splunk_hec_routes.yaml':
       ensure  => present,
       path    => '/etc/puppetlabs/puppet/puppet.conf',
       section => 'master',
       setting => 'route_file',
       value   => '/etc/puppetlabs/puppet/splunk_hec_routes.yaml',
       require => File['/etc/puppetlabs/puppet/splunk_hec_routes.yaml'],
-      notify  => Service['pe-puppetserver'],
+      notify  => Service[$service],
     }
   }
 
   file { '/etc/puppetlabs/puppet/splunk_hec.yaml':
     ensure  => file,
-    owner   => pe-puppet,
-    group   => pe-puppet,
+    owner   => $owner,
+    group   => $group,
     mode    => '0640',
     content => epp('splunk_hec/splunk_hec.yaml.epp'),
-    notify  => Service['pe-puppetserver'],
+    notify  => Service[$service],
   }
 }
