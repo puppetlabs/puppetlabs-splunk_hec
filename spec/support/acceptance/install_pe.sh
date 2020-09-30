@@ -3,11 +3,11 @@
 version=`puppet --version`
 
 if [ -z "$version" ]; then
-  PE_RELEASE=2019.6
-  PE_LATEST=$(curl https://artifactory.delivery.puppetlabs.net/artifactory/generic_enterprise__local/${PE_RELEASE}/release/ci-ready/LATEST)
-  PE_FILE_NAME=puppet-enterprise-${PE_LATEST}-ubuntu-16.04-amd64
+  PE_RELEASE=2019.8.1
+  PE_LATEST=$(curl https://artifactory.delivery.puppetlabs.net/artifactory/generic_enterprise__local/archives/releases/${PE_RELEASE}/LATEST)
+  PE_FILE_NAME=puppet-enterprise-${PE_LATEST}-ubuntu-18.04-amd64
   TAR_FILE=${PE_FILE_NAME}.tar
-  DOWNLOAD_URL=https://artifactory.delivery.puppetlabs.net/artifactory/generic_enterprise__local/${PE_RELEASE}/release/ci-ready/${TAR_FILE}
+  DOWNLOAD_URL=https://artifactory.delivery.puppetlabs.net/artifactory/generic_enterprise__local/archives/releases/${PE_RELEASE}/${TAR_FILE}
 
   ## Download PE
   curl -o ${TAR_FILE} ${DOWNLOAD_URL}
@@ -24,7 +24,7 @@ if [ -z "$version" ]; then
   fi
 
   cd ${PE_FILE_NAME}
-  printf '1' | ./puppet-enterprise-installer
+  printf 'y' | ./puppet-enterprise-installer
   if [[ $? -ne 0 ]];then
     echo “Error: Failed to install Puppet Enterprise. Please check the logs and call Bryan.x ”
     exit 2
@@ -46,6 +46,6 @@ fi
 version=`puppet --version`
 
 if [ -z "$version" ];  then
-  echo 'puppet install failed'
+  echo 'puppet instaall failed'
   exit 1
 fi
