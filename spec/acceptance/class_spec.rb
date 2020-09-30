@@ -20,7 +20,7 @@ describe 'Verify the minimum install' do
     it 'Successfully creates a report after a simple puppet apply' do
       host = return_host
       run_shell('puppet apply -e \' notify { "Hello World" : }\' --reports=splunk_hec')
-      expect(run_shell("ls /opt/puppetlabs/puppet/cache/reports/#{host}").stdout).to match %r{\.json}
+      expect(run_shell("ls /opt/puppetlabs/puppet/cache/reports/#{host}").stdout).to match %r{\.yaml}
     end
 
     it 'Successfully sends data to an http endpoint' do
