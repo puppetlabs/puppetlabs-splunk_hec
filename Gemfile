@@ -63,6 +63,8 @@ if Gem.win_platform? && puppet_version =~ %r{^(file:///|git://)}
   gems['win32-service'] =  ['0.8.8', require: false]
 end
 
+gem "common_events_library", git: 'git@github.com:puppetlabs/common_events_library.git', :branch => "PIE-403-gemspec"
+
 gems.each do |gem_name, gem_params|
   gem gem_name, *gem_params
 end
