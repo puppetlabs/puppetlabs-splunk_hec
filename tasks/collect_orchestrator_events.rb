@@ -25,7 +25,7 @@ event = {
   'time' => timestamp.to_i,
   'sourcetype' => 'puppet:summary',
   'event' => {
-    'pe_orchestrator_events' =>  response.body,
+    'pe_orchestrator_events' => response.body,
   },
 }
 
@@ -36,4 +36,3 @@ client = Net::HTTP.new(SPLUNK_SERVER, SPLUNK_PORT)
 client.use_ssl = false
 client.verify_mode = OpenSSL::SSL::VERIFY_NONE
 client.request(request)
-
