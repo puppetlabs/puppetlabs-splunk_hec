@@ -6,7 +6,7 @@
   "license": "Apache-2.0",
   "source": "https://github.com/puppetlabs/puppetlabs-splunk_hec",
   "project_page": "https://github.com/puppetlabs/puppetlabs-splunk_hec",
-  "issues_url": "https://github.com/puppetlabs/puppetlabs-splunk_hec/issues",
+  "issues_url": "https://tickets.puppetlabs.com/projects/PIE/issues",
   "dependencies": [
     {
       "name": "puppetlabs/puppet_metrics_collector",
