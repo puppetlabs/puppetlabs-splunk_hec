@@ -1,0 +1,34 @@
+{
+  "description": "This task submits all PE API events to Splunk's HEC",
+  "remote": false,
+  "parameters": {
+    "pe_console": {
+      "description": "The FQDN of the Puppet Enterprise node",
+      "type": "String[1]"
+    },
+    "pe_username": {
+      "description": "A valid PE username with an API role",
+      "type": "Optional[String[1]]"
+    },
+    "pe_password": {
+      "description": "A valid PE password with an API role",
+      "type": "Optional[String[1]]"
+    },
+    "splunk_server": {
+      "description": "The FQDN of the Splunk Server",
+      "type": "String[1]",
+      "default": "localhost"
+    },
+    "splunk_port": {
+      "description": "The port that the Splunk Server is listening on",
+      "type": "String[1]",
+      "default": "8088"
+    },
+    "splunk_token": {
+      "description": "A valid splunk token for using the Splunk Collector",
+      "type": "String[1]",
+      "default": "abcd1234"
+    }
+  },
+  "input_method": "stdin"
+}
