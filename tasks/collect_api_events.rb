@@ -23,7 +23,8 @@ def transform(body, pe_console, source_type, splunk_client, splunk_token)
       'sourcetype' => source_type,
       'event' => pe_event,
     }
-    splunk_client.post_request('/services/collector', event, {'Authorization': "Splunk #{splunk_token}"})
+    response = splunk_client.post_request('/services/collector', event, {'Authorization': "Splunk #{splunk_token}"})
+    raise "Failed to POST to the splunk server [#{response.error!}]" unless response.code == '200'
   end
   events_json
 end
@@ -39,13 +40,13 @@ def parse_body(response_body)
 end
 
 
-splunk_client = CommonEventsHttp.new(splunk_server, port: splunk_port, ssl_verify: false)
+splunk_client = CommonEventsHttp.new('http://' + splunk_server, port: splunk_port, ssl_verify: false)
 orchestrator = Orchestrator.new(pe_console, pe_username, pe_password, ssl_verify: false)
 response = orchestrator.get_all_jobs
 raise "Failed to get the jobs from PE [#{response.error!}]" unless response.code == '200'
 
 body = parse_body(response.body)
-transform(body['items'], pe_console, 'puppet:summary', splunk_client, splunk_token)
+transform(body['items'], pe_console, 'puppet:events_summary', splunk_client, splunk_token)
 
 puts "Post of orchestrator events successful"
 
@@ -54,5 +55,5 @@ response = events.get_all_events
 raise "Failed to get the activity API events from PE [#{response.error!}]" unless response.code == '200'
 
 body = parse_body(response.body)
-transform(body['commits'], pe_console, 'puppet:summary', splunk_client, splunk_token)
+transform(body['commits'], pe_console, 'puppet:activity', splunk_client, splunk_token)
 puts "Post of activity service events successful"
