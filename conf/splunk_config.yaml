@@ -1,0 +1,9 @@
+---
+pe:
+  console: marine-gingham.delivery.puppetlabs.net
+  username: admin
+  password: pie
+splunk:
+  server: localhost
+  port: '8088'
+  token: abcd1234
