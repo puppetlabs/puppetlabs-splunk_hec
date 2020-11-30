@@ -3,15 +3,12 @@ require 'benchmark'
 require 'json'
 require 'net/https'
 require 'time'
+require 'yaml'
 
-params = JSON.parse(STDIN.read)
-
-pe_console = params['pe_console']
-pe_username = params['pe_username'] || 'admin'
-pe_password = params['pe_password'] || 'pie'
-splunk_server = params['splunk_server'] || 'localhost'
-splunk_token  = params['splunk_token'] || 'abcd1234'
-splunk_port = params['splunk_port'] || '8088'
+def load_settings(configfile)
+  raise "Failed to load the config file [#{configfile}]" unless File.file?(configfile)
+  open(configfile) {|f| YAML.load(f) }
+end
 
 def transform(body, pe_console, source_type, splunk_client, splunk_token)
   events_json = ''
@@ -24,6 +21,7 @@ def transform(body, pe_console, source_type, splunk_client, splunk_token)
       'event' => pe_event,
     }
     response = splunk_client.post_request('/services/collector', event, {'Authorization': "Splunk #{splunk_token}"})
+    puts response
     raise "Failed to POST to the splunk server [#{response.error!}]" unless response.code == '200'
   end
   events_json
@@ -39,21 +37,24 @@ def parse_body(response_body)
   body
 end
 
+config_file = ENV['CONFIG_FILE'] || 'conf/splunk_config.yaml'
 
-splunk_client = CommonEventsHttp.new('http://' + splunk_server, port: splunk_port, ssl_verify: false)
-orchestrator = Orchestrator.new(pe_console, pe_username, pe_password, ssl_verify: false)
+settings = load_settings(config_file)
+
+splunk_client = CommonEventsHttp.new('http://' + settings['splunk']['server'], port: settings['splunk']['port'], ssl_verify: false)
+orchestrator = Orchestrator.new(settings['pe']['console'], settings['pe']['username'], settings['pe']['password'], ssl_verify: false)
 response = orchestrator.get_all_jobs
 raise "Failed to get the jobs from PE [#{response.error!}]" unless response.code == '200'
 
 body = parse_body(response.body)
-transform(body['items'], pe_console, 'puppet:events_summary', splunk_client, splunk_token)
+transform(body['items'], settings['pe']['console'], 'puppet:summary', splunk_client, settings['splunk']['token'])
 
 puts "Post of orchestrator events successful"
 
-events = Events.new(pe_console, pe_username, pe_password, ssl_verify: false)
+events = Events.new(settings['pe']['console'], settings['pe']['username'], settings['pe']['password'], ssl_verify: false)
 response = events.get_all_events
 raise "Failed to get the activity API events from PE [#{response.error!}]" unless response.code == '200'
 
 body = parse_body(response.body)
-transform(body['commits'], pe_console, 'puppet:activity', splunk_client, splunk_token)
+transform(body['commits'], settings['pe']['console'], 'puppet:summary', splunk_client, settings['splunk']['token'])
 puts "Post of activity service events successful"
