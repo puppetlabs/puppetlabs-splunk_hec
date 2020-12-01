@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Extract branch name
-      run: echo ::set-env name=GITHUB_BRANCH::$(echo ${GITHUB_REF#refs/heads/})
+      run: echo "GITHUB_BRANCH=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
 
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
@@ -38,10 +38,10 @@ jobs:
 
     - name: Calculate the release prep commit's COMMIT_TITLE, COMMIT_BODY_MAIN, COMMIT_BODY_NOTE
       run: |
-        echo ::set-env name=COMMIT_TITLE::$(echo 'Release prep to ${{ github.event.inputs.module_version }}')
-        echo ::set-env name=COMMIT_BODY_MAIN::$(echo -n 'You will need to manually update the \`CHANGELOG.md\` file. First, checkout this PR on your local machine via something like \`git fetch upstream; git checkout upstream/release_prep\`. Then, once you have updated the \`CHANGELOG.md\` file, \`git commit --amend\` your update, then push your changes to this PR via something like \`git push --set-upstream upstream.\`')
+        echo "COMMIT_TITLE=$(echo 'Release prep to ${{ github.event.inputs.module_version }}')" >> $GITHUB_ENV
+        echo "COMMIT_BODY_MAIN=$(echo -n 'You will need to manually update the \`CHANGELOG.md\` file. First, checkout this PR on your local machine via something like \`git fetch upstream; git checkout upstream/release_prep\`. Then, once you have updated the \`CHANGELOG.md\` file, \`git commit --amend\` your update, then push your changes to this PR via something like \`git push --set-upstream upstream.\`')" >> $GITHUB_ENV
         if [ ! -z '${{ steps.most_recent_tag.outputs.tag  }}' ]; then
-          echo ::set-env name=COMMIT_BODY_NOTE::$(echo -n "${commit_body} **Note:** You can use https://github.com/${{ github.repository }}/compare/${{ steps.most_recent_tag.outputs.tag  }}...${{ env.GITHUB_BRANCH }} to see all the new commits that have landed since the previous release.")
+          echo "COMMIT_BODY_NOTE=$(echo -n "${commit_body} **Note:** You can use https://github.com/${{ github.repository }}/compare/${{ steps.most_recent_tag.outputs.tag  }}...${{ env.GITHUB_BRANCH }} to see all the new commits that have landed since the previous release.")" >> $GITHUB_ENV
         fi
 
     - name: Generate the release prep commit
