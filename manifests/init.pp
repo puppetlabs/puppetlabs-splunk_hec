@@ -33,7 +33,9 @@ class splunk_hec (
   if $enable_reports {
     if $reports != '' {
       notify { "reports param deprecation warning" :
-        message  => "The 'reports' parameter is being deprecated in favor of having the module automatically add the 'splunk_hec' setting to puppet.conf. You can enable this behavior by setting 'reports' to '', the empty string, but please keep in mind that the 'reports' parameter will be removed in a future release.",
+        message  => "The 'reports' parameter is being deprecated in favor of having the module automatically add the 'splunk_hec' setting \
+        to puppet.conf. You can enable this behavior by setting 'reports' to '', the empty string, but please keep in mind that the \
+        'reports' parameter will be removed in a future release.",
         loglevel =>  'warning',
       }
 
