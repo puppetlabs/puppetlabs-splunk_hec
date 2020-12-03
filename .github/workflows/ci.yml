@@ -18,7 +18,7 @@ jobs:
         ruby-version: ${{ matrix.ruby_version }}
 
     - name: Static Checks
-      uses: puppetlabs/action-litmus_spec@master
+      uses: RandomNoun7/action-litmus_spec@MAINT-fix-user-install-bug
       with:
         puppet_gem_version: ${{ matrix.puppet_gem_version }}
         check: ${{ matrix.check }}
