@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## [v0.8.2](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v0.8.2) (2020-12-02)
+
+[Full Changelog](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v0.8.1...v0.8.2)
+
+### Changed
+
+- Project issues URl changed in metadata to point to JIRA to create tickets instead of at github to create issues [\#62](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/62)
+
+- Switch to the `pe_ini_subsetting` resource for adding the report processor setting [\#51](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/51)
+
+### Deprecated
+
+- 'report' setting is now dynamically calculated. [\#49](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/49)
+
+
 ## [v0.8.1](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v0.8.1) (2020-05-11)
 
 [Full Changelog](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v0.8.0...v0.8.1)
