@@ -57,3 +57,6 @@
 <% if $splunk_hec::include_resources_corrective_change { -%>
 "include_resources_corrective_change" : "<%= $splunk_hec::include_resources_corrective_change %>"
 <% } -%>
+<% if $splunk_hec::summary_resources_format { -%>
+"summary_resources_format" : "<%= $splunk_hec::summary_resources_format %>"
+<% } -%>

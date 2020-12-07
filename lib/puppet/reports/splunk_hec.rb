@@ -1,4 +1,4 @@
-require 'puppet/util/splunk_hec'
+require File.dirname(__FILE__) + '/../util/splunk_hec.rb'
 
 Puppet::Reports.register_report(:splunk_hec) do
   desc 'Submits just a report summary to Splunk HEC endpoint'
@@ -26,6 +26,12 @@ Puppet::Reports.register_report(:splunk_hec) do
         'total' => self.metrics['changes']['total'],
       },
     }
+
+    # puppet 4 compatibility, code_id and job_id were added in puppet 5
+    if report_format.to_i < 7
+      job_id = nil
+      code_id = nil
+    end
 
     event = {
       'host' => host,
@@ -89,7 +95,15 @@ Puppet::Reports.register_report(:splunk_hec) do
     end
 
     if add_resources
-      event['event']['resource_events'] = resource_statuses.select { |_k, v| v.events.count > 0 }
+      resource_events_hash = resource_statuses.select { |_k, v| v.events.count > 0 }
+      # We may want to return this as a hash or an array. Splunk deals better
+      # with arrays but we need to give people the choice so as to not break
+      # existing reports
+      event['event']['resource_events'] = if settings['summary_resources_format'] == 'array'
+                                            resource_events_hash.map { |_k, v| v }
+                                          else
+                                            resource_events_hash
+                                          end
     end
 
     Puppet.info "Submitting report to Splunk at #{get_splunk_url('summary')}"
