@@ -27,7 +27,7 @@ class splunk_hec (
   Optional[Boolean] $include_logs_corrective_change = false,
   Optional[Array] $include_resources_status = undef,
   Optional[Boolean] $include_resources_corrective_change = false,
-
+  String $summary_resources_format = 'hash',
 ) {
 
   # Account for the differences in Puppet Enterprise and open source

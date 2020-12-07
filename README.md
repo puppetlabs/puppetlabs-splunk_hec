@@ -69,8 +69,110 @@ When complete the hec token should look something like this\
 ![Puppet Report Viewer config](https://raw.githubusercontent.com/puppetlabs/puppetlabs-splunk_hec/v0.8.1/docs/images/puppet_report_viewer_config.png)
 5. Log into the Splunk Console, search `index=* sourcetype=puppet:summary` and if everything was done properly, you should see the reports (and soon facts) from the systems in your Puppet environment
 
-## Tasks
+Configuring SSL support for this report processor and tasks requires that the Splunk HEC service being used has a [properly configured SSL certificate](https://docs.splunk.com/Documentation/Splunk/latest/Security/AboutsecuringyourSplunkconfigurationwithSSL). Once the HEC service has a valid SSL certificate, the CA will need to be made available to the report processor to load. The supported path is to install a copy of the Splunk CA to a directory called `/etc/puppetlabs/puppet/splunk_hec/` and provide the file name to `splunk_hec` class.
+
+One can update the splunk_hec.yaml file with these settings:
+
+```
+"ssl_ca" : "splunk_ca.cert"
+```
+
+Or create a profile that copies the `splunk_ca.cert` as part of invoking the splunk_hec class:
+
+```
+class profile::splunk_hec {
+  file { '/etc/puppetlabs/puppet/splunk_hec':
+    ensure => directory,
+    owner  => 'pe-puppet',
+    group  => 'pe-puppet',
+    mode   => 0644,
+  }
+  file { '/etc/puppetlabs/puppet/splunk_hec/splunk_ca.cert':
+    ensure => file,
+    owner  => 'pe-puppet',
+    group  => 'pe-puppet',
+    mode   => '0644',
+    source => 'puppet:///modules/profile/splunk_hec/splunk_ca.cert',
+  }
+}
+```
+
+Customized Reporting
+----------
+As of 0.8.0 and later the report processor can be configured to include Logs and Resource Events along with the existing summary data. Because this data varies between runs and agents in Puppet, it is difficult to predict how much data one will use in Splunk as a result. However this removes the need for configuring the Detailed Report Generation alerts in Splunk to retrieve that information, which is useful for large installations that need to retrieve a large amount of data. You can now just send the information from Puppet directly.
+
+Add one or more of these parameters based on the desired outcome, these apply to the state of the puppet runs, one cannot filter by facts on which nodes these are in effect for. So one can get `logs when a puppet run fails`, but not `logs when a windows server puppet run fails`. By default none of these are enabled.
+
+##### include_logs_status
+
+Array: Determines if [logs](https://puppet.com/docs/puppet/latest/format_report.html#puppet::util::log) should be included based on the return status of the puppet agent run. The can be none, one, or any of the following: `failed changed unchanged`
+
+##### include_logs_catalog_failure
+
+Boolean: Include logs if a catalog fails to compile. This is a more specific type of failure that indicates a serverside issue. Values: `true false`
+
+##### include_logs_corrective_change
+
+Boolean: Include logs if a there is a corrective change (a PE only feature) - indicating drift was detected from the last time puppet ran on the system. Values: `true false`
+
+##### include_resources_status
+
+Array: Determines if [resource events](https://puppet.com/docs/puppet/latest/format_report.html#puppet::resource::status) should be included based on the return status of the puppet agent run. Note: this only includes resources whose status is not `unchanged` - not the entire catalog. The can be none, one, or any of the following: `failed changed unchanged`
+
+##### include_resources_corrective_change
+
+Boolean: Include resource events if a there is a corrective change (a PE only feature) - indicating drift was detected from the last time puppet ran on the system. Values: `true false`
+
+##### summary_resources_format
+
+String: If `include_resources_corrective_change` or `include_resources_status` is set and therefore `resource_events` are being sent as part of `puppet:summary` events, we can choose what format they should be sent in. Depending on your usage within Splunk, different format may be preferable, the possible values are (`hash`, `array`). Default: `hash`. Here is an example of the data that will be forwarded to splunk in each instance:
+
+`hash`
+
+```json
+{
+  "resource_events": {
+    "File[/etc/something.conf]": {
+      "resource": "File[/etc/something.conf]",
+      "failed": false,
+      "out_of_sync": true
+    }
+  }
+}
+```
+
+`array`
+
+```json
+{
+  "resource_events": [
+    {
+      "resource": "File[/etc/something.conf]",
+      "failed": false,
+      "out_of_sync": true
+    }
+  ]
+}
+```
+
+Advanced Settings:
 -----------
+
+The splunk_hec module also supports customizing the `fact_terminus` and `facts_cache_terminus` names in the custom routes.yaml it deploys. If you are using a different facts_terminus (ie, not PuppetDB), you will want to set that parameter.
+
+If you are already using a custom routes.yaml, these are the equivalent instructions of what the splunk_hec module does, the most important setting is configuring `cache: splunk_hec`
+- Create a custom splunk_routes.yaml file to override where facts are cached
+```yaml
+master:
+  facts:
+    terminus: puppetdb
+    cache: splunk_hec
+```
+- Set this routes file instead of the default one with `puppet config set route_file /etc/puppetlabs/puppet/splunk_routes.yaml --section master`
+
+
+Tasks
+-----
 
 Two tasks are provided for submitting data from a Bolt plan to Splunk. For clarity, we recommend using a different HEC token to distinguish between events from Puppet runs and those generated by Bolt. The Puppet Report Viewer addon includes a puppet:bolt sourcetype to faciltate this. Currently SSL validation for Bolt communications to Splunk is not supported.
 
