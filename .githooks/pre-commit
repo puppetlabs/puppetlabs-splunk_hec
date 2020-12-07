@@ -1,0 +1,23 @@
+#!/bin/sh
+
+if git rev-parse --verify HEAD >/dev/null 2>&1
+then
+	against=HEAD
+else
+	# Initial commit: diff against an empty tree object
+	against=$(git hash-object -t tree /dev/null)
+fi
+
+# Whitespace check copied from the template pre-commit hook.
+git diff-index --check --cached $against --
+
+bundle exec rake \
+ syntax \
+ lint \
+ metadata_lint \
+ check:symlinks \
+ check:git_ignore \
+ check:dot_underscore \
+ check:test_file \
+ rubocop \
+ spec
