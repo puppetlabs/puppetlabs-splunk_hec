@@ -47,11 +47,16 @@ describe 'splunk_hec' do
     }
     MANIFEST
   end
+
   let(:params) do
     {
       'url'   => 'foo_url',
       'token' => 'foo_token',
     }
+  end
+
+  let(:facts) do
+    { splunk_hec_is_pe: true }
   end
 
   context 'enable_reports is false' do
