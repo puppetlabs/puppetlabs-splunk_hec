@@ -1,11 +1,17 @@
 #!/opt/puppetlabs/puppet/bin/ruby
 
 require 'common_events_library'
+require 'fileutils'
 require 'benchmark'
 require 'json'
 require 'net/https'
 require 'time'
 require 'yaml'
+
+STORE_DIR = ENV['STORE_DIR'] || '/etc/puppetlabs/splunk/'
+
+API_EVENTS_STORE = "#{STORE_DIR}/splunk-events-store".freeze
+API_ACTIVITY_STORE = "#{STORE_DIR}/splunk-activity-store".freeze
 
 def load_settings(configfile)
   raise "Failed to load the config file [#{configfile}]" unless File.file?(configfile)
@@ -22,54 +28,62 @@ def transform(body, pe_console, source_type)
       'sourcetype' => source_type,
       'event' => pe_event,
     }
-    events << ' ' unless events.empty?
-    events << event.to_json
+    events << "#{event.to_json} "
   end
   events
 end
 
-def parse_body(response_body)
-  body = {}
-  begin
-    body = JSON.parse(response_body)
-  rescue JSON::ParserError => e
-    raise("PE response is invalid json [#{e}]")
-  end
-  body
+def store_index(index, filepath)
+  open(filepath, 'w') { |f| f.puts index }
+end
+
+def get_index(filepath)
+  # rubocop:disable Style/RescueModifier
+  File.open(filepath, &:readline).to_i rescue 0
+end
+
+def process_response(body, total, settings, index_file, source_type, splunk_client)
+  return false if total.zero? || total.nil?
+
+  events_json = transform(body, settings['pe']['console'], source_type)
+  store_index(body.empty? ? 0 : total, index_file)
+
+  response = splunk_client.post_request('/services/collector', events_json, { Authorization: "Splunk #{settings['splunk']['token']}" }, use_raw_body: true)
+  raise "Failed to POST to the splunk server [#{response.error!}]" unless response.code == '200'
+  true
 end
 
 config_file = ENV['CONFIG_FILE'] || "#{File.expand_path(File.dirname(__FILE__))}/../conf/splunk_config.yaml"
+
+# ensure the config directory is created.
+FileUtils.mkdir_p STORE_DIR
+
+# load our settings from the config file.
 settings = load_settings(config_file)
 
+# setup clients
 splunk_client = CommonEventsHttp.new('http://' + settings['splunk']['server'], port: settings['splunk']['port'], ssl_verify: false)
-orchestrator = Orchestrator.new(settings['pe']['console'], settings['pe']['username'], settings['pe']['password'], ssl_verify: false)
-response = orchestrator.get_all_jobs
+orchestrator  = Orchestrator.new(settings['pe']['console'], settings['pe']['username'], settings['pe']['password'], ssl_verify: false)
+events        = Events.new(settings['pe']['console'], settings['pe']['username'], settings['pe']['password'], ssl_verify: false)
+
+# source and process the orchestrator events
+previous_index = get_index(API_EVENTS_STORE)
+
+response = orchestrator.get_all_jobs(offset: previous_index, limit: 1000)
 raise "Failed to get the jobs from PE [#{response.error!}]" unless response.code == '200'
+body = JSON.parse(response.body)
 
-body = parse_body(response.body)
+puts body['pagination']
+result = process_response(body['items'], body['pagination']['total'], settings, API_EVENTS_STORE, 'puppet:summary', splunk_client)
+puts 'There were no orchestrator events to send to splunk' unless result
+puts 'Orchestrator events sent to splunk' if result
 
-events_json = transform(body['items'], settings['pe']['console'], 'puppet:summary')
-
-if events_json.empty?
-  puts 'There were no orchestrator events'
-else
-  response = splunk_client.post_request('/services/collector', events_json, { Authorization: "Splunk #{settings['splunk']['token']}" }, use_raw_body: true)
-  raise "Failed to POST to the splunk server [#{response.error!}]" unless response.code == '200'
-
-  puts 'Post of orchestrator events successful'
-end
-
-events = Events.new(settings['pe']['console'], settings['pe']['username'], settings['pe']['password'], ssl_verify: false)
-response = events.get_all_events
+# source and process the activity service events
+previous_index = get_index(API_ACTIVITY_STORE)
+response = events.get_all_events(offset: previous_index)
 raise "Failed to get the activity API events from PE [#{response.error!}]" unless response.code == '200'
-
-body = parse_body(response.body)
-activity_json = transform(body['commits'], settings['pe']['console'], 'puppet:summary')
-if activity_json.empty?
-  puts 'There were no activity service events'
-else
-  response = splunk_client.post_request('/services/collector', activity_json, { Authorization: "Splunk #{settings['splunk']['token']}" }, use_raw_body: true)
-  raise "Failed to POST to the splunk server [#{response.error!}]" unless response.code == '200'
-
-  puts 'Post of activity service events successful'
-end
+body = JSON.parse(response.body)
+puts body['total-rows']
+result = process_response(body['commits'], body['total-rows'], settings, API_ACTIVITY_STORE, 'puppet:summary', splunk_client)
+puts 'There were no activity service events to send to splunk' unless result
+puts 'Activity events sent to splunk' if result
