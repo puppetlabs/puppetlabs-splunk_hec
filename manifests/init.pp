@@ -27,6 +27,7 @@ class splunk_hec (
   Optional[Boolean] $include_logs_corrective_change = false,
   Optional[Array] $include_resources_status = undef,
   Optional[Boolean] $include_resources_corrective_change = false,
+  Optional[Boolean] $include_api_collection = true,
   String $summary_resources_format = 'hash',
 ) {
 
@@ -44,6 +45,16 @@ class splunk_hec (
     $service        = 'puppetserver'
     $owner          = 'puppet'
     $group          = 'puppet'
+  }
+
+
+  if $include_api_collection {
+    cron { 'collectpeapi':
+      ensure  => 'present',
+      command => '/etc/puppetlabs/code/environments/production/modules/splunk_hec/scripts/collect_api_events.rb',
+      user    => 'root',
+      minute  => '*/2',
+    }
   }
 
   if $enable_reports {

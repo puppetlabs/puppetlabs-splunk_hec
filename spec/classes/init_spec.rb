@@ -45,13 +45,20 @@ describe 'splunk_hec' do
         subsetting_separator => $subsetting_separator,
       }
     }
+
+    define cron (
+      Optional[Any] $ensure  = undef,
+      Optional[Any] $command = undef,
+      Optional[Any] $user    = undef,
+      Optional[Any] $minute  = undef,
+    ) {}
     MANIFEST
   end
 
   let(:params) do
     {
-      'url'   => 'foo_url',
-      'token' => 'foo_token',
+      url: 'foo_url',
+      token: 'foo_token',
     }
   end
 
@@ -61,9 +68,7 @@ describe 'splunk_hec' do
 
   context 'enable_reports is false' do
     let(:params) do
-      p = super()
-      p['enable_reports'] = false
-      p
+      super().merge(enable_reports: false)
     end
 
     it { is_expected.to have_pe_ini_setting_resource_count(0) }
@@ -72,9 +77,7 @@ describe 'splunk_hec' do
 
   context 'enable_reports is true' do
     let(:params) do
-      p = super()
-      p['enable_reports'] = true
-      p
+      super().merge(enable_reports: true)
     end
 
     context "sets 'reports' setting to 'puppetdb,splunk_hec' (default behavior)" do
@@ -96,13 +99,23 @@ describe 'splunk_hec' do
 
     context "automatically includes the 'splunk_hec' processor if $reports == ''" do
       let(:params) do
-        p = super()
-        p['reports'] = ''
-        p
+        super().merge(reports: '')
       end
 
       it { is_expected.to contain_pe_ini_subsetting('enable splunk_hec').with_subsetting('splunk_hec') }
       it { is_expected.to have_pe_ini_setting_resource_count(0) }
+    end
+
+    context 'handles $include_api_collection correctly' do
+      it { is_expected.to contain_cron('collectpeapi') }
+
+      context 'with api collection turned off' do
+        let(:params) do
+          super().merge(include_api_collection: false)
+        end
+
+        it { is_expected.to have_cron_resource_count(0) }
+      end
     end
   end
 end

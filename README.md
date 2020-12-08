@@ -7,10 +7,11 @@ puppet-splunk_hec
 2. [Requirements](#requirements)
 3. [Installation](#installation)
 4. [Tasks](#tasks)
-5. [Advanced Topics](#advanced-topics)
-6. [Known Issues](#known-issues)
-7. [Breaking Changes](#breaking-changes)
-8. [Release Process](#release-process)
+5. [Events](#events)
+6. [Advanced Topics](#advanced-topics)
+7. [Known Issues](#known-issues)
+8. [Breaking Changes](#breaking-changes)
+9. [Release Process](#release-process)
 
 ## Description
 -----------
@@ -62,6 +63,7 @@ When complete the hec token should look something like this\
         manage_routes = true
         token = something like F5129FC8-7272-442B-983C-203F013C1948
         url = something like https://splunk-8.splunk.internal:8088/services/collector
+        include_api_collection = true
         ```
     5. Hit save
     6. Run Puppet on the node group, this will cause a restart of the Puppet-Server service
@@ -155,7 +157,61 @@ String: If `include_resources_corrective_change` or `include_resources_status` i
 }
 ```
 
-Advanced Settings:
+Events
+-----------
+
+The splunk_hec module allows the posting of PE orchestrator and activity service events to splunk. 
+
+#### Prerequisites
+
+To utilize the API collection a user with the correct RBAC priviledges will
+need to be created. The User must have read access to the Orchestrator and Activity Service API's in Puppet Enterprise.
+
+#### Configuration
+
+The configuration required for the module to post to splunk is set in the following file
+
+```bash
+splunk_hec/conf/splunk_hec.yaml
+```
+
+All fields MUST be completed for the collector to function.
+
+```yaml
+---
+pe:
+  console: your-puppet-enterprise-console.com
+  username: admin
+  password: astrongpassword
+splunk:
+  server: your-valid-splunk-server.com
+  port: '8088'
+  token: abcd1234
+```
+
+#### Installation
+
+1. Ensure you have completed (GH: Gregs step to create the new source types)
+2. Update the configuration file
+3. Run puppet agent -t
+
+The events now will be collected and posted to your Splunk Server. These events will appear in the Splunk UI.
+
+There are two source types
+
+```bash
+puppet:events_summary
+puppet:activity
+```
+
+#### Viewing the events
+
+Use `source="puppet:events_summary"` in your Splunk search field to show the orchestrator events.
+
+Use `source="puppet:activity"` in your Splunk search field to show the activity service events.
+
+
+Advanced Settings
 -----------
 
 The splunk_hec module also supports customizing the `fact_terminus` and `facts_cache_terminus` names in the custom routes.yaml it deploys. If you are using a different facts_terminus (ie, not PuppetDB), you will want to set that parameter.
