@@ -43,7 +43,8 @@ puppet_version = ENV['PUPPET_GEM_VERSION']
 facter_version = ENV['FACTER_GEM_VERSION']
 hiera_version = ENV['HIERA_GEM_VERSION']
 
-gem 'common_events_library', git: 'https://github.com/puppetlabs/puppetlabs-common_events.git', branch: "main"
+gem 'common_events_library', source: 'https://artifactory.delivery.puppetlabs.net/artifactory/api/gems/rubygems__local/'
+
 gems = {}
 
 gems['puppet'] = location_for(puppet_version)
