@@ -164,6 +164,7 @@ namespace :acceptance do
 
   desc 'Runs the tests'
   task :run_tests do
+    # master.bolt_run_script('NUM_TASKS=10 spec/support/acceptance/post_tasks.sh')
     rspec_command  = 'bundle exec rspec ./spec/acceptance --format documentation'
     rspec_command += ' --format RspecJunitFormatter --out rspec_junit_results.xml' if ENV['CI'] == 'true'
     puts("Running the tests ...\n")

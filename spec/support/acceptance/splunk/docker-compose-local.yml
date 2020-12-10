@@ -2,7 +2,7 @@ version: "2.0"
 
 services:
   enterprise:
-    image: artifactory.delivery.puppetlabs.net:5000/splunk/splunk:latest
+    image: splunk/splunk:latest
     hostname: splunk_instance
     environment:
       - SPLUNK_START_ARGS=--accept-license
@@ -12,8 +12,8 @@ services:
       # like github for testing.
       - SPLUNK_APPS_URL=https://splunkbase.splunk.com/app/4413/release/3.0.1/download
       # TODO: Make a PIE account
-      - SPLUNKBASE_USERNAME=gregsparkspie
-      - SPLUNKBASE_PASSWORD=5736kKtVRkgFBs4@
+      - SPLUNKBASE_USERNAME=gregsparks
+      - SPLUNKBASE_PASSWORD=2Riboflavin!
       - SPLUNK_PASSWORD=piepiepie
     volumes:
       # default.yml is a mechanism to load splunk settings that would normally
@@ -24,4 +24,4 @@ services:
       - "0.0.0.0:8000:8000"
       # 8088 is the hec endpoint
       - "0.0.0.0:8088:8088"
-      - "0.0.0.0:8089:8089"
+      - "0.0.0.0:4433:4433"

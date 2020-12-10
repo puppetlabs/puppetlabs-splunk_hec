@@ -112,5 +112,6 @@ describe 'splunk_hec' do
         it { is_expected.to have_cron_resource_count(0) }
       end
     end
+  
   end
 end
