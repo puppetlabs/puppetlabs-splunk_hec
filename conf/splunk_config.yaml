@@ -1,6 +1,6 @@
 ---
 pe:
-  console: marine-gingham.delivery.puppetlabs.net
+  console: main-conformist.delivery.puppetlabs.net
   username: admin
   password: pie
 splunk:
