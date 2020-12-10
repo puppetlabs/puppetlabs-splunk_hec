@@ -43,7 +43,7 @@ def get_index(filepath)
 end
 
 def process_response(body, total, settings, index_file, source_type, splunk_client)
-  return false if total.zero? || total.nil?
+  return false if total.nil? || total.zero?
 
   events_json = transform(body, settings['pe']['console'], source_type)
   store_index(body.empty? ? 0 : total, index_file)
@@ -74,12 +74,14 @@ raise "Failed to get the jobs from PE [#{response.error!}]" unless response.code
 body = JSON.parse(response.body)
 
 puts body['pagination']
+
 result = process_response(body['items'], body['pagination']['total'], settings, API_EVENTS_STORE, 'puppet:summary', splunk_client)
 puts 'There were no orchestrator events to send to splunk' unless result
 puts 'Orchestrator events sent to splunk' if result
 
 # source and process the activity service events
 previous_index = get_index(API_ACTIVITY_STORE)
+
 response = events.get_all_events(offset: previous_index)
 raise "Failed to get the activity API events from PE [#{response.error!}]" unless response.code == '200'
 body = JSON.parse(response.body)
