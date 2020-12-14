@@ -75,7 +75,7 @@ body = JSON.parse(response.body)
 
 puts body['pagination']
 
-result = process_response(body['items'], body['pagination']['total'], settings, API_EVENTS_STORE, 'puppet:summary', splunk_client)
+result = process_response(body['items'], body['pagination']['total'], settings, API_EVENTS_STORE, 'puppet:events_summary', splunk_client)
 puts 'There were no orchestrator events to send to splunk' unless result
 puts 'Orchestrator events sent to splunk' if result
 
@@ -86,6 +86,6 @@ response = events.get_all_events(offset: previous_index)
 raise "Failed to get the activity API events from PE [#{response.error!}]" unless response.code == '200'
 body = JSON.parse(response.body)
 puts body['total-rows']
-result = process_response(body['commits'], body['total-rows'], settings, API_ACTIVITY_STORE, 'puppet:summary', splunk_client)
+result = process_response(body['commits'], body['total-rows'], settings, API_ACTIVITY_STORE, 'puppet:activity', splunk_client)
 puts 'There were no activity service events to send to splunk' unless result
 puts 'Activity events sent to splunk' if result
