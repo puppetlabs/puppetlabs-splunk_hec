@@ -44,7 +44,7 @@ Instructions assume you are using Puppet Enterprise. For Open Source Puppet inst
     1. Navigate to `Settings` > `Data Input` in your Splunk console
     2. Add a new `HTTP Event Collector` with a name of your choice
     3. Ensure `indexer acknowledgement` is not enabled
-    4. Click Next and Select the `puppet:summary` sourcetype located under the Puppet Data category
+    4. Click Next and set the source type to Automatic.
     5. Ensure the `App Context` is set to `Puppet Report Viewer`
     6. Add the `main` index
     7. Set the Default Index to `main`
