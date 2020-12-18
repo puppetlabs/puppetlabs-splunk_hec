@@ -80,9 +80,10 @@ describe 'splunk_hec' do
       super().merge(enable_reports: true)
     end
 
-    context "sets 'reports' setting to 'puppetdb,splunk_hec' (default behavior)" do
-      it { is_expected.to contain_pe_ini_setting('enable splunk_hec').with_value('puppetdb,splunk_hec') }
-      it { is_expected.to have_pe_ini_subsetting_resource_count(0) }
+    context "sets 'reports' setting to 'splunk_hec' (default behavior)" do
+      it { is_expected.to contain_pe_ini_subsetting('enable splunk_hec').with_subsetting('splunk_hec') }
+      it { is_expected.to have_pe_ini_setting_resource_count(0) }
+      it { is_expected.to have_pe_ini_subsetting_resource_count(1) }
     end
 
     context "set 'reports' setting to $reports if $reports != ''" do
@@ -95,15 +96,6 @@ describe 'splunk_hec' do
       it { is_expected.to contain_notify('reports param deprecation warning') }
       it { is_expected.to contain_pe_ini_setting('enable splunk_hec').with_value('foo,bar,baz') }
       it { is_expected.to have_pe_ini_subsetting_resource_count(0) }
-    end
-
-    context "automatically includes the 'splunk_hec' processor if $reports == ''" do
-      let(:params) do
-        super().merge(reports: '')
-      end
-
-      it { is_expected.to contain_pe_ini_subsetting('enable splunk_hec').with_subsetting('splunk_hec') }
-      it { is_expected.to have_pe_ini_setting_resource_count(0) }
     end
 
     context 'handles $include_api_collection correctly' do

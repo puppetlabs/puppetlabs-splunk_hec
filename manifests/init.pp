@@ -10,9 +10,9 @@ class splunk_hec (
   Boolean $enable_reports = false,
   Boolean $record_event = false,
   Boolean $manage_routes = false,
-  String $reports = "puppetdb,splunk_hec",
   String $facts_terminus = "puppetdb",
   String $facts_cache_terminus = "splunk_hec",
+  Optional[String] $reports = undef,
   Optional[String] $pe_console = undef,
   Optional[Integer] $timeout = undef,
   Optional[String] $ssl_ca = undef,
@@ -58,7 +58,7 @@ class splunk_hec (
   }
 
   if $enable_reports {
-    if $reports != '' {
+    if $reports != undef  {
       notify { "reports param deprecation warning" :
         message  => "The 'reports' parameter is being deprecated in favor of having the module automatically add the 'splunk_hec' setting \
         to puppet.conf. You can enable this behavior by setting 'reports' to '', the empty string, but please keep in mind that the \
