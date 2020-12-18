@@ -12,8 +12,8 @@ services:
       # like github for testing.
       - SPLUNK_APPS_URL=https://splunkbase.splunk.com/app/4413/release/3.0.1/download
       # TODO: Make a PIE account
-      - SPLUNKBASE_USERNAME=gregsparks
-      - SPLUNKBASE_PASSWORD=2Riboflavin!
+      - SPLUNKBASE_USERNAME=gregsparkspie
+      - SPLUNKBASE_PASSWORD=5736kKtVRkgFBs4@
       - SPLUNK_PASSWORD=piepiepie
     volumes:
       # default.yml is a mechanism to load splunk settings that would normally
