@@ -51,9 +51,17 @@ class splunk_hec (
   if $include_api_collection {
     cron { 'collectpeapi':
       ensure  => 'present',
-      command => '/etc/puppetlabs/code/environments/production/modules/splunk_hec/scripts/collect_api_events.rb',
+      command => "${settings::confdir}/splunk_hec_collect_api_events.rb",
       user    => 'root',
       minute  => '*/2',
+      require => [File["${settings::confdir}/splunk_hec_collect_api_events.rb"]],
+    }
+    file { "${settings::confdir}/splunk_hec_collect_api_events.rb":
+      ensure => file,
+      owner  => $owner,
+      group  => $group,
+      mode   => '0755',
+      source => 'puppet:///modules/splunk_hec/splunk_hec_collect_api_events.rb',
     }
   }
 
