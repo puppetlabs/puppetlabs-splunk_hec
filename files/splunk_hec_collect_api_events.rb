@@ -1,12 +1,26 @@
 #!/opt/puppetlabs/puppet/bin/ruby
-
-require 'common_events_library'
 require 'fileutils'
 require 'benchmark'
 require 'json'
 require 'net/https'
 require 'time'
 require 'yaml'
+require 'find'
+
+modulepaths = `puppet config print modulepath`.chomp.split(':')
+
+catch :done do
+  modulepaths.each do |modulepath|
+    Find.find(modulepath) do |path|
+      if path =~ %r{common_events_library.gemspec}
+        $LOAD_PATH.unshift("#{File.dirname(path)}/lib")
+        throw :done
+      end
+    end
+  end
+end
+
+require 'common_events_library'
 
 STORE_DIR = ENV['STORE_DIR'] || '/etc/puppetlabs/splunk/'
 
