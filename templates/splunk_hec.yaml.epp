@@ -9,6 +9,12 @@
 <% if $splunk_hec::pe_console{ -%>
 "pe_console" : "<%= $splunk_hec::pe_console %>"
 <% } -%>
+<% if $splunk_hec::pe_username{ -%>
+"pe_username" : "<%= $splunk_hec::pe_username %>"
+<% } -%>
+<% if $splunk_hec::pe_password{ -%>
+"pe_password" : "<%= $splunk_hec::pe_password.unwrap %>"
+<% } -%>
 <% if $splunk_hec::timeout { -%>
 "timeout" : "<%= $splunk_hec::timeout %>"
 <% } -%>

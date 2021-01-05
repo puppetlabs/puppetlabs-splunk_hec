@@ -59,6 +59,9 @@ describe 'splunk_hec' do
     {
       url: 'foo_url',
       token: 'foo_token',
+      pe_username: 'user',
+      pe_password: RSpec::Puppet::Sensitive.new('password'),
+      pe_console: 'console',
     }
   end
 
