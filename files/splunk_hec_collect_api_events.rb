@@ -8,6 +8,7 @@ require 'yaml'
 require 'find'
 
 modulepaths = `puppet config print modulepath`.chomp.split(':')
+confdir = `puppet config print confdir`.chomp
 
 catch :done do
   modulepaths.each do |modulepath|
@@ -59,15 +60,15 @@ end
 def process_response(body, total, settings, index_file, source_type, splunk_client)
   return false if total.nil? || total.zero?
 
-  events_json = transform(body, settings['pe']['console'], source_type)
+  events_json = transform(body, settings['pe_console'], source_type)
   store_index(body.empty? ? 0 : total, index_file)
 
-  response = splunk_client.post_request('/services/collector', events_json, { Authorization: "Splunk #{settings['splunk']['token']}" }, use_raw_body: true)
+  response = splunk_client.post_request('/services/collector', events_json, { Authorization: "Splunk #{settings['token']}" }, use_raw_body: true)
   raise "Failed to POST to the splunk server [#{response.error!}]" unless response.code == '200'
   true
 end
 
-config_file = ENV['CONFIG_FILE'] || "#{File.expand_path(File.dirname(__FILE__))}/../conf/splunk_config.yaml"
+config_file = ENV['CONFIG_FILE'] || "#{confdir}/splunk_hec.yaml"
 
 # ensure the config directory is created.
 FileUtils.mkdir_p STORE_DIR
@@ -76,9 +77,11 @@ FileUtils.mkdir_p STORE_DIR
 settings = load_settings(config_file)
 
 # setup clients
-splunk_client = CommonEventsHttp.new('http://' + settings['splunk']['server'], port: settings['splunk']['port'], ssl_verify: false)
-orchestrator  = Orchestrator.new(settings['pe']['console'], settings['pe']['username'], settings['pe']['password'], ssl_verify: false)
-events        = Events.new(settings['pe']['console'], settings['pe']['username'], settings['pe']['password'], ssl_verify: false)
+splunk_uri = URI(settings['url'])
+
+splunk_client = CommonEventsHttp.new((splunk_uri.scheme + '://' + splunk_uri.host), port: 8088, ssl_verify: false)
+orchestrator  = Orchestrator.new(settings['pe_console'], settings['pe_username'], settings['pe_password'], ssl_verify: false)
+events        = Events.new(settings['pe_console'], settings['pe_username'], settings['pe_password'], ssl_verify: false)
 
 # source and process the orchestrator events
 previous_index = get_index(API_EVENTS_STORE)
@@ -99,7 +102,7 @@ previous_index = get_index(API_ACTIVITY_STORE)
 response = events.get_all_events(offset: previous_index)
 raise "Failed to get the activity API events from PE [#{response.error!}]" unless response.code == '200'
 body = JSON.parse(response.body)
-puts body['total-rows']
+puts body['total-rows'].to_s + ' Activity events.'
 result = process_response(body['commits'], body['total-rows'], settings, API_ACTIVITY_STORE, 'puppet:activity', splunk_client)
 puts 'There were no activity service events to send to splunk' unless result
 puts 'Activity events sent to splunk' if result
