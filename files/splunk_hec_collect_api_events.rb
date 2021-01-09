@@ -25,7 +25,7 @@ require 'common_events_library'
 
 STORE_DIR = ENV['STORE_DIR'] || '/etc/puppetlabs/splunk/'
 
-API_EVENTS_STORE = "#{STORE_DIR}/splunk-events-store".freeze
+API_JOBS_STORE = "#{STORE_DIR}/splunk-jobs-store".freeze
 API_ACTIVITY_STORE = "#{STORE_DIR}/splunk-activity-store".freeze
 
 def load_settings(configfile)
@@ -84,17 +84,21 @@ orchestrator  = Orchestrator.new(settings['pe_console'], settings['pe_username']
 events        = Events.new(settings['pe_console'], settings['pe_username'], settings['pe_password'], ssl_verify: false)
 
 # source and process the orchestrator events
-previous_index = get_index(API_EVENTS_STORE)
+previous_index = get_index(API_JOBS_STORE)
 
-response = orchestrator.get_all_jobs(offset: previous_index, limit: 1000)
-raise "Failed to get the jobs from PE [#{response.error!}]" unless response.code == '200'
+# Orchestrator offsets count down from the newest record vs counting up from the oldest.
+# This first request is to determine the total number of jobs that exist.
+response = orchestrator.get_all_jobs(offset: 0, limit: 1)
 body = JSON.parse(response.body)
+# New jobs is determined by subtracting total number of jobs from the jobs that already exist in Splunk.
+new_jobs = body['pagination']['total'] - previous_index
 
-puts body['pagination']
-
-result = process_response(body['items'], body['pagination']['total'], settings, API_EVENTS_STORE, 'puppet:events_summary', splunk_client)
-puts 'There were no orchestrator events to send to splunk' unless result
-puts 'Orchestrator events sent to splunk' if result
+puts "Sending #{new_jobs} Orchestrator job(s) to Splunk."
+if new_jobs > 0
+  jobs_response = orchestrator.get_all_jobs(offset: 0, limit: new_jobs)
+  jobs_data = JSON.parse(jobs_response.body)
+  process_response(jobs_data['items'], jobs_data['pagination']['total'], settings, API_JOBS_STORE, 'puppet:events_summary', splunk_client)
+end
 
 # source and process the activity service events
 previous_index = get_index(API_ACTIVITY_STORE)
