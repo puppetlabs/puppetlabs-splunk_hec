@@ -105,10 +105,17 @@ end
 # source and process the activity service events
 previous_index = get_index(API_ACTIVITY_STORE)
 
-response = events.get_all_events(offset: previous_index)
+# Events API does a similar thing where we have to get the latest available event
+# and then use the count of available events to figure out if there are more to send.
+response = events.get_all_events(offset: 0, limit: 0)
 raise "Failed to get the activity API events from PE [#{response.error!}]" unless response.code == '200'
 body = JSON.parse(response.body)
-puts body['total-rows'].to_s + ' Activity events.'
-result = process_response(body['commits'], body['total-rows'], settings, API_ACTIVITY_STORE, 'puppet:activity', splunk_client)
-puts 'There were no activity service events to send to splunk' unless result
-puts 'Activity events sent to splunk' if result
+new_events = body['total-rows'].to_i - previous_index
+puts "Sending #{new_events} events API events to splunk"
+
+if new_events > 0
+  puts "Sending #{new_events} events to Splunk"
+  response = events.get_all_events(offset: 0, limit: new_events)
+  body = JSON.parse(response.body)
+  process_response(body['commits'], body['total-rows'], settings, API_ACTIVITY_STORE, 'puppet:activity', splunk_client)
+end
