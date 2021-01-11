@@ -2,7 +2,7 @@ version: "2.0"
 
 services:
   enterprise:
-    image: splunk/splunk:latest
+    image: artifactory.delivery.puppetlabs.net:5000/splunk/splunk:latest
     hostname: splunk_instance
     environment:
       - SPLUNK_START_ARGS=--accept-license

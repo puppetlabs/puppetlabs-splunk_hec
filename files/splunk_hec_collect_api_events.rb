@@ -7,6 +7,8 @@ require 'time'
 require 'yaml'
 require 'find'
 
+ENV['PATH'] = "#{ENV['PATH']}:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"
+
 modulepaths = `puppet config print modulepath`.chomp.split(':')
 confdir = `puppet config print confdir`.chomp
 
