@@ -20,9 +20,17 @@ This is a report processor & fact terminus for Puppet to submit data to Splunk's
 
 It is possible to only include data in reports based on specific conditions (Puppet Agent Run failure, compilation failure, change, etc.) See Customized-Reporting in the [Advanced Topics](#advanced-topics) section for details on using that.
 
-Enabling this module is as simple as classifying your Puppet Servers with spluk_hec and setting the Splunk HEC URL along with the token provided by Splunk. This module sends data to Splunk by modifying your report processor settings and indirector routes.yaml.
+To enable this module:
+  - Classify your Puppet Servers with the splunk_hec class
+  - Set the `url` parameter which refers to your Splunk url along with the token provided by Splunk
+  - Set the `token` parameter which will be the HEC token you create in Splunk.
+  - Set the `enable_reports` to true
 
-There are two Tasks included in this module, `splunk_hec:bolt_apply` and `splunk_hec:bolt_result`, that provide similar data for Bolt Plans to submit data to Splunk. Example plans are included which demonstrate task usage.
+This module sends data to Splunk by modifying your report processor settings and indirector routes.yaml.
+
+To send Orchestrator jobs and Event activity to Splunk, follow the instructions in the [Events](#events) Section.
+
+There are two Tasks included in this module, `splunk_hec:bolt_apply` and `splunk_hec:bolt_result`, that provide a pre-packaged way to compose Bolt Plans that submit data to Splunk every time they are run. Example plans are included which demonstrate task usage.
 
 ## Requirements
 ------------
@@ -160,40 +168,34 @@ String: If `include_resources_corrective_change` or `include_resources_status` i
 Events
 -----------
 
-The splunk_hec module allows the posting of PE orchestrator and activity service events to splunk. 
+The splunk_hec module allows the posting of PE orchestrator and activity service events to splunk.
 
 #### Prerequisites
 
-To utilize the API collection a user with the correct RBAC priviledges will
-need to be created. The User must have read access to the Orchestrator and Activity Service API's in Puppet Enterprise.
+- To utilize the API collector, a user with the correct RBAC priviledges will
+  need to be created. The User must have read access to the Orchestrator and Activity Service API's in Puppet Enterprise.
+- The common events module will need to be installed. The instructions are below.
 
 #### Configuration
 
-The configuration required for the module to post to splunk is set in the following file
-
-```bash
-splunk_hec/conf/splunk_hec.yaml
-```
-
-All fields MUST be completed for the collector to function.
-
-```yaml
----
-pe:
-  console: your-puppet-enterprise-console.com
-  username: admin
-  password: astrongpassword
-splunk:
-  server: your-valid-splunk-server.com
-  port: '8088'
-  token: abcd1234
-```
+1. From your PE console, set the `include_api_collection` parameter in the splunk_hec class to true.
+2. Set the `pe_console` parameter to the url of the pe console you want to use.
+3. Set the `pe_username` parameter to a pe user with read access to the Orchestrator and Activity Service API's in Puppet Enterprise.
+4. Set the `pe_password` parameter to the password for the user above.
 
 #### Installation
 
-1. Ensure you have completed (GH: Gregs step to create the new source types)
-2. Update the configuration file
-3. Run puppet agent -t
+1. Ensure you have the latest version of the Puppet Report Viewer installed (Version 3.0.2 or higher) in your Splunk installation.
+   - Here is the link: https://splunkbase.splunk.com/app/4413/
+   - This will ensure that you have the needed source types to apply to your data in Splunk.
+2. Configure the Splunk_hec class as described above.
+3. Install the Common Events module.
+   - Specify this module in your Puppetfile.
+      ```
+      mod 'common_events',
+          :git => 'https://github.com/puppetlabs/puppetlabs-common_events'
+      ```
+4. Run `puppet agent -t`
 
 The events now will be collected and posted to your Splunk Server. These events will appear in the Splunk UI.
 
@@ -216,14 +218,14 @@ Advanced Settings
 
 The splunk_hec module also supports customizing the `fact_terminus` and `facts_cache_terminus` names in the custom routes.yaml it deploys. If you are using a different facts_terminus (ie, not PuppetDB), you will want to set that parameter.
 
-If you are already using a custom routes.yaml, these are the equivalent instructions of what the splunk_hec module does, the most important setting is configuring `cache: splunk_hec`
+If you are already using a custom routes.yaml, these are the equivalent instructions of what the splunk_hec module does. The most important setting is configuring `cache: splunk_hec`
 - Create a custom splunk_routes.yaml file to override where facts are cached
-```yaml
-master:
-  facts:
-    terminus: puppetdb
-    cache: splunk_hec
-```
+  ```yaml
+  master:
+    facts:
+      terminus: puppetdb
+      cache: splunk_hec
+  ```
 - Set this routes file instead of the default one with `puppet config set route_file /etc/puppetlabs/puppet/splunk_routes.yaml --section master`
 
 
@@ -234,7 +236,7 @@ Two tasks are provided for submitting data from a Bolt plan to Splunk. For clari
 
 `splunk_hec::bolt_apply`: A task that uses the remote task option to submit a Bolt Apply report in a similar format to the puppet:summary. Unlike the summary, this includes the facts from a target because those are available to bolt at execution time and added to the report data before submission to Splunk.
 
-`splunk_hec::bolt_result`: A task that sends the result of a function to Splunk. Since the format is freeform and dependent on the individual function/tasks being called, formatting of the data is best done in the plan itself prior to submitting the result hash to the task. 
+`splunk_hec::bolt_result`: A task that sends the result of a function to Splunk. Since the format is freeform and dependent on the individual function/tasks being called, formatting of the data is best done in the plan itself prior to submitting the result hash to the task.
 
 To setup, add the splunk_hec endpoint as a remote target in `inventory.yml`:
 
