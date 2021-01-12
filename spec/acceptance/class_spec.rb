@@ -10,7 +10,16 @@ describe 'Verify the minimum install' do
       hasrestart => true,
       restart    => "service pe-puppetserver reload",
     }
-    class { 'splunk_hec': url => "http://localhost:8088/services/collector/event", token => 'abcd1234', record_event => true }
+
+    class { 'splunk_hec':
+      url                    => 'http://localhost:8088/services/collector/event',
+      token                  => 'abcd1234',
+      record_event           => true,
+      pe_username            => 'admin',
+      pe_console             => 'localhost',
+      pe_password            => Sensitive('pie'),
+      include_api_collection => true,
+    }
     MANIFEST
 
     it 'Sets up the pe-puppetserver service and splunk_hec class' do
@@ -34,7 +43,15 @@ describe 'Verify the minimum install' do
           hasrestart => true,
           restart    => "service pe-puppetserver reload",
         }
-        class { 'splunk_hec': url => 'notanendpoint/nicetry', token => '', record_event => true }
+        class { 'splunk_hec':
+          url                    => 'notanendpoint/nicetry',
+          token                  => '',
+          record_event           => true,
+          pe_username            => 'admin',
+          pe_console             => 'localhost',
+          pe_password            => Sensitive('pie'),
+          include_api_collection => true,
+        }
         MANIFEST
       apply_manifest(failmanifest, catch_failures: true)
       cmd = 'cat /etc/puppetlabs/code/environments/production/modules/splunk_hec/examples/foo.json | puppet splunk_hec --sourcetype puppet:summary --saved_report'
