@@ -102,7 +102,7 @@ describe 'splunk_hec' do
     end
 
     context 'handles $include_api_collection correctly' do
-      it { is_expected.to contain_cron('collectpeapi') }
+      it { is_expected.to have_cron_resource_count(0) }
 
       context 'with api collection turned off' do
         let(:params) do
