@@ -7,8 +7,6 @@ require 'time'
 require 'yaml'
 require 'find'
 
-ENV['PATH'] = "#{ENV['PATH']}:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"
-
 modulepaths = `puppet config print modulepath`.chomp.split(':')
 confdir = `puppet config print confdir`.chomp
 
@@ -92,8 +90,9 @@ previous_index = get_index(API_JOBS_STORE)
 # This first request is to determine the total number of jobs that exist.
 response = orchestrator.get_all_jobs(offset: 0, limit: 1)
 body = JSON.parse(response.body)
+
 # New jobs is determined by subtracting total number of jobs from the jobs that already exist in Splunk.
-new_jobs = body['pagination']['total'] - previous_index
+new_jobs = (body['total-rows'] || 0) - previous_index
 
 puts "Sending #{new_jobs} Orchestrator job(s) to Splunk."
 if new_jobs > 0
@@ -103,19 +102,27 @@ if new_jobs > 0
 end
 
 # source and process the activity service events
-previous_index = get_index(API_ACTIVITY_STORE)
+services = ['classifier', 'rbac'] # 'pe-console', 'code-manager']
 
-# Events API does a similar thing where we have to get the latest available event
-# and then use the count of available events to figure out if there are more to send.
-response = events.get_all_events(offset: 0, limit: 0)
-raise "Failed to get the activity API events from PE [#{response.error!}]" unless response.code == '200'
-body = JSON.parse(response.body)
-new_events = body['total-rows'].to_i - previous_index
-puts "Sending #{new_events} events API events to splunk"
+services.each do |service|
+  store_file = "#{API_ACTIVITY_STORE}-#{service}"
+  previous_index = get_index(store_file)
 
-if new_events > 0
-  puts "Sending #{new_events} events to Splunk"
-  response = events.get_all_events(offset: 0, limit: new_events)
+  # determine the event list size from an initial read
+  response = events.get_all_events(service: service, limit: 1)
+  raise "Failed to get the activity API events from PE [#{response.error!}]" unless response.code == '200'
   body = JSON.parse(response.body)
-  process_response(body['commits'], body['total-rows'], settings, API_ACTIVITY_STORE, 'puppet:activity', splunk_client)
+
+  # determine the event new_jobs amount
+  new_jobs = (body['total-rows'] || 0) - previous_index
+  puts "Sending #{new_jobs} #{service} events(s) to Splunk."
+
+  next unless new_jobs > 0
+
+  # get the events using the limit
+  response = events.get_all_events(service: service, limit: new_jobs)
+  body = JSON.parse(response.body)
+  result = process_response(body['commits'], body['total-rows'], settings, store_file, 'puppet:activity', splunk_client)
+  puts "There were no activity service #{service} events to send to splunk" unless result
+  puts "Activity events for #{service} sent to splunk" if result
 end
