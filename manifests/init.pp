@@ -14,7 +14,7 @@ class splunk_hec (
   String $facts_cache_terminus = "splunk_hec",
   Optional[String] $pe_username = undef,
   Optional[Sensitive[String]] $pe_password = undef,
-  Optional[String] $pe_console = undef,
+  Optional[String] $pe_console = $settings::report_server,
   Optional[String] $reports = undef,
   Optional[Integer] $timeout = undef,
   Optional[String] $ssl_ca = undef,
