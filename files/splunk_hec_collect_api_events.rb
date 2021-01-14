@@ -94,7 +94,7 @@ response = orchestrator.get_all_jobs(offset: 0, limit: 1)
 body = JSON.parse(response.body)
 
 # New jobs is determined by subtracting total number of jobs from the jobs that already exist in Splunk.
-new_jobs = (body['total-rows'] || 0) - previous_index
+new_jobs = (body['pagination']['total'] || 0) - previous_index
 
 puts "Sending #{new_jobs} Orchestrator job(s) to Splunk."
 if new_jobs > 0
