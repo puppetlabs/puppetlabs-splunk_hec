@@ -81,26 +81,24 @@ settings = load_settings(config_file)
 # setup clients
 splunk_uri = URI(settings['url'])
 
-splunk_client = CommonEventsHttp.new((splunk_uri.scheme + '://' + splunk_uri.host), port: 8088, ssl_verify: false)
-orchestrator  = Orchestrator.new(settings['pe_console'], settings['pe_username'], settings['pe_password'], ssl_verify: false)
-events        = Events.new(settings['pe_console'], settings['pe_username'], settings['pe_password'], ssl_verify: false)
+splunk_client        = CommonEventsHttp.new((splunk_uri.scheme + '://' + splunk_uri.host), port: 8088, ssl_verify: false)
+orchestrator_client  = Orchestrator.new(settings['pe_console'], settings['pe_username'], settings['pe_password'], ssl_verify: false)
+events_client        = Events.new(settings['pe_console'], settings['pe_username'], settings['pe_password'], ssl_verify: false)
 
 # source and process the orchestrator events
 previous_index = get_index(API_JOBS_STORE)
 
 # Orchestrator offsets count down from the newest record vs counting up from the oldest.
 # This first request is to determine the total number of jobs that exist.
-response = orchestrator.get_all_jobs(offset: 0, limit: 1)
-body = JSON.parse(response.body)
+jobs = orchestrator_client.get_jobs(limit: 1)
 
 # New jobs is determined by subtracting total number of jobs from the jobs that already exist in Splunk.
-new_jobs = (body['pagination']['total'] || 0) - previous_index
+new_jobs = jobs.total - previous_index
 
 puts "Sending #{new_jobs} Orchestrator job(s) to Splunk."
 if new_jobs > 0
-  jobs_response = orchestrator.get_all_jobs(offset: 0, limit: new_jobs)
-  jobs_data = JSON.parse(jobs_response.body)
-  process_response(jobs_data['items'], jobs_data['pagination']['total'], settings, API_JOBS_STORE, 'puppet:events_summary', splunk_client)
+  jobs = orchestrator_client.get_jobs(limit: new_jobs)
+  process_response(jobs.items, jobs.total, settings, API_JOBS_STORE, 'puppet:events_summary', splunk_client)
 end
 
 # source and process the activity service events
@@ -111,20 +109,17 @@ services.each do |service|
   previous_index = get_index(store_file)
 
   # determine the event list size from an initial read
-  response = events.get_all_events(service: service, limit: 1)
-  raise "Failed to get the activity API events from PE [#{response.error!}]" unless response.code == '200'
-  body = JSON.parse(response.body)
+  events = events_client.get_events(service: service, limit: 1)
 
   # determine the event new_jobs amount
-  new_jobs = (body['total-rows'] || 0) - previous_index
+  new_jobs = events.total - previous_index
   puts "Sending #{new_jobs} #{service} events(s) to Splunk."
 
   next unless new_jobs > 0
 
   # get the events using the limit
-  response = events.get_all_events(service: service, limit: new_jobs)
-  body = JSON.parse(response.body)
-  result = process_response(body['commits'], body['total-rows'], settings, store_file, 'puppet:activity', splunk_client)
+  events = events_client.get_events(service: service, limit: new_jobs)
+  result = process_response(events.items, events.total, settings, store_file, 'puppet:activity', splunk_client)
   puts "There were no activity service #{service} events to send to splunk" unless result
   puts "Activity events for #{service} sent to splunk" if result
 end
