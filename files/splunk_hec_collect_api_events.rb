@@ -89,8 +89,8 @@ def main
   splunk_uri = URI(settings['url'])
 
   splunk_client        = CommonEventsHttp.new((splunk_uri.scheme + '://' + splunk_uri.host), port: 8088, ssl_verify: false)
-  orchestrator_client  = Orchestrator.new(settings['pe_console'], settings['pe_username'], settings['pe_password'], ssl_verify: false)
-  events_client        = Events.new(settings['pe_console'], settings['pe_username'], settings['pe_password'], ssl_verify: false)
+  orchestrator_client  = Orchestrator.new(settings['pe_console'], username: settings['pe_username'], password: settings['pe_password'], token: settings['pe_token'], ssl_verify: false)
+  events_client        = Events.new(settings['pe_console'], username: settings['pe_username'], password: settings['pe_password'], token: settings['pe_token'], ssl_verify: false)
 
   # source and process the orchestrator events
   previous_index = get_index(API_JOBS_STORE)
