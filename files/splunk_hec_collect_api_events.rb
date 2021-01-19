@@ -7,24 +7,6 @@ require 'time'
 require 'yaml'
 require 'find'
 
-ENV['PATH'] = "#{ENV['PATH']}:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"
-
-modulepaths = `puppet config print modulepath`.chomp.split(':')
-confdir = `puppet config print confdir`.chomp
-
-catch :done do
-  modulepaths.each do |modulepath|
-    Find.find(modulepath) do |path|
-      if path =~ %r{common_events_library.gemspec}
-        $LOAD_PATH.unshift("#{File.dirname(path)}/lib")
-        throw :done
-      end
-    end
-  end
-end
-
-require 'common_events_library'
-
 STORE_DIR = ENV['STORE_DIR'] || '/etc/puppetlabs/splunk/'
 
 API_JOBS_STORE = "#{STORE_DIR}/splunk-jobs-store".freeze
@@ -35,12 +17,18 @@ def load_settings(configfile)
   open(configfile) { |f| YAML.safe_load(f) }
 end
 
+def hostname_without_protocol(pe_console)
+  pe_console_uri = URI.parse(pe_console)
+  # If the hostname parameter is an IP address, use the path instead of the hostname
+  pe_console_uri.hostname || pe_console_uri.path
+end
+
 def transform(body, pe_console, source_type)
   events = ''
   body.each do |pe_event|
     timestamp = Time.new
     event = {
-      'host' => pe_console,
+      'host' => hostname_without_protocol(pe_console),
       'time' => timestamp.to_i,
       'sourcetype' => source_type,
       'event' => pe_event,
@@ -70,56 +58,80 @@ def process_response(body, total, settings, index_file, source_type, splunk_clie
   true
 end
 
-config_file = ENV['CONFIG_FILE'] || "#{confdir}/splunk_hec.yaml"
+def main
+  ENV['PATH'] = "#{ENV['PATH']}:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"
 
-# ensure the config directory is created.
-FileUtils.mkdir_p STORE_DIR
+  modulepaths = `puppet config print modulepath`.chomp.split(':')
+  confdir = `puppet config print confdir`.chomp
 
-# load our settings from the config file.
-settings = load_settings(config_file)
+  catch :done do
+    modulepaths.each do |modulepath|
+      Find.find(modulepath) do |path|
+        if path =~ %r{common_events_library.gemspec}
+          $LOAD_PATH.unshift("#{File.dirname(path)}/lib")
+          throw :done
+        end
+      end
+    end
+  end
 
-# setup clients
-splunk_uri = URI(settings['url'])
+  require 'common_events_library'
 
-splunk_client        = CommonEventsHttp.new((splunk_uri.scheme + '://' + splunk_uri.host), port: 8088, ssl_verify: false)
-orchestrator_client  = Orchestrator.new(settings['pe_console'], settings['pe_username'], settings['pe_password'], ssl_verify: false)
-events_client        = Events.new(settings['pe_console'], settings['pe_username'], settings['pe_password'], ssl_verify: false)
+  config_file = ENV['CONFIG_FILE'] || "#{confdir}/splunk_hec.yaml"
 
-# source and process the orchestrator events
-previous_index = get_index(API_JOBS_STORE)
+  # ensure the config directory is created.
+  FileUtils.mkdir_p STORE_DIR
 
-# Orchestrator offsets count down from the newest record vs counting up from the oldest.
-# This first request is to determine the total number of jobs that exist.
-jobs = orchestrator_client.get_jobs(limit: 1)
+  # load our settings from the config file.
+  settings = load_settings(config_file)
 
-# New jobs is determined by subtracting total number of jobs from the jobs that already exist in Splunk.
-new_jobs = jobs.total - previous_index
+  # setup clients
+  splunk_uri = URI(settings['url'])
 
-puts "Sending #{new_jobs} Orchestrator job(s) to Splunk."
-if new_jobs > 0
-  jobs = orchestrator_client.get_jobs(limit: new_jobs)
-  process_response(jobs.items, jobs.total, settings, API_JOBS_STORE, 'puppet:events_summary', splunk_client)
+  splunk_client        = CommonEventsHttp.new((splunk_uri.scheme + '://' + splunk_uri.host), port: 8088, ssl_verify: false)
+  orchestrator_client  = Orchestrator.new(settings['pe_console'], settings['pe_username'], settings['pe_password'], ssl_verify: false)
+  events_client        = Events.new(settings['pe_console'], settings['pe_username'], settings['pe_password'], ssl_verify: false)
+
+  # source and process the orchestrator events
+  previous_index = get_index(API_JOBS_STORE)
+
+  # Orchestrator offsets count down from the newest record vs counting up from the oldest.
+  # This first request is to determine the total number of jobs that exist.
+  jobs = orchestrator_client.get_jobs(limit: 1)
+
+  # New jobs is determined by subtracting total number of jobs from the jobs that already exist in Splunk.
+  new_jobs = jobs.total - previous_index
+
+  puts "Sending #{new_jobs} Orchestrator job(s) to Splunk."
+  if new_jobs > 0
+    jobs = orchestrator_client.get_jobs(limit: new_jobs)
+    process_response(jobs.items, jobs.total, settings, API_JOBS_STORE, 'puppet:events_summary', splunk_client)
+  end
+
+  # source and process the activity service events
+  services = ['classifier', 'rbac'] # 'pe-console', 'code-manager']
+
+  services.each do |service|
+    store_file = "#{API_ACTIVITY_STORE}-#{service}"
+    previous_index = get_index(store_file)
+
+    # determine the event list size from an initial read
+    events = events_client.get_events(service: service, limit: 1)
+
+    # determine the event new_jobs amount
+    new_jobs = events.total - previous_index
+    puts "Sending #{new_jobs} #{service} events(s) to Splunk."
+
+    next unless new_jobs > 0
+
+    # get the events using the limit
+    events = events_client.get_events(service: service, limit: new_jobs)
+    result = process_response(events.items, events.total, settings, store_file, 'puppet:activity', splunk_client)
+    puts "There were no activity service #{service} events to send to splunk" unless result
+    puts "Activity events for #{service} sent to splunk" if result
+  end
 end
 
-# source and process the activity service events
-services = ['classifier', 'rbac'] # 'pe-console', 'code-manager']
-
-services.each do |service|
-  store_file = "#{API_ACTIVITY_STORE}-#{service}"
-  previous_index = get_index(store_file)
-
-  # determine the event list size from an initial read
-  events = events_client.get_events(service: service, limit: 1)
-
-  # determine the event new_jobs amount
-  new_jobs = events.total - previous_index
-  puts "Sending #{new_jobs} #{service} events(s) to Splunk."
-
-  next unless new_jobs > 0
-
-  # get the events using the limit
-  events = events_client.get_events(service: service, limit: new_jobs)
-  result = process_response(events.items, events.total, settings, store_file, 'puppet:activity', splunk_client)
-  puts "There were no activity service #{service} events to send to splunk" unless result
-  puts "Activity events for #{service} sent to splunk" if result
+if $PROGRAM_NAME == __FILE__
+  main
 end
