@@ -179,9 +179,13 @@ The splunk_hec module allows the posting of PE orchestrator and activity service
 #### Configuration
 
 1. From your PE console, set the `include_api_collection` parameter in the splunk_hec class to true.
-2. Set the `pe_username` parameter to a pe user with read access to the Orchestrator and Activity Service API's in Puppet Enterprise.
-3. Set the `pe_password` parameter to the password for the user above.
-4. Optionally set the `pe_console` parameter if not the server this module is installed on.
+2. Set up api authentication.
+  1. Username / Password Auth.
+    - Set the `pe_username` parameter to a pe user with read access to the Orchestrator and Activity Service API's in Puppet Enterprise.
+    - Set the `pe_password` parameter to the password for the user above.
+  2. Token Auth.
+    - Set the `pe_token` parameter for a user with read access to the Orchestrator and Activity Service API's in Puppet Enterprise.
+3. Optionally set the `pe_console` parameter if not the server this module is installed on.
     - Should be the fqdn of the Puppet server you wish to use. Omit the http protocol.
 
 #### Installation

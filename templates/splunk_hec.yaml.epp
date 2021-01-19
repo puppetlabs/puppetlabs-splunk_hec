@@ -15,6 +15,9 @@
 <% if $splunk_hec::pe_password{ -%>
 "pe_password" : "<%= $splunk_hec::pe_password.unwrap %>"
 <% } -%>
+<% if $splunk_hec::pe_token{ -%>
+"pe_token" : "<%= $splunk_hec::pe_token.unwrap %>"
+<% } -%>
 <% if $splunk_hec::timeout { -%>
 "timeout" : "<%= $splunk_hec::timeout %>"
 <% } -%>
