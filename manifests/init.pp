@@ -54,9 +54,14 @@ class splunk_hec (
     if ($pe_username == undef) or ($pe_password == undef) or ($pe_console == undef) {
       fail('pe_username, pe_password, and pe_console must all be set to use the api_collection feature.')
     }
+
     cron { 'collectpeapi':
       ensure  => 'present',
-      command => "${settings::confdir}/splunk_hec_collect_api_events.rb",
+      command => @("COMMAND"/L),
+        ${settings::confdir}/splunk_hec_collect_api_events.rb \
+        ${settings::confdir} \
+        ${settings::modulepath}
+        |-COMMAND
       user    => 'root',
       minute  => '*/2',
       require => [File["${settings::confdir}/splunk_hec_collect_api_events.rb"]],

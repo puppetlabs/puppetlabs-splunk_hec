@@ -58,14 +58,11 @@ def process_response(body, total, settings, index_file, source_type, splunk_clie
   true
 end
 
-def main
+def main(confdir, modulepaths)
   ENV['PATH'] = "#{ENV['PATH']}:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"
 
-  modulepaths = `puppet config print modulepath`.chomp.split(':')
-  confdir = `puppet config print confdir`.chomp
-
   catch :done do
-    modulepaths.each do |modulepath|
+    modulepaths.split(':').each do |modulepath|
       Find.find(modulepath) do |path|
         if path =~ %r{common_events_library.gemspec}
           $LOAD_PATH.unshift("#{File.dirname(path)}/lib")
@@ -133,5 +130,5 @@ def main
 end
 
 if $PROGRAM_NAME == __FILE__
-  main
+  main(ARGV[0], ARGV[1])
 end
