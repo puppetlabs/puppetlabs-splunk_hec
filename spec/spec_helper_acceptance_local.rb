@@ -57,3 +57,23 @@ end
 def return_host
   master.uri
 end
+
+def standard_manifest
+  <<-MANIFEST
+    service { 'pe-puppetserver':
+      ensure     => running,
+      hasrestart => true,
+      restart    => "service pe-puppetserver reload",
+    }
+    class { 'splunk_hec':
+      url                    => "http://#{master.uri}:8088/services/collector/event",
+      pe_console             => "#{master.uri}",
+      token                  => "abcd1234",
+      pe_username            => "admin",
+      pe_password            => Sensitive('pie'),
+      enable_reports         => true,
+      manage_routes          => true,
+      include_api_collection => true,
+    }
+  MANIFEST
+end
