@@ -204,18 +204,21 @@ The splunk_hec module allows the posting of PE orchestrator and activity service
 
 The events now will be collected and posted to your Splunk Server. These events will appear in the Splunk UI.
 
-There are two source types
+There are three possible source types.
 
-```bash
-puppet:events_summary
-puppet:activity
+```
+puppet:jobs
+puppet:activities_classifier
+puppet:activities_rbac
 ```
 
 #### Viewing the events
 
-Use `source="puppet:events_summary"` in your Splunk search field to show the orchestrator events.
+Use `source="puppet:jobs"` in your Splunk search field to show the orchestrator jobs. Orchestrator jobs includes Puppet agent runs kicked off from the `Run Puppet` button in the console, and it includes Tasks and Plans run from the console using the `Run Task` and `Run Plan` buttons.
 
-Use `source="puppet:activity"` in your Splunk search field to show the activity service events.
+Use `source="puppet:activities_classifier"` in your Splunk search field to show Classifier events coming from the Activity Service API. These events will include things like creating new classifier node groups, changing node group classification rules, etc.
+
+User `source="puppet:activities_rbac` in your Splunk search field to show rbac events coming from the Activity Service API. These events will include things like creating new local users, updating user metadata, etc.
 
 
 Advanced Settings
