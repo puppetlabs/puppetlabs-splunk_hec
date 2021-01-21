@@ -78,7 +78,7 @@ describe 'Verify the minimum install' do
       jobs = orchestrator.get_jobs(limit: 1)
 
       # Do a splunk search for the orchestrator sourcetype for the last 5 minutes
-      cmd = 'docker exec splunk_enterprise_1 bash -c \'sudo /opt/splunk/bin/splunk search sourcetype="puppet:events_summary" -earliest_time -5m -latest_time now -auth admin:piepiepie\''
+      cmd = 'docker exec splunk_enterprise_1 bash -c \'sudo /opt/splunk/bin/splunk search sourcetype="puppet:jobs" -earliest_time -5m -latest_time now -auth admin:piepiepie\''
 
       result = run_shell(cmd, expect_failures: true)
       events = result['stdout'].split("\n")

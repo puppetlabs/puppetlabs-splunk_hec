@@ -12,6 +12,9 @@ STORE_DIR = ENV['STORE_DIR'] || '/etc/puppetlabs/splunk/'
 API_JOBS_STORE = "#{STORE_DIR}/splunk-jobs-store".freeze
 API_ACTIVITY_STORE = "#{STORE_DIR}/splunk-activity-store".freeze
 
+ORCHESTRATOR_JOBS_SOURCE_TYPE = 'puppet:jobs'.freeze
+ACTIVITIES_API_SOURCE_TYPE_BASE = 'puppet:activities'.freeze
+
 def load_settings(configfile)
   raise "Failed to load the config file [#{configfile}]" unless File.file?(configfile)
   open(configfile) { |f| YAML.safe_load(f) }
@@ -102,7 +105,7 @@ def main(confdir, modulepaths)
   puts "Sending #{new_jobs} Orchestrator job(s) to Splunk."
   if new_jobs > 0
     jobs = orchestrator_client.get_jobs(limit: new_jobs)
-    process_response(jobs.items, jobs.total, settings, API_JOBS_STORE, 'puppet:events_summary', splunk_client)
+    process_response(jobs.items, jobs.total, settings, API_JOBS_STORE, ORCHESTRATOR_JOBS_SOURCE_TYPE, splunk_client)
   end
 
   # source and process the activity service events
@@ -110,6 +113,7 @@ def main(confdir, modulepaths)
 
   services.each do |service|
     store_file = "#{API_ACTIVITY_STORE}-#{service}"
+    source_type = "#{ACTIVITIES_API_SOURCE_TYPE_BASE}_#{service}"
     previous_index = get_index(store_file)
 
     # determine the event list size from an initial read
@@ -123,7 +127,7 @@ def main(confdir, modulepaths)
 
     # get the events using the limit
     events = events_client.get_events(service: service, limit: new_jobs)
-    result = process_response(events.items, events.total, settings, store_file, 'puppet:activity', splunk_client)
+    result = process_response(events.items, events.total, settings, store_file, source_type, splunk_client)
     puts "There were no activity service #{service} events to send to splunk" unless result
     puts "Activity events for #{service} sent to splunk" if result
   end
