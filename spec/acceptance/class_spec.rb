@@ -29,7 +29,7 @@ describe 'Verify the minimum install' do
         }
         class { 'splunk_hec':
           url => 'notanendpoint/nicetry',
-          token => '',
+          splunk_token => '',
           record_event => true,
           include_api_collection = true,
         }
@@ -46,7 +46,7 @@ describe 'Verify the minimum install' do
         }
         class { 'splunk_hec':
           url                    => 'notanendpoint/nicetry',
-          token                  => '',
+          splunk_token                  => '',
           record_event           => true,
           pe_username            => 'admin',
           pe_console             => 'localhost',

@@ -56,7 +56,7 @@ def process_response(body, total, settings, index_file, source_type, splunk_clie
   events_json = transform(body, settings['pe_console'], source_type)
   store_index(body.empty? ? 0 : total, index_file)
 
-  response = splunk_client.post_request('/services/collector', events_json, { Authorization: "Splunk #{settings['token']}" }, use_raw_body: true)
+  response = splunk_client.post_request('/services/collector', events_json, { Authorization: "Splunk #{settings['splunk_token']}" }, use_raw_body: true)
   raise "Failed to POST to the splunk server [#{response.error!}]" unless response.code == '200'
   true
 end

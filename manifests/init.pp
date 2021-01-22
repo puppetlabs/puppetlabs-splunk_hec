@@ -5,7 +5,7 @@
 # processor by setting reports to '', the empty string.
 class splunk_hec (
   String $url,
-  String $token,
+  String $splunk_token,
   Array $collect_facts = ["dmi","disks","partitions","processors","networking"],
   Boolean $enable_reports = false,
   Boolean $record_event = false,

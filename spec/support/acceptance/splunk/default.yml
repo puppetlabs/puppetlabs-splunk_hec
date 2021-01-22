@@ -1,6 +1,6 @@
 ---
 # This file is used by the Splunk container to configure settings that would
-# typically be set in the web interface. 
+# typically be set in the web interface.
 # https://splunk.github.io/docker-splunk/ADVANCED.html
 retry_num: 100
 splunk:

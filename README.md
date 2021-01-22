@@ -23,7 +23,7 @@ It is possible to only include data in reports based on specific conditions (Pup
 To enable this module:
   - Classify your Puppet Servers with the splunk_hec class
   - Set the `url` parameter which refers to your Splunk url along with the token provided by Splunk
-  - Set the `token` parameter which will be the HEC token you create in Splunk.
+  - Set the `splunk_token` parameter which will be the HEC token you create in Splunk.
   - Set the `enable_reports` to true
 
 This module sends data to Splunk by modifying your report processor settings and indirector routes.yaml.
@@ -69,7 +69,7 @@ When complete the hec token should look something like this\
         ```
         enable_reports = true
         manage_routes = true
-        token = something like F5129FC8-7272-442B-983C-203F013C1948
+        splunk_token = something like F5129FC8-7272-442B-983C-203F013C1948
         url = something like https://splunk-8.splunk.internal:8088/services/collector
         include_api_collection = true
         ```

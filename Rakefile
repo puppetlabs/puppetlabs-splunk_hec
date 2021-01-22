@@ -204,7 +204,7 @@ namespace :acceptance do
   task :ci_run_tests do
     begin
       Rake::Task['acceptance:setup'].invoke
-      Rake::Task['acceptance:run_tests'].invoke 
+      Rake::Task['acceptance:run_tests'].invoke
     ensure
       Rake::Task['acceptance:tear_down'].invoke
     end

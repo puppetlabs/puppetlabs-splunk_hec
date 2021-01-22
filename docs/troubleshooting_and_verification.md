@@ -31,7 +31,7 @@ Facts enabled properly using the module:
 To verify the reports are in Splunk properly, search all indexes for the source type 'puppet:summary' for reports, 'puppet:facts' for facts:
 `index=* sourcetype=puppet:summary` and `index=* sourcetype=puppet:facts`
 
-The number of events corresponds to the number of Puppet runs that have occured during that time period, not number of hosts. To verify all hosts in an environment have submitted facts/reports, one will need to dedup the events by host to get an accurate count, this is only worth doing after the module has been deployed for atleast an hour (or longer, depending on the Puppet run interval set in the environment). In the Splunk search view, set the time window to the last 60 minutes and use the following search, the resulting Event Count will match the number of nodes in the Puppet Enterprise console:
+The number of events corresponds to the number of Puppet runs that have occured during that time period, not number of hosts. To verify all hosts in an environment have submitted facts/reports, one will need to dedup the events by host to get an accurate count, this is only worth doing after the module has been deployed for at least an hour (or longer, depending on the Puppet run interval set in the environment). In the Splunk search view, set the time window to the last 60 minutes and use the following search, the resulting Event Count will match the number of nodes in the Puppet Enterprise console:
 `index=* sourcetype=puppet:summary | dedup host`
 
 If you are using multiple PE consoles (ie, multiple Puppet Enterprise installations), you will need to add an additional filter by pe_console value:
