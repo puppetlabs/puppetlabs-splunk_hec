@@ -5,7 +5,7 @@ node default {
 
   class { 'splunk_hec':
     url                    => 'http://localhost:8088/services/collector/event',
-    token                  => 'abcd1234',
+    splunk_token           => 'abcd1234',
     pe_console             => 'https://localhost',
     record_event           => true,
     pe_username            => 'admin',

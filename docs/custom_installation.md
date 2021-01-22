@@ -3,7 +3,7 @@
 
 __If you are installing this module using a control-repo, you must have splunk_hec in your production environment's Puppetfile so the puppetserver process can load the libraries it needs properly. You can then create a feature branch to enable them and test the configuration, but the libraries must be in production otherwise the feature branch won't work as expected. If your puppetserver is in a different environment, please add this module to the Puppetfile in that environment as well.__
 
-The steps below will help install and troubleshoot the report processor on a single Puppet Master, including manual steps to configure a puppet-server, and to use the included splunk_hec class. Because one is modifying production machines, these steps allow you to validate your settings before deploying the changes live. See the tl,dr; instructions for 
+The steps below will help install and troubleshoot the report processor on a single Puppet Master, including manual steps to configure a puppet-server, and to use the included splunk_hec class. Because one is modifying production machines, these steps allow you to validate your settings before deploying the changes live. See the tl,dr; instructions for
 
 1. Install the Puppet Report Viewer Addon in Splunk. This will import the needed sourcetypes to configure Splunk's HTTP Endpoint Collector (HEC) and provide a dashboard that will show the reports once they are sent to Splunk.
 
@@ -20,7 +20,7 @@ The steps below will help install and troubleshoot the report processor on a sin
   ```
 ---
 "url" : "https://splunk-dev.testing.local:8088/services/collector"
-"token" : "13311780-EC29-4DD0-A796-9F0CDC56F2AD"
+"splunk_token" : "13311780-EC29-4DD0-A796-9F0CDC56F2AD"
 ```
 (Note: If HA is enabled you will need to ensure these settings exist in each master. This is often done through the PE HA Replica node group.)
 
@@ -28,12 +28,12 @@ The steps below will help install and troubleshoot the report processor on a sin
 
 7. If configured properly the Puppet Report Viewer app in Splunk will show 1 node in the Overview tab.
 
-8. Now it is time to roll these settings out to the fleet of to the Puppet Masters in the installation. For Puppet Enterprise users: 
+8. Now it is time to roll these settings out to the fleet of the Puppet Masters in the installation. For Puppet Enterprise users:
 	- Navigate to Classification -> PE Infrastructure -> PE Master
 	- Select Configuration
 	- Press Refresh to ensure the splunk_hec class is loaded
 	- Add new class `splunk_hec`
-	- From the `Parameter name` select atleast `url` and `token` and provide the same attributes from the testing configuration file
+	- From the `Parameter name` select at least `url` and `splunk_token` and provide the same attributes from the testing configuration file
 	- Optionally set `enable_reports` to `true` if there isn't another component managing the servers reports setting, otherwise manually add `splunk_hec` to the settings as described in the manual steps. Note that if `enable_reports` is set to `true`, then you can have the module automatically add the `splunk_hec` report processor to the servers reports setting by setting the `reports` parameter to the empty string, `''`.
 	- Commit changes and run Puppet. It is best to navigate to the PE Certificate Authority Classification gorup and run Puppet there first, before running Puppet on the remaining machines
 

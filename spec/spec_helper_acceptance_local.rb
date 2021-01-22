@@ -68,7 +68,7 @@ def standard_manifest
     class { 'splunk_hec':
       url                    => "http://#{master.uri}:8088/services/collector/event",
       pe_console             => "#{master.uri}",
-      token                  => "abcd1234",
+      splunk_token           => "abcd1234",
       pe_username            => "admin",
       pe_password            => Sensitive('pie'),
       enable_reports         => true,

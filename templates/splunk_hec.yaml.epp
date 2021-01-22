@@ -1,7 +1,7 @@
 # managed by puppet
 ---
 "url" : "<%= $splunk_hec::url %>"
-"token" : "<%= $splunk_hec::token %>"
+"splunk_token" : "<%= $splunk_hec::splunk_token %>"
 "facts" :
 <% $splunk_hec::collect_facts.each |$fact| {-%>
         - <%= $fact %>
