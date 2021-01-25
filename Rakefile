@@ -158,6 +158,8 @@ namespace :acceptance do
   desc 'Installs the module on the master'
   task :install_module do
     master.run_shell("rm -rf '/etc/puppetlabs/puppet/splunk_hec.yaml'")
+    # Ensure that all dependency modules are installed in spec/fixture/modules
+    Rake::Task['spec_prep'].invoke
     # This litmus helper installs splunk_hec as well because it's symlinked into fixtures.
     Rake::Task['litmus:install_modules_from_directory'].invoke("#{Dir.pwd}/spec/fixtures/modules",'ssh_nodes')
     master.bolt_upload_file('./spec/support/acceptance/splunk_hec.yaml', '/etc/puppetlabs/puppet/splunk_hec.yaml')
