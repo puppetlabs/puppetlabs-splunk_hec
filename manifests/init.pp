@@ -51,8 +51,17 @@ class splunk_hec (
   }
 
   if $include_api_collection {
-    if ($pe_username == undef) or ($pe_password == undef) or ($pe_console == undef) {
-      fail('pe_username, pe_password, and pe_console must all be set to use the api_collection feature.')
+    if (
+      ($pe_token == undef)
+      and
+      ($pe_username == undef or $pe_password == undef)
+    ) {
+      $authorization_failure_message = @(MESSAGE/L)
+      Please set both 'pe_username' and 'pe_password' \
+      if you are not using a pre generated PE authorization \
+      token in the 'pe_token' parameter
+      |-MESSAGE
+      fail($authorization_failure_message)
     }
 
     cron { 'collectpeapi':

@@ -30,9 +30,17 @@ GetText/DecorateString:
   - spec/**/*
 RSpec/BeforeAfterAll:
   Description: Beware of using after(:all) as it may cause state to leak between tests.
-    A necessary evil in acceptance testing.
+    A necessary evil in acceptance testing. Disabled here because there is setup that
+    needs to be done before all of the examples in the context but it would be wasteful
+    to do that set up for each example in the context.
   Exclude:
   - spec/acceptance/**/*.rb
+  Enabled: false
+RSpec/InstanceVariable:
+  Description: Can be dangerous as it can cause state to leak across tests. In this case
+    we need the state to leak deliberately from the before blocks into the examples
+    and then still be usable in the after blocks.
+  Enabled: false
 RSpec/HookArgument:
   Description: Prefer explicit :each argument, matching existing module's style
   EnforcedStyle: each
