@@ -10,10 +10,7 @@ services:
       # Report Viewer from Splunkbase.
       # We could alternatively download the packaged app from a location
       # like github for testing.
-      - SPLUNK_APPS_URL=https://splunkbase.splunk.com/app/4413/release/3.0.1/download
-      # TODO: Make a PIE account
-      - SPLUNKBASE_USERNAME=gregsparks
-      - SPLUNKBASE_PASSWORD=2Riboflavin!
+      - SPLUNK_APPS_URL=https://github.com/puppetlabs/TA-puppet-report-viewer/tarball/main
       - SPLUNK_PASSWORD=piepiepie
     volumes:
       # default.yml is a mechanism to load splunk settings that would normally
