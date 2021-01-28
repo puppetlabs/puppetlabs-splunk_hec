@@ -10,6 +10,9 @@ include PuppetLitmus
 # Silence warnings that a backend is not set.
 set :backend, :exec
 
+# Set the number of tasks that should be invoked and then sent to splunka as events
+TASK_COUNT = 5
+
 RSpec.configure do |config|
   include TargetHelpers
 

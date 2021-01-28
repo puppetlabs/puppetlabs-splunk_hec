@@ -6,22 +6,31 @@ RSpec.shared_context 'event collection setup' do |manifest_type|
                splunk_token_manifest
              end
 
-  before(:all) do
+  before(:each) do
     master.apply_manifest(manifest, catch_failures: true)
-    5.times do
-      response = master.run_shell("puppet task run enterprise_tasks::test_connect -n #{master.uri}")
-      raise 'task run failed' unless response.exit_code == 0
-    end
-    # 'Waiting for the cron job to complete'
-    @time_stamp ||= Time.now
+  end
+end
+
+RSpec.shared_context 'send and collect events' do
+  before(:each) do
+    cmd = %(for i in {1..#{TASK_COUNT}}; do puppet task run enterprise_tasks::test_connect -n #{master.uri}; done)
+    response = master.run_shell(cmd)
+    raise 'task run failed' unless response.exit_code == 0
     master.run_shell(cron_command)
   end
 
-  after(:all) do
-    @time_stamp = nil
+  let(:jobs_starting_count) do
+    # Get the number of available jobs minus the standard 4 extra that show up
+    orchestrator_client.get_jobs(limit: 1).total - 4
   end
 
-  let(:delay) do
-    Time.at(@time_stamp.to_i).utc.strftime('%m/%d/%Y:%H:%M:%S')
+  let(:events) do
+    cmd = %(docker exec splunk_enterprise_1 bash -c "sudo /opt/splunk/bin/splunk search 'sourcetype=\"puppet:jobs\"' -maxout #{TASK_COUNT} -auth admin:piepiepie")
+
+    result = run_shell(cmd, expect_failures: true)
+    events = result['stdout'].split("\n")
+    events.map do |event|
+      JSON.parse(event)
+    end
   end
 end
