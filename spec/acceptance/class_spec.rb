@@ -8,7 +8,7 @@ require 'support/acceptance/shared_context'
 require 'support/acceptance/shared_examples'
 
 describe 'Verify the minimum install' do
-  describe 'with a basic test' do
+  context 'with a basic test' do
     it 'Sets up the pe-puppetserver service and splunk_hec class' do
       apply_manifest(default_manifest, catch_failures: true)
     end
@@ -35,15 +35,17 @@ describe 'Verify the minimum install' do
     end
   end
 
-  describe 'Collect events from PE and sends to the splunk endpoint' do
+  context 'Send events from PE using username/pass auth' do
     include_context 'event collection setup', :default_manifest
 
-    include_examples 'collects and pushed API results', :without_pe_token_key
+    include_examples 'configuration tests', :without_pe_token_key
+    include_examples 'collect and push API results'
   end
 
-  describe 'Collect events from PE using token authentication' do
+  context 'Send events from PE using token authentication' do
     include_context 'event collection setup', :splunk_token_manifest
 
-    include_examples 'collects and pushed API results', :without_pe_password_key
+    include_examples 'configuration tests', :without_pe_password_key
+    include_examples 'collect and push API results'
   end
 end
