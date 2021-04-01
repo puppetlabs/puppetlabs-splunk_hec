@@ -20,7 +20,9 @@
 
 This is a report processor & fact terminus for Puppet to submit data to Splunk's logging system using Splunk's [HTTP Event Collector](https://docs.splunk.com/Documentation/Splunk/8.0.1/Data/UsetheHTTPEventCollector) service. There is a complimentary app in SplunkBase called [Puppet Report Viewer](https://splunkbase.splunk.com/app/4413/) that generates useful dashboards and makes searching this data easier. Please note that the Puppet Report Viewer app should be installed in Splunk before configuring this module.
 
-It is possible to only include data in reports based on specific conditions (Puppet Agent Run failure, compilation failure, change, etc.) See Customized-Reporting in the [Advanced Topics](#advanced-topics) section for details on using that.
+There is also the [Puppet Alert Actions](https://splunkbase.splunk.com/app/4928/) app, which contains the alert actions that were previously shipped in the Puppet Report Viewer:
+
+> The Puppet Alert Actions app allows you to run custom Tasks in Puppet Enterprise or retrieve detailed Report information about a particular Puppet Event that would be sent to the Puppet Report Viewer. For additional information on configuring Puppet Alert Actions, please see our documentation located [here](https://github.com/puppetlabs/TA-puppet-alert-actions).
 
 It is possible to only include data in reports based on specific conditions (Puppet Agent Run failure, compilation failure, change, etc.) See the [Customized Reporting](#customized-reporting) section for details on using that.
 
