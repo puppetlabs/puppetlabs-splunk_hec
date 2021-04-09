@@ -8,13 +8,12 @@
 4. [Custom Installation](#custom-installation)
 5. [SSL Configuration](#ssl-configuration)
 6. [Customized Reporting](#customized-reporting)
-7. [Events](#events)
-8. [Tasks](#tasks)
-9. [Advanced Settings](#advanced-settings)
-10. [Advanced Topics](#advanced-topics)
-11. [Known Issues](#known-issues)
-12. [Breaking Changes](#breaking-changes)
-13. [Release Process](#release-process)
+7. [Tasks](#tasks)
+8. [Advanced Settings](#advanced-settings)
+9. [Advanced Topics](#advanced-topics)
+10. [Known Issues](#known-issues)
+11. [Breaking Changes](#breaking-changes)
+12. [Release Process](#release-process)
 
 ## Overview
 
@@ -30,12 +29,10 @@ To enable this module:
 
   * Classify your Puppet Servers with the `splunk_hec` class.
   * Set the `url` parameter which refers to your Splunk url.
-  * Set the `splunk_token` parameter which will be the HEC token you create in Splunk.
+  * Set the `token` parameter which will be the HEC token you create in Splunk.
   * Set the `enable_reports` parameter to **true**.
 
 This module sends data to Splunk by modifying your report processor settings and indirector `routes.yaml`.
-
-To send Orchestrator jobs and Event activity to Splunk, follow the instructions in the [Events](#events) Section.
 
 There are two Tasks included in this module, `splunk_hec:bolt_apply` and `splunk_hec:bolt_result`, that provide a pre-packaged way to compose Bolt Plans that submit data to Splunk every time they are run. Example plans are included which demonstrate task usage.
 
@@ -64,7 +61,7 @@ Instructions assume you are using Puppet Enterprise. For Open Source Puppet inst
   * Click **Review** and then **Submit**.
   * When complete the HEC token should look something like this:
 
-  ![hec_token](https://raw.githubusercontent.com/puppetlabs/puppetlabs-splunk_hec/v0.8.1/docs/images/hec_token.png)
+  ![hec_token](https://raw.githubusercontent.com/puppetlabs/puppetlabs-splunk_hec/main/docs/images/hec_token.png)
 
 3. Install the module and add the `splunk_hec` class to the **PE Master** node group.
   * Install the `splunk_hec` module on your Puppet Primary Server.
@@ -76,12 +73,11 @@ Instructions assume you are using Puppet Enterprise. For Open Source Puppet inst
 
       ```
       enable_reports = true
-      manage_routes = true
-      splunk_token = <TOKEN GENERATED IN STEP 2>
-      url = something like https://splunk-8.splunk.internal:8088/services/collector
-      include_api_collection = true
+      manage_routes  = true
+      token          = <TOKEN GENERATED IN STEP 2>
+      url            = something like https://splunk-8.splunk.internal:8088/services/collector
       ```
-      
+
   * Commit the changes.
   * Run Puppet on the node group; this will cause a restart of the `pe-puppetserver` service.
 
@@ -91,7 +87,7 @@ Instructions assume you are using Puppet Enterprise. For Open Source Puppet inst
 
 > **Please Note**: If you are installing this module using a `control-repo`, you must have `splunk_hec` in your production environment's `Puppetfile` so the Puppet Server process can properly load the required libraries. You can then create a feature branch to enable them and test the configuration, but the libraries **must be** in `production`; otherwise the feature branch won't work as expected. If your Puppet Server is in a different environment, please add this module to the `Puppetfile` in that environment as well.
 
-The steps below will help install and troubleshoot the report processor on a standard Puppet Primary Server; including manual steps to configure compilers (Puppet Servers), and to use the included `splunk_hec` class. Because one is modifying production machines, these steps allow you to validate your settings before deploying the changes live. 
+The steps below will help install and troubleshoot the report processor on a standard Puppet Primary Server; including manual steps to configure compilers (Puppet Servers), and to use the included `splunk_hec` class. Because one is modifying production machines, these steps allow you to validate your settings before deploying the changes live.
 
 1. Install the Puppet Report Viewer app in Splunk. This will import the needed source types to configure Splunk's HTTP Endpoint Collector (HEC) and provide a dashboard that will show the reports once they are sent to Splunk.
 
@@ -114,7 +110,7 @@ The steps below will help install and troubleshoot the report processor on a sta
       ```
       ---
       "url" : "https://splunk-dev.testing.local:8088/services/collector"
-      "splunk_token" : "13311780-EC29-4DD0-A796-9F0CDC56F2AD"
+      "token" : "13311780-EC29-4DD0-A796-9F0CDC56F2AD"
       ```
       (**Note**: If [Disaster Recovery](https://puppet.com/docs/pe/latest/dr_overview.html) is enabled you will need to ensure these settings exist on the Replica node as well. This is often done through the `PE HA Replica` node group.)
 
@@ -127,7 +123,7 @@ The steps below will help install and troubleshoot the report processor on a sta
   * Select `PE Master` and navigate to the `Classes` tab.
   * Click **Refresh** to ensure that the `splunk_hec` class is loaded.
   * Add new class `splunk_hec`.
-  * From the `Parameter` drop down list you will need to configure at least `url` and `splunk_token`, providing the same values from the testing configuration file.  
+  * From the `Parameter` drop down list you will need to configure at least `url` and `token`, providing the same values from the testing configuration file.
       * Optionally set `enable_reports` to `true` if there isn't another component managing the servers reports setting. Otherwise manually add `splunk_hec` to the settings as described in the [manual steps](#manual-steps) below.
   * Commit changes and run Puppet. It is best to navigate to the `PE Certificate Authority` node group and run Puppet there first, before running Puppet on the remaining nodes.
 
@@ -136,7 +132,7 @@ The steps below will help install and troubleshoot the report processor on a sta
 #### Manual Steps:
 
   * Add `splunk_hec` to `reports` under the `[master]` configuration block in `/etc/puppetlabs/puppet/puppet.conf`:
-        
+
     ```
     [master]
     node_terminus = classifier
@@ -144,7 +140,7 @@ The steps below will help install and troubleshoot the report processor on a sta
     storeconfigs_backend = puppetdb
     reports = puppetdb,splunk_hec
     ```
-        
+
   * Restart the `pe-puppetserver` process (`puppet-server` for Open Source Puppet) for it to reload the configuration and the plugin.
 
   * Run `puppet agent -t` on an agent; if you are using the suggested name, use `source="http:puppet-report-summary"` in your Splunk search field to show the reports as they arrive.
@@ -263,62 +259,6 @@ Here is an example of the data that will be forwarded to Splunk in each instance
 }
 ```
 
-## Events
-
-The `splunk_hec` module allows the posting of PE orchestrator and activity service events to Splunk.
-
-#### Prerequisites
-
-* To utilize the API collector, a user with the correct RBAC privileges will
-  need to be created. The user must have read access to the **Orchestrator** and **Activity Service** API's in PE.
-* The common events module will need to be installed. The instructions are below.
-
-#### Configuration
-
-1. From the PE console, set the `include_api_collection` parameter in the `splunk_hec` class to **true**.
-2. Set up API Authentication.
-  * Username / Password Auth:
-      * Set the `pe_username` parameter to a pe user with read access to the Orchestrator and Activity Service API's in PE.
-      * Set the `pe_password` parameter to the password for the user above.
-  * Token Auth:
-      * Set the `pe_token` parameter for a user with read access to the Orchestrator and Activity Service API's in PE.
-3. Optionally set the `pe_console` parameter if the PE console is not hosted on the same node that this module is installed on.
-  * This should be the FQDN of the node that is hosting the PE console. Omit the `https` protocol.
-
-#### Installation
-
-1. Ensure you have the latest version of the **Puppet Report Viewer** installed (>= 3.0.2) in your Splunk installation.
-  * Here is the link: https://splunkbase.splunk.com/app/4413/
-  * This will ensure that you have the needed source types to apply to your data in Splunk.
-2. Configure the `splunk_hec` class as described above.
-3. Install the `common_events` module.
-  * Specify this module in your Puppetfile:
-      
-      ```
-      mod 'common_events',
-          :git => 'https://github.com/puppetlabs/puppetlabs-common_events'
-      ```
-      
-4. Run `puppet agent -t`
-
-The events now will be collected and posted to your Splunk Server. These events will appear in the Splunk UI.
-
-There are three possible source types:
-
-```
-puppet:jobs
-puppet:activities_classifier
-puppet:activities_rbac
-```
-
-#### Viewing the events
-
-Use `source="puppet:jobs"` in your Splunk search field to show the orchestrator jobs. Orchestrator jobs includes Puppet agent runs kicked off from the `Run Puppet` button in the console, and it includes Tasks and Plans run from the console using the `Run task` and `Run plan` buttons.
-
-Use `source="puppet:activities_classifier"` in your Splunk search field to show Classifier events coming from the Activity Service API. These events will include things like creating new classifier node groups, changing node group classification rules, etc.
-
-Use `source="puppet:activities_rbac` in your Splunk search field to show RBAC events coming from the Activity Service API. These events will include things like creating new local users, updating user metadata, etc.
-
 ## Tasks
 
 Two tasks are provided for submitting data from a Bolt plan to Splunk. For clarity, we recommend using a different HEC token to distinguish between events from Puppet runs and those generated by Bolt. The Puppet Report Viewer app includes a `puppet:bolt` sourcetype to faciltate this. Currently SSL validation for Bolt communications to Splunk is not supported.
@@ -358,7 +298,7 @@ If you are already using a custom `splunk_routes.yaml`, these are the equivalent
       terminus: puppetdb
       cache: splunk_hec
   ```
-  
+
   * Set this routes file instead of the default one by running the following commmand:
 
   ```

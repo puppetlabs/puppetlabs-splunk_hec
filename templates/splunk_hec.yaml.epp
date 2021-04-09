@@ -1,22 +1,13 @@
 # managed by puppet
 ---
 "url" : "<%= $splunk_hec::url %>"
-"splunk_token" : "<%= $splunk_hec::splunk_token %>"
+"token" : "<%= $splunk_hec::token %>"
 "facts" :
 <% $splunk_hec::collect_facts.each |$fact| {-%>
         - <%= $fact %>
 <% } -%>
 <% if $splunk_hec::pe_console{ -%>
 "pe_console" : "<%= $splunk_hec::pe_console %>"
-<% } -%>
-<% if $splunk_hec::pe_username{ -%>
-"pe_username" : "<%= $splunk_hec::pe_username %>"
-<% } -%>
-<% if $splunk_hec::pe_password{ -%>
-"pe_password" : "<%= $splunk_hec::pe_password.unwrap %>"
-<% } -%>
-<% if $splunk_hec::pe_token{ -%>
-"pe_token" : "<%= $splunk_hec::pe_token.unwrap %>"
 <% } -%>
 <% if $splunk_hec::timeout { -%>
 "timeout" : "<%= $splunk_hec::timeout %>"

@@ -45,23 +45,13 @@ describe 'splunk_hec' do
         subsetting_separator => $subsetting_separator,
       }
     }
-
-    define cron (
-      Optional[Any] $ensure  = undef,
-      Optional[Any] $command = undef,
-      Optional[Any] $user    = undef,
-      Optional[Any] $minute  = undef,
-    ) {}
     MANIFEST
   end
 
   let(:params) do
     {
-      url: 'foo_url',
-      splunk_token: 'foo_token',
-      pe_username: 'user',
-      pe_password: RSpec::Puppet::Sensitive.new('password'),
-      pe_console: 'console',
+      'url'   => 'foo_url',
+      'token' => 'foo_token',
     }
   end
 
@@ -71,7 +61,9 @@ describe 'splunk_hec' do
 
   context 'enable_reports is false' do
     let(:params) do
-      super().merge(enable_reports: false)
+      p = super()
+      p['enable_reports'] = false
+      p
     end
 
     it { is_expected.to have_pe_ini_setting_resource_count(0) }
@@ -80,7 +72,9 @@ describe 'splunk_hec' do
 
   context 'enable_reports is true' do
     let(:params) do
-      super().merge(enable_reports: true)
+      p = super()
+      p['enable_reports'] = true
+      p
     end
 
     context "sets 'reports' setting to 'splunk_hec' (default behavior)" do
@@ -99,18 +93,6 @@ describe 'splunk_hec' do
       it { is_expected.to contain_notify('reports param deprecation warning') }
       it { is_expected.to contain_pe_ini_setting('enable splunk_hec').with_value('foo,bar,baz') }
       it { is_expected.to have_pe_ini_subsetting_resource_count(0) }
-    end
-
-    context 'handles $include_api_collection correctly' do
-      it { is_expected.to have_cron_resource_count(0) }
-
-      context 'with api collection turned off' do
-        let(:params) do
-          super().merge(include_api_collection: false)
-        end
-
-        it { is_expected.to have_cron_resource_count(0) }
-      end
     end
   end
 end
