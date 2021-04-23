@@ -1,4 +1,5 @@
 require 'puppet_litmus'
+PuppetLitmus.configure!
 
 # The Target class and TargetHelpers module are a useful ways
 # for tests to reuse Litmus' helpers when they want to do stuff
