@@ -1,8 +1,5 @@
 
-$LOAD_PATH.unshift "#{Dir.pwd}/spec/fixtures/modules/common_events_library/lib"
-
 require 'spec_helper_acceptance'
-require 'common_events_library'
 require 'ostruct'
 require 'support/acceptance/shared_context'
 require 'support/acceptance/shared_examples'
@@ -33,19 +30,5 @@ describe 'Verify the minimum install' do
       results = run_shell(cmd, expect_failures: true).to_s
       expect(results).to match %r{exit_code=1}
     end
-  end
-
-  context 'Send events from PE using username/pass auth' do
-    include_context 'event collection setup', :default_manifest
-
-    include_examples 'configuration tests', :without_pe_token_key
-    include_examples 'collect and push API results'
-  end
-
-  context 'Send events from PE using token authentication' do
-    include_context 'event collection setup', :splunk_token_manifest
-
-    include_examples 'configuration tests', :without_pe_password_key
-    include_examples 'collect and push API results'
   end
 end
