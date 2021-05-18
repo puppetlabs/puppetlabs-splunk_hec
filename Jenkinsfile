@@ -3,7 +3,7 @@
 
 pipeline{
     agent {
-        label 'worker'
+        label 'k8s-worker'
     }
     environment {
       RUBY_VERSION='2.5.7'
