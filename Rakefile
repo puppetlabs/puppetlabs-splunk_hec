@@ -4,7 +4,6 @@ require 'puppet-syntax/tasks/puppet-syntax'
 require 'puppet_blacksmith/rake_tasks' if Bundler.rubygems.find_name('puppet-blacksmith').any?
 require 'github_changelog_generator/task' if Bundler.rubygems.find_name('github_changelog_generator').any?
 require 'puppet-strings/tasks' if Bundler.rubygems.find_name('puppet-strings').any?
-require 'open3'
 
 def changelog_user
   return unless Rake.application.top_level_tasks.include? "changelog"
@@ -73,25 +72,6 @@ Gemfile:
         ref: '20ee04ba1234e9e83eb2ffb5056e23d641c7a018'
         condition: "Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new('2.2.2')"
 EOM
-  end
-end
-
-namespace :launch do
-  desc "Start a Splunk instance"
-  task :splunk_server do
-    system("docker-compose -f spec/support/acceptance/splunk/docker-compose.yml down")
-    system("docker-compose -f spec/support/acceptance/splunk/docker-compose.yml up -d --remove-orphans")
-    _, stderr, _, _  = Open3.popen3("docker ps -q -f name=splunk_enterprise_1 -f status=running")
-    puts "Splunk Server container=#{stderr.gets}"
-  end
-
-  task :orch do
-    splunk_server = "localhost"
-    splunk_port = '8088' 
-    splunk_token = 'abcd1234'
-    module_path = 'spec/fixtures/modules'
-    pe_server = 'unquiet-prank.delivery.puppetlabs.net'
-    system("bundle exec bolt task run --modulepath #{module_path} splunk_hec::collect_orchestrator_events --targets localhost pe_console=#{pe_server} splunk_server=#{splunk_server} splunk_port=#{splunk_port} splunk_token=#{splunk_token}")
   end
 end
 
@@ -164,7 +144,6 @@ namespace :acceptance do
 
   desc 'Runs the tests'
   task :run_tests do
-    # master.bolt_run_script('NUM_TASKS=10 spec/support/acceptance/post_tasks.sh')
     rspec_command  = 'bundle exec rspec ./spec/acceptance --format documentation'
     rspec_command += ' --format RspecJunitFormatter --out rspec_junit_results.xml' if ENV['CI'] == 'true'
     puts("Running the tests ...\n")
@@ -203,7 +182,7 @@ namespace :acceptance do
   task :ci_run_tests do
     begin
       Rake::Task['acceptance:setup'].invoke
-      Rake::Task['acceptance:run_tests'].invoke
+      Rake::Task['acceptance:run_tests'].invoke 
     ensure
       Rake::Task['acceptance:tear_down'].invoke
     end

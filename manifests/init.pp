@@ -5,18 +5,15 @@
 # processor by setting reports to '', the empty string.
 class splunk_hec (
   String $url,
-  String $splunk_token,
+  String $token,
   Array $collect_facts = ["dmi","disks","partitions","processors","networking"],
   Boolean $enable_reports = false,
   Boolean $record_event = false,
   Boolean $manage_routes = false,
   String $facts_terminus = "puppetdb",
   String $facts_cache_terminus = "splunk_hec",
-  Optional[String] $pe_username = undef,
-  Optional[Sensitive[String]] $pe_password = undef,
-  Optional[Sensitive[String]] $pe_token = undef,
-  Optional[String] $pe_console = $settings::report_server,
   Optional[String] $reports = undef,
+  Optional[String] $pe_console = $settings::report_server,
   Optional[Integer] $timeout = undef,
   Optional[String] $ssl_ca = undef,
   Optional[String] $token_summary = undef,
@@ -30,7 +27,6 @@ class splunk_hec (
   Optional[Boolean] $include_logs_corrective_change = false,
   Optional[Array] $include_resources_status = undef,
   Optional[Boolean] $include_resources_corrective_change = false,
-  Optional[Boolean] $include_api_collection = false,
   String $summary_resources_format = 'hash',
 ) {
 
@@ -48,40 +44,6 @@ class splunk_hec (
     $service        = 'puppetserver'
     $owner          = 'puppet'
     $group          = 'puppet'
-  }
-
-  if $include_api_collection {
-    if (
-      ($pe_token == undef)
-      and
-      ($pe_username == undef or $pe_password == undef)
-    ) {
-      $authorization_failure_message = @(MESSAGE/L)
-      Please set both 'pe_username' and 'pe_password' \
-      if you are not using a pre generated PE authorization \
-      token in the 'pe_token' parameter
-      |-MESSAGE
-      fail($authorization_failure_message)
-    }
-
-    cron { 'collectpeapi':
-      ensure  => 'present',
-      command => @("COMMAND"/L),
-        ${settings::confdir}/splunk_hec_collect_api_events.rb \
-        ${settings::confdir} \
-        ${settings::modulepath}
-        |-COMMAND
-      user    => 'root',
-      minute  => '*/2',
-      require => [File["${settings::confdir}/splunk_hec_collect_api_events.rb"]],
-    }
-    file { "${settings::confdir}/splunk_hec_collect_api_events.rb":
-      ensure => file,
-      owner  => $owner,
-      group  => $group,
-      mode   => '0755',
-      source => 'puppet:///modules/splunk_hec/splunk_hec_collect_api_events.rb',
-    }
   }
 
   if $enable_reports {

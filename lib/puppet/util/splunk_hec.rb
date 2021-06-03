@@ -48,7 +48,7 @@ module Puppet::Util::Splunk_hec
     source_type = body['sourcetype'].split(':')[1]
     token_name = "token_#{source_type}"
     http = create_http(source_type)
-    token = settings[token_name] || settings['splunk_token'] || raise(Puppet::Error, 'Must provide token parameter to splunk class')
+    token = settings[token_name] || settings['token'] || raise(Puppet::Error, 'Must provide token parameter to splunk class')
     req = Net::HTTP::Post.new(@uri.path.to_str)
     req.add_field('Authorization', "Splunk #{token}")
     req.add_field('Content-Type', 'application/json')

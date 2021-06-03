@@ -20,7 +20,7 @@ The steps below will help install and troubleshoot the report processor on a sin
   ```
 ---
 "url" : "https://splunk-dev.testing.local:8088/services/collector"
-"splunk_token" : "13311780-EC29-4DD0-A796-9F0CDC56F2AD"
+"token" : "13311780-EC29-4DD0-A796-9F0CDC56F2AD"
 ```
 (Note: If HA is enabled you will need to ensure these settings exist in each master. This is often done through the PE HA Replica node group.)
 
@@ -28,12 +28,12 @@ The steps below will help install and troubleshoot the report processor on a sin
 
 7. If configured properly the Puppet Report Viewer app in Splunk will show 1 node in the Overview tab.
 
-8. Now it is time to roll these settings out to the fleet of the Puppet Masters in the installation. For Puppet Enterprise users:
+8. Now it is time to roll these settings out to the fleet of to the Puppet Masters in the installation. For Puppet Enterprise users:
 	- Navigate to Classification -> PE Infrastructure -> PE Master
 	- Select Configuration
 	- Press Refresh to ensure the splunk_hec class is loaded
 	- Add new class `splunk_hec`
-	- From the `Parameter name` select at least `url` and `splunk_token` and provide the same attributes from the testing configuration file
+	- From the `Parameter name` select at least `url` and `token` and provide the same attributes from the testing configuration file
 	- Optionally set `enable_reports` to `true` if there isn't another component managing the servers reports setting, otherwise manually add `splunk_hec` to the settings as described in the manual steps. Note that if `enable_reports` is set to `true`, then you can have the module automatically add the `splunk_hec` report processor to the servers reports setting by setting the `reports` parameter to the empty string, `''`.
 	- Commit changes and run Puppet. It is best to navigate to the PE Certificate Authority Classification gorup and run Puppet there first, before running Puppet on the remaining machines
 

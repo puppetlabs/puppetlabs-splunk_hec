@@ -1,5 +1,5 @@
 ---
 "url" : "http://localhost:8088/services/collector/event"
-"splunk_token" : "abcd1234"
+"token" : "abcd1234"
 "enable_reports" : "true"
 "manage_routes" : "true"
