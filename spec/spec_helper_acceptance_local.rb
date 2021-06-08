@@ -1,5 +1,3 @@
-# rubocop:disable Style/AccessorMethodName
-
 require 'serverspec'
 require 'puppet_litmus'
 require 'support/acceptance/helpers.rb'

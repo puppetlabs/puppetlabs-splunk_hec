@@ -38,10 +38,10 @@ class Puppet::Application::Splunk_hec < Puppet::Application
       'sourcetype' => sourcetype.to_s,
       'event' => {},
     }
-    data['servers'].keys.each do |server|
+    data['servers'].each_key do |server|
       name = get_name(server.to_s)
       content = data['servers'][server.to_s]
-      content.keys.each do |serv|
+      content.each_key do |serv|
         event = event_template.clone
         event['host'] = name
         event['event'] = content[serv.to_s]

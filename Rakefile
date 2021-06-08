@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+require 'bundler'
 require 'puppet_litmus/rake_tasks' if Bundler.rubygems.find_name('puppet_litmus').any?
 require 'puppetlabs_spec_helper/rake_tasks'
 require 'puppet-syntax/tasks/puppet-syntax'
@@ -15,8 +18,17 @@ end
 
 def changelog_project
   return unless Rake.application.top_level_tasks.include? "changelog"
-  returnVal = nil || JSON.load(File.read('metadata.json'))['source'].match(%r{.*/([^/]*)})[1]
-  raise "unable to find the changelog_project in .sync.yml or the name in metadata.json" if returnVal.nil?
+
+  returnVal = nil
+  returnVal ||= begin
+    metadata_source = JSON.load(File.read('metadata.json'))['source']
+    metadata_source_match = metadata_source && metadata_source.match(%r{.*\/([^\/]*?)(?:\.git)?\Z})
+
+    metadata_source_match && metadata_source_match[1]
+  end
+
+  raise "unable to find the changelog_project in .sync.yml or calculate it from the source in metadata.json" if returnVal.nil?
+
   puts "GitHubChangelogGenerator project:#{returnVal}"
   returnVal
 end
@@ -41,7 +53,7 @@ if Bundler.rubygems.find_name('github_changelog_generator').any?
     config.header = "# Change log\n\nAll notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org)."
     config.add_pr_wo_labels = true
     config.issues = false
-    config.merge_prefix = "### UNCATEGORIZED PRS; GO LABEL THEM"
+    config.merge_prefix = "### UNCATEGORIZED PRS; LABEL THEM ON GITHUB"
     config.configure_sections = {
       "Changed" => {
         "prefix" => "### Changed",
@@ -49,11 +61,11 @@ if Bundler.rubygems.find_name('github_changelog_generator').any?
       },
       "Added" => {
         "prefix" => "### Added",
-        "labels" => ["feature", "enhancement"],
+        "labels" => ["enhancement", "feature"],
       },
       "Fixed" => {
         "prefix" => "### Fixed",
-        "labels" => ["bugfix"],
+        "labels" => ["bug", "documentation", "bugfix"],
       },
     }
   end
@@ -61,16 +73,15 @@ else
   desc 'Generate a Changelog from GitHub'
   task :changelog do
     raise <<EOM
-The changelog tasks depends on unreleased features of the github_changelog_generator gem.
+The changelog tasks depends on recent features of the github_changelog_generator gem.
 Please manually add it to your .sync.yml for now, and run `pdk update`:
 ---
 Gemfile:
   optional:
     ':development':
       - gem: 'github_changelog_generator'
-        git: 'https://github.com/skywinder/github-changelog-generator'
-        ref: '20ee04ba1234e9e83eb2ffb5056e23d641c7a018'
-        condition: "Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new('2.2.2')"
+        version: '~> 1.15'
+        condition: "Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new('2.3.0')"
 EOM
   end
 end
@@ -82,14 +93,14 @@ namespace :acceptance do
 
   desc 'Provisions the VMs. This is currently just the master'
   task :provision_vms do
-    if File.exist?('inventory.yaml')
-      # Check if a master VM's already been setup
+    if File.exist?('spec/fixtures/litmus_inventory.yaml')
+    # Check if a master VM's already been setup
       begin
         uri = master.uri
         puts("A master VM at '#{uri}' has already been set up")
         next
       rescue TargetNotFoundError
-        # Pass-thru, this means that we haven't set up the master VM
+      # Pass-thru, this means that we haven't set up the master VM
       end
     end
 
@@ -97,9 +108,7 @@ namespace :acceptance do
     Rake::Task['litmus:provision_list'].invoke(provision_list)
   end
 
-  # TODO: This should be refactored to use the https://github.com/puppetlabs/puppetlabs-peadm
-  # module for PE setup
-  desc 'Sets up PE on the master'
+  desc 'Sets up PE on master'
   task :setup_pe do
     master.bolt_run_script('spec/support/acceptance/install_pe.sh')
   end
@@ -128,11 +137,14 @@ namespace :acceptance do
           'hec_token' => hec_token,
         }
       },
+    'facts' => {
+      'platform' => 'splunk_hec'
+    },
       'vars' => {
         'roles' => ['splunk_instance'],
       }
     }]
-    write_to_inventory_file(inventory_hash, 'inventory.yaml')
+    write_to_inventory_file(inventory_hash, 'spec/fixtures/litmus_inventory.yaml')
   end
 
   desc 'Installs the module on the master'
@@ -170,22 +182,20 @@ namespace :acceptance do
     end
   end
 
-
   desc 'Teardown the setup'
   task :tear_down do
     puts("Tearing down the test infrastructure ...\n")
     Rake::Task['litmus:tear_down'].invoke(master.uri)
-    FileUtils.rm_f('inventory.yaml')
+    FileUtils.rm_f('spec/fixtures/litmus_inventory.yaml')
   end
 
   desc 'Task for CI'
   task :ci_run_tests do
     begin
       Rake::Task['acceptance:setup'].invoke
-      Rake::Task['acceptance:run_tests'].invoke 
+      Rake::Task['acceptance:run_tests'].invoke
     ensure
       Rake::Task['acceptance:tear_down'].invoke
     end
   end
 end
-
