@@ -58,3 +58,27 @@ end
 def return_host
   master.uri
 end
+
+def setup_manifest(disabled: false, url: 'http://localhost:8088/services/collector/event')
+  <<-MANIFEST
+  # cloned from https://github.com/puppetlabs/puppetlabs-puppet_enterprise/blob/a82d3adafcf1dfd13f1c338032f325d80fa58eda/manifests/trapperkeeper/pe_service.pp#L10-L17
+  service { 'pe-puppetserver':
+    ensure     => running,
+    hasrestart => true,
+    restart    => "service pe-puppetserver reload",
+  }
+
+  class { 'splunk_hec':
+    url                    => '#{url}',
+    token                  => 'abcd1234',
+    record_event           => true,
+    pe_console             => 'localhost',
+    disabled               => #{disabled},
+  }
+  MANIFEST
+end
+
+def clear_testing_setup
+  host = return_host
+  run_shell("find /opt/puppetlabs/puppet/cache/reports/#{host} -type f -delete")
+end

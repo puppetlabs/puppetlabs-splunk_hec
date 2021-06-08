@@ -60,3 +60,6 @@
 <% if $splunk_hec::summary_resources_format { -%>
 "summary_resources_format" : "<%= $splunk_hec::summary_resources_format %>"
 <% } -%>
+<% if $splunk_hec::disabled { -%>
+"disabled" : "<%= $splunk_hec::disabled %>"
+<% } -%>
