@@ -6,6 +6,8 @@ Puppet::Reports.register_report(:splunk_hec) do
 
   include Puppet::Util::Splunk_hec
   def process
+    # This prevents the processor from running if disabled
+    return 0 if settings['disabled']
     # now we can create the event with the timestamp from the report
 
     epoch = sourcetypetime(time.iso8601(3))

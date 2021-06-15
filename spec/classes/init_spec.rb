@@ -95,4 +95,14 @@ describe 'splunk_hec' do
       it { is_expected.to have_pe_ini_subsetting_resource_count(0) }
     end
   end
+
+  context 'disabled is set to true' do
+    let(:params) do
+      p = super()
+      p['disabled'] = true
+      p
+    end
+
+    it { is_expected.to compile }
+  end
 end
