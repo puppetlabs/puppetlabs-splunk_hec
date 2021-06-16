@@ -1,7 +1,5 @@
+# An example of submitting an a task or functions results to splunk as a task itself uses pcp/pe hosts
 plan splunk_hec::result_example {
-
-  # An example of submitting an a task or functions results to splunk as a task itself
-  # uses pcp/pe hosts 
 
   $result_ca = puppetdb_query('nodes [ certname ]{}')
   $ca = $result_ca.map |$r| { $r["certname"] }
@@ -23,6 +21,4 @@ plan splunk_hec::result_example {
       notice("${node} errored with a message: ${result.error}")
     }
   }
-
-
 }

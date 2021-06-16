@@ -1,8 +1,74 @@
-# Simple class to manage your splunk_hec connectivity
-# note if you manage enable_reports, it will default to puppetdb,splunk_hec
-# if you wish to add other reports, you can do so with the reports param
-# note that you can have the module automatically add the splunk_hec reports
-# processor by setting reports to '', the empty string.
+# @summary Simple class to manage your splunk_hec connectivity
+#
+# @note If you manage enable_reports, it will default to puppetdb,splunk_hec
+#       If you wish to add other reports, you can do so with the reports param
+#       That you can have the module automatically add the splunk_hec reports
+#       processor by setting reports to '', the empty string.
+#
+# @example
+#   include splunk_hec
+#
+# @param [String] url
+#   The url of the server that PE is running on
+# @param [String] token
+#   The user token
+# @param [Array] collect_facts
+#   The list of facts that will be collected in the report
+# @param [Boolean] enable_reports
+#   Adds splunk_hec to the list of report processors
+# @param [Boolean] record_event
+#   If set to true, will call store_event and save report as json
+# @param [Boolean] disabled
+#   Disables the splunk_hec report processor
+# @param [Boolean] manage_routes
+#   When false, will not automatically send facts to splunk_hec
+# @param [String] facts_terminus
+#   Ensure that facts get saved to puppetdb
+# @param [String] facts_cache_terminus
+#   Makes sure that the facts get sent to splunk_hec
+# @param [Optional[String]] reports
+#   Can specify report processors (other than puppetdb which is default)
+#   Deprecated; should not use (will give warning).
+# @param [Optional[String]] pe_console
+#   The FQDN for the PE console
+# @param [Optional[Integer]] timeout
+#   Timeout limit for for both open and read sessions
+# @param [Optional[String]] ssl_ca
+#   The name of the ca certification/bundle for ssl validation of the splunk_hec endpoint
+# @param [Optional[String]] token_summary
+#   Corresponds to puppet:summary in the Puppet Report Viewer
+#   When storing summary in a different index than the default token
+# @param [Optional[String]] token_facts
+#   Corresponds to puppet:facts in the Puppet Report Viewer
+#   When storing facts in a different index than the default token
+# @param [Optional[String]] token_metrics
+#   Corresponds to puppet:metrics in the Puppet Report Viewer
+#   When storing metrics in a different index than the default token
+# @param [Optional[String]] url_summary
+#   Similar to token_summary; used to store summary in a different index than the default url
+# @param [Optional[String]] url_facts
+#   Similar to token_facts; used to store facts in a different index than the default url
+# @param [Optional[String]] url_metrics
+#   Similar to token_metrics; used to store metrics in a different index than the default url
+# @param [Optional[Array]] include_logs_status
+#   Determines if puppet logs should be included based on the return status of the puppet agent run
+#   Can be none, one, or any of the following: failed, changed, unchanged
+# @param [Optional[Boolean]] include_logs_catalog_failure
+#   Include logs if catalog fails to compile
+# @param [Optional[Boolean]] include_logs_corrective_change
+#   Include logs if there is a corrective change
+#   Only a PE feature
+# @param [Optional[Array]] include_resources_status
+#   Determines if resource events should be included based on return status of puppet agent run
+#   Does not include 'unchanged' status reports
+#   Allowed values are: failed, changed, unchanged
+# @param [Optional[Boolean]] include_resources_corrective_change
+#   Include resource events if there is a corrective change
+#   Only a PE feature
+# @param [String] summary_resources_format
+#   If include_resource_corrective_change or include_resources_status is set and thus resource_events
+#   are being sent as part of puppet:summary events, then can choose format.
+#   Allowed values are: 'hash', 'array'
 class splunk_hec (
   String $url,
   String $token,
