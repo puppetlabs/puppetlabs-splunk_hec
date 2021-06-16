@@ -14,7 +14,5 @@ fixtures:
       "repo": "https://github.com/puppetlabs/puppetlabs-translate"
     facts: 'git://github.com/puppetlabs/puppetlabs-facts.git'
     puppet_agent: 'git://github.com/puppetlabs/puppetlabs-puppet_agent.git'
-    provision:
-      repo: "git://github.com/puppetlabs/provision.git"
-      ref: "1ddac67b8a6f829c545103185c05291a47e0776e"
+    provision: "git://github.com/puppetlabs/provision.git"
     common_events_library: 'https://github.com/puppetlabs/puppetlabs-common_events.git'

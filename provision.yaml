@@ -1,5 +1,5 @@
 acceptance:
-  provisioner: vmpooler
+  provisioner: abs
   images: ['ubuntu-1804-x86_64']
   vars: |
     roles: ['master']
