@@ -6,7 +6,7 @@
 
 ### Classes
 
-* [`splunk_hec`](#splunk_hec): Simple class to manage your splunk_hec connectivity note if you manage enable_reports, it will default to puppetdb,splunk_hec if you wish to 
+* [`splunk_hec`](#splunk_hec): Simple class to manage your splunk_hec connectivity
 
 ### Tasks
 
@@ -16,206 +16,268 @@
 
 ### Plans
 
-* [`splunk_hec::apply_example`](#splunk_hecapply_example)
-* [`splunk_hec::result_example`](#splunk_hecresult_example)
+* [`splunk_hec::apply_example`](#splunk_hecapply_example): Example of submitting the report from a bolt apply block to Splunk users PE for pcp/hosts
+* [`splunk_hec::result_example`](#splunk_hecresult_example): An example of submitting an a task or functions results to splunk as a task itself uses pcp/pe hosts
 
 ## Classes
 
-### `splunk_hec`
+### <a name="splunk_hec"></a>`splunk_hec`
 
 Simple class to manage your splunk_hec connectivity
-note if you manage enable_reports, it will default to puppetdb,splunk_hec
-if you wish to add other reports, you can do so with the reports param
-note that you can have the module automatically add the splunk_hec reports
+
+* **Note** If you manage enable_reports, it will default to puppetdb,splunk_hec
+If you wish to add other reports, you can do so with the reports param
+That you can have the module automatically add the splunk_hec reports
 processor by setting reports to '', the empty string.
+
+#### Examples
+
+##### 
+
+```puppet
+include splunk_hec
+```
 
 #### Parameters
 
-The following parameters are available in the `splunk_hec` class.
+The following parameters are available in the `splunk_hec` class:
 
-##### `url`
+* [`url`](#url)
+* [`token`](#token)
+* [`collect_facts`](#collect_facts)
+* [`enable_reports`](#enable_reports)
+* [`record_event`](#record_event)
+* [`disabled`](#disabled)
+* [`manage_routes`](#manage_routes)
+* [`facts_terminus`](#facts_terminus)
+* [`facts_cache_terminus`](#facts_cache_terminus)
+* [`reports`](#reports)
+* [`pe_console`](#pe_console)
+* [`timeout`](#timeout)
+* [`ssl_ca`](#ssl_ca)
+* [`token_summary`](#token_summary)
+* [`token_facts`](#token_facts)
+* [`token_metrics`](#token_metrics)
+* [`url_summary`](#url_summary)
+* [`url_facts`](#url_facts)
+* [`url_metrics`](#url_metrics)
+* [`include_logs_status`](#include_logs_status)
+* [`include_logs_catalog_failure`](#include_logs_catalog_failure)
+* [`include_logs_corrective_change`](#include_logs_corrective_change)
+* [`include_resources_status`](#include_resources_status)
+* [`include_resources_corrective_change`](#include_resources_corrective_change)
+* [`summary_resources_format`](#summary_resources_format)
+
+##### <a name="url"></a>`url`
 
 Data type: `String`
 
+The url of the server that PE is running on
 
-
-##### `token`
+##### <a name="token"></a>`token`
 
 Data type: `String`
 
+The user token
 
-
-##### `collect_facts`
+##### <a name="collect_facts"></a>`collect_facts`
 
 Data type: `Array`
 
-
+The list of facts that will be collected in the report
 
 Default value: `["dmi","disks","partitions","processors","networking"]`
 
-##### `enable_reports`
+##### <a name="enable_reports"></a>`enable_reports`
 
 Data type: `Boolean`
 
-
+Adds splunk_hec to the list of report processors
 
 Default value: ``false``
 
-##### `record_event`
+##### <a name="record_event"></a>`record_event`
 
 Data type: `Boolean`
 
-
+If set to true, will call store_event and save report as json
 
 Default value: ``false``
 
-##### `manage_routes`
+##### <a name="disabled"></a>`disabled`
 
 Data type: `Boolean`
 
-
+Disables the splunk_hec report processor
 
 Default value: ``false``
 
-##### `reports`
+##### <a name="manage_routes"></a>`manage_routes`
+
+Data type: `Boolean`
+
+When false, will not automatically send facts to splunk_hec
+
+Default value: ``false``
+
+##### <a name="facts_terminus"></a>`facts_terminus`
 
 Data type: `String`
 
-
-
-Default value: `"puppetdb,splunk_hec"`
-
-##### `facts_terminus`
-
-Data type: `String`
-
-
+Ensure that facts get saved to puppetdb
 
 Default value: `"puppetdb"`
 
-##### `facts_cache_terminus`
+##### <a name="facts_cache_terminus"></a>`facts_cache_terminus`
 
 Data type: `String`
 
-
+Makes sure that the facts get sent to splunk_hec
 
 Default value: `"splunk_hec"`
 
-##### `pe_console`
+##### <a name="reports"></a>`reports`
 
 Data type: `Optional[String]`
 
-
+Can specify report processors (other than puppetdb which is default)
+Deprecated; should not use (will give warning).
 
 Default value: ``undef``
 
-##### `timeout`
+##### <a name="pe_console"></a>`pe_console`
+
+Data type: `Optional[String]`
+
+The FQDN for the PE console
+
+Default value: `$settings::report_server`
+
+##### <a name="timeout"></a>`timeout`
 
 Data type: `Optional[Integer]`
 
-
+Timeout limit for for both open and read sessions
 
 Default value: ``undef``
 
-##### `ssl_ca`
+##### <a name="ssl_ca"></a>`ssl_ca`
 
 Data type: `Optional[String]`
 
-
+The name of the ca certification/bundle for ssl validation of the splunk_hec endpoint
 
 Default value: ``undef``
 
-##### `token_summary`
+##### <a name="token_summary"></a>`token_summary`
 
 Data type: `Optional[String]`
 
-
+Corresponds to puppet:summary in the Puppet Report Viewer
+When storing summary in a different index than the default token
 
 Default value: ``undef``
 
-##### `token_facts`
+##### <a name="token_facts"></a>`token_facts`
 
 Data type: `Optional[String]`
 
-
+Corresponds to puppet:facts in the Puppet Report Viewer
+When storing facts in a different index than the default token
 
 Default value: ``undef``
 
-##### `token_metrics`
+##### <a name="token_metrics"></a>`token_metrics`
 
 Data type: `Optional[String]`
 
-
+Corresponds to puppet:metrics in the Puppet Report Viewer
+When storing metrics in a different index than the default token
 
 Default value: ``undef``
 
-##### `url_summary`
+##### <a name="url_summary"></a>`url_summary`
 
 Data type: `Optional[String]`
 
-
+Similar to token_summary; used to store summary in a different index than the default url
 
 Default value: ``undef``
 
-##### `url_facts`
+##### <a name="url_facts"></a>`url_facts`
 
 Data type: `Optional[String]`
 
-
+Similar to token_facts; used to store facts in a different index than the default url
 
 Default value: ``undef``
 
-##### `url_metrics`
+##### <a name="url_metrics"></a>`url_metrics`
 
 Data type: `Optional[String]`
 
-
+Similar to token_metrics; used to store metrics in a different index than the default url
 
 Default value: ``undef``
 
-##### `include_logs_status`
+##### <a name="include_logs_status"></a>`include_logs_status`
 
 Data type: `Optional[Array]`
 
-
+Determines if puppet logs should be included based on the return status of the puppet agent run
+Can be none, one, or any of the following: failed, changed, unchanged
 
 Default value: ``undef``
 
-##### `include_logs_catalog_failure`
+##### <a name="include_logs_catalog_failure"></a>`include_logs_catalog_failure`
 
 Data type: `Optional[Boolean]`
 
-
+Include logs if catalog fails to compile
 
 Default value: ``false``
 
-##### `include_logs_corrective_change`
+##### <a name="include_logs_corrective_change"></a>`include_logs_corrective_change`
 
 Data type: `Optional[Boolean]`
 
-
+Include logs if there is a corrective change
+Only a PE feature
 
 Default value: ``false``
 
-##### `include_resources_status`
+##### <a name="include_resources_status"></a>`include_resources_status`
 
 Data type: `Optional[Array]`
 
-
+Determines if resource events should be included based on return status of puppet agent run
+Does not include 'unchanged' status reports
+Allowed values are: failed, changed, unchanged
 
 Default value: ``undef``
 
-##### `include_resources_corrective_change`
+##### <a name="include_resources_corrective_change"></a>`include_resources_corrective_change`
 
 Data type: `Optional[Boolean]`
 
-
+Include resource events if there is a corrective change
+Only a PE feature
 
 Default value: ``false``
+
+##### <a name="summary_resources_format"></a>`summary_resources_format`
+
+Data type: `String`
+
+If include_resource_corrective_change or include_resources_status is set and thus resource_events
+are being sent as part of puppet:summary events, then can choose format.
+Allowed values are: 'hash', 'array'
+
+Default value: `'hash'`
 
 ## Tasks
 
-### `bolt_apply`
+### <a name="bolt_apply"></a>`bolt_apply`
 
 This task submits the a bolt apply report (and other data) to Splunk's HEC
 
@@ -253,7 +315,7 @@ Data type: `Optional[String[1]]`
 
 The name of the plan being run (shouldn't change each run)
 
-### `bolt_result`
+### <a name="bolt_result"></a>`bolt_result`
 
 This task submits a bolt task result to Splunk's HEC
 
@@ -267,7 +329,7 @@ Data type: `Hash`
 
 The individual result from a result set
 
-### `cleanup_tokens`
+### <a name="cleanup_tokens"></a>`cleanup_tokens`
 
 Revokes the tokens generated by the Splunk App Puppet Report Viewer
 
@@ -283,27 +345,30 @@ Username configured in Puppet Report Viewer
 
 ## Plans
 
-### `splunk_hec::apply_example`
+### <a name="splunk_hecapply_example"></a>`splunk_hec::apply_example`
 
-The splunk_hec::apply_example class.
+Example of submitting the report from a bolt apply block to Splunk users PE for pcp/hosts
 
 #### Parameters
 
-The following parameters are available in the `splunk_hec::apply_example` plan.
+The following parameters are available in the `splunk_hec::apply_example` plan:
 
-##### `plan_guid`
+* [`plan_guid`](#plan_guid)
+* [`plan_name`](#plan_name)
 
-Data type: `Optional[String[1]]`
-
-
-
-##### `plan_name`
+##### <a name="plan_guid"></a>`plan_guid`
 
 Data type: `Optional[String[1]]`
 
+A guid used to identify invocation of the plan (should change each run)
 
+##### <a name="plan_name"></a>`plan_name`
 
-### `splunk_hec::result_example`
+Data type: `Optional[String[1]]`
 
-The splunk_hec::result_example class.
+The name of the plan being run (shouldn't change each run)
+
+### <a name="splunk_hecresult_example"></a>`splunk_hec::result_example`
+
+An example of submitting an a task or functions results to splunk as a task itself uses pcp/pe hosts
 

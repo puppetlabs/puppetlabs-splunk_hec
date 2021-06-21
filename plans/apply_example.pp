@@ -1,10 +1,12 @@
+# Example of submitting the report from a bolt apply block to Splunk users PE for pcp/hosts
+# @param [Optional[String[1]]] plan_guid
+#   A guid used to identify invocation of the plan (should change each run)
+# @param [Optional[String[1]]] plan_name
+#   The name of the plan being run (shouldn't change each run)
 plan splunk_hec::apply_example (
   Optional[String[1]] $plan_guid,
   Optional[String[1]] $plan_name,
 ) {
-
-  # Example of submitting the report from a bolt apply block to Splunk
-  # users PE for pcp/hosts
 
   $result_ca = puppetdb_query('nodes [ certname ]{}')
   $ca = $result_ca.map |$r| { $r["certname"] }
