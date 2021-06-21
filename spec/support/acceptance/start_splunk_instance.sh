@@ -1,5 +1,4 @@
 #!/bin/bash
-
 function cleanup() {
   # bolt_upload_file isn't idempotent, so remove this directory
   # to ensure that later invocations of the setup_servicenow_instance
@@ -8,34 +7,72 @@ function cleanup() {
 }
 trap cleanup EXIT
 
-rep=$(curl -s --unix-socket /var/run/docker.sock http://ping > /dev/null)
+function start_splunk() {
+  id=`docker ps -q -f name=splunk_enterprise_1 -f status=running`
+
+  if [ ! -z "$id" ]
+  then
+    echo "Killing the current Splunk container (id = ${id}) ..."
+    docker rm --force ${id}
+  fi
+
+  docker-compose -f /tmp/splunk/docker-compose.yml up -d --remove-orphans
+
+  id=`docker ps -q -f name=splunk_enterprise_1 -f status=running`
+
+  if [ -z "$id" ]
+  then
+    echo 'Splunk container start failed.'
+    exit 1
+  fi
+  echo 'Splunk container start succeeded.'
+}
+
+function centos_install_docker() {
+  yum install -y yum-utils
+  yum-config-manager \
+    --add-repo \
+    https://download.docker.com/linux/centos/docker-ce.repo
+  yum install docker-ce docker-ce-cli containerd.io -y
+  systemctl start docker
+
+  curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+  mv /usr/local/bin/docker-compose /usr/bin/docker-compose
+  chmod +x /usr/bin/docker-compose
+}
+
+function compose_starting() {
+  docker ps --all | grep starting
+}
+
+function wait_for_compose() {
+  while [ 1 ]
+  do
+    if [ -z "$(compose_starting)" ]
+    then
+      exit
+    fi
+  done
+}
+
+CENTOS=$(cat /etc/*-release | grep CentOS)
+
+nodocker=$(which docker 2>&1 | grep "no docker")
 status=$?
 
-if [ "$status" == "7" ]; then
-    apt-get -qq update -y 1>&- 2>&-
-    apt-get install -qq docker.io -y 1>&- 2>&-
-    apt-get install -qq docker-compose -y 1>&- 2>&-
-fi
-
-set -e
-
-id=`docker ps -q -f name=splunk_enterprise_1 -f status=running`
-
-if [ ! -z "$id" ]
+if [ ! -z "$nodocker" ]
 then
-  echo "Killing the current Splunk container (id = ${id}) ..."
-  docker rm --force ${id}
+  if [ ! -z "$CENTOS" ]; then
+    centos_install_docker
+  fi
+else
+  apt-get -qq update -y 1>&- 2>&-
+  apt-get install -qq docker.io -y 1>&- 2>&-
+  apt-get install -qq docker-compose -y 1>&- 2>&-
 fi
 
-docker-compose -f /tmp/splunk/docker-compose.yml up -d --remove-orphans
-
-id=`docker ps -q -f name=splunk_enterprise_1 -f status=running`
-
-if [ -z "$id" ]
-then
-  echo 'Splunk container start failed.'
-  exit 1
-fi
-
-echo 'Splunk container start succeeded.'
+printenv
+docker system info
+start_splunk
+wait_for_compose
 exit 0

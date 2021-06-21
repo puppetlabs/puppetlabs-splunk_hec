@@ -9,9 +9,9 @@ RSpec.configure do |config|
   include TargetHelpers
 
   config.before(:suite) do
-    # Stop the puppet service on the master to avoid edge-case conflicting
+    # Stop the puppet service on the puppetserver to avoid edge-case conflicting
     # Puppet runs (one triggered by service vs one we trigger)
-    master.run_shell('puppet resource service puppet ensure=stopped')
+    puppetserver.run_shell('puppet resource service puppet ensure=stopped')
   end
 end
 
@@ -25,7 +25,7 @@ def set_sitepp_content(manifest)
   }
   HERE
 
-  master.run_shell("echo '#{content}' > /etc/puppetlabs/code/environments/production/manifests/site.pp")
+  puppetserver.run_shell("echo '#{content}' > /etc/puppetlabs/code/environments/production/manifests/site.pp")
 end
 
 def trigger_puppet_run(target, acceptable_exit_codes: [0, 2])
@@ -53,17 +53,24 @@ def to_manifest(*declarations)
   declarations.join("\n")
 end
 
-def return_host
-  master.uri
+def host_name
+  @puppetserver_hostname ||= puppetserver.run_shell('facter fqdn').stdout.chomp
 end
 
-def setup_manifest(disabled: false, url: 'http://localhost:8088/services/collector/event')
+def report_dir
+  cmd = "reportdir=`puppet config print reportdir --section server` \n"\
+        "hostname=`facter fqdn` \n"\
+        'echo \"$reportdir/$hostname\"'
+  @report_dir ||= puppetserver.run_shell(cmd).stdout.chomp
+end
+
+def setup_manifest(servicename, disabled: false, url: 'http://localhost:8088/services/collector/event')
   <<-MANIFEST
   # cloned from https://github.com/puppetlabs/puppetlabs-puppet_enterprise/blob/a82d3adafcf1dfd13f1c338032f325d80fa58eda/manifests/trapperkeeper/pe_service.pp#L10-L17
-  service { 'pe-puppetserver':
+  service { '#{servicename}':
     ensure     => running,
     hasrestart => true,
-    restart    => "service pe-puppetserver reload",
+    restart    => "service #{servicename} reload",
   }
 
   class { 'splunk_hec':
@@ -76,7 +83,14 @@ def setup_manifest(disabled: false, url: 'http://localhost:8088/services/collect
   MANIFEST
 end
 
+def puppet_service_name
+  service_name = ''
+  run_shell('[ -f /opt/puppetlabs/server/pe_version ]', expect_failures: true) do |result|
+    service_name = result.exit_code == 0 ? 'pe_puppetserver' : 'puppetserver'
+  end
+  service_name
+end
+
 def clear_testing_setup
-  host = return_host
-  run_shell("find /opt/puppetlabs/puppet/cache/reports/#{host} -type f -delete")
+  run_shell("if [ -d \"#{report_dir}\" ]; then find #{report_dir} -type f -delete; fi")
 end

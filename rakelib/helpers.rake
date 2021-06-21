@@ -2,16 +2,16 @@ namespace :acceptance do
   require_relative '../spec/support/acceptance/helpers'
   include TargetHelpers
 
-  desc 'Provisions the VMs. This is currently just the master'
+  desc 'Provisions the VMs. This is currently just the puppetserver'
   task :provision_vms do
     if File.exist?('spec/fixtures/litmus_inventory.yaml')
-    # Check if a master VM's already been setup
+    # Check if a puppetserver VM's already been setup
       begin
-        uri = master.uri
-        puts("A master VM at '#{uri}' has already been set up")
+        uri = puppetserver.uri
+        puts("A puppetserver VM at '#{uri}' has already been set up")
         next
       rescue TargetNotFoundError
-      # Pass-thru, this means that we haven't set up the master VM
+      # Pass-thru, this means that we haven't set up the puppetserver VM
       end
     end
 
@@ -19,18 +19,18 @@ namespace :acceptance do
     Rake::Task['litmus:provision_list'].invoke(provision_list)
   end
 
-  desc 'Sets up PE on master'
+  desc 'Sets up PE on puppetserver'
   task :setup_pe do
-    master.bolt_run_script('spec/support/acceptance/install_pe.sh')
+    puppetserver.bolt_run_script('spec/support/acceptance/install_pe.sh')
   end
 
   desc 'Sets up the Splunk instance'
   task :setup_splunk_instance do
-    puts("Starting the Splunk instance at the master (#{master.uri})")
-    master.bolt_upload_file('./spec/support/acceptance/splunk', '/tmp/splunk')
-    master.bolt_run_script('spec/support/acceptance/start_splunk_instance.sh')
+    puts("Starting the Splunk instance at the puppetserver (#{puppetserver.uri})")
+    puppetserver.bolt_upload_file('./spec/support/acceptance/splunk', '/tmp/splunk')
+    puts puppetserver.bolt_run_script('spec/support/acceptance/start_splunk_instance.sh').stdout.chomp
     # HEC token is hard coded because it will always be the same in the splunk container
-    instance, hec_token = "#{master.uri}:8088", 'abcd1234'
+    instance, hec_token = "#{puppetserver.uri}:8088", 'abcd1234'
 
     # Update the inventory file
     puts('Updating the inventory.yaml file with the Splunk HEC credentials')
@@ -49,7 +49,9 @@ namespace :acceptance do
         }
       },
     'facts' => {
-      'platform' => 'splunk_hec'
+      'platform' => 'splunk_hec',
+      'provisioner' => 'docker',
+      'container_name' => 'splunk_enterprise_1'
     },
       'vars' => {
         'roles' => ['splunk_instance'],
@@ -58,17 +60,17 @@ namespace :acceptance do
     write_to_inventory_file(inventory_hash, 'spec/fixtures/litmus_inventory.yaml')
   end
 
-  desc 'Installs the module on the master'
+  desc 'Installs the module on the puppetserver'
   task :install_module do
-    master.run_shell("rm -rf '/etc/puppetlabs/puppet/splunk_hec.yaml'")
-    Rake::Task['litmus:install_module'].invoke(master.uri)
-    master.bolt_upload_file('./spec/support/acceptance/splunk_hec.yaml', '/etc/puppetlabs/puppet/splunk_hec.yaml')
+    puppetserver.run_shell("rm -rf '/etc/puppetlabs/puppet/splunk_hec.yaml'")
+    Rake::Task['litmus:install_module'].invoke(puppetserver.uri)
+    puppetserver.bolt_upload_file('./spec/support/acceptance/splunk_hec.yaml', '/etc/puppetlabs/puppet/splunk_hec.yaml')
   end
 
   desc 'Runs the tests'
   task :run_tests do
     rspec_command  = 'bundle exec rspec ./spec/acceptance --format documentation'
-    rspec_command += ' --format RspecJunitFormatter --out rspec_junit_results.xml' if ENV['CI'] == 'true'
+    rspec_command += ' --format RspecJunitFormatter --out rspec_junit_results.xml' if ENV['CLOUD_CI'] == 'true'
     puts("Running the tests ...\n")
     unless system(rspec_command)
       # system returned false which means rspec failed. So exit 1 here
@@ -96,7 +98,7 @@ namespace :acceptance do
   desc 'Teardown the setup'
   task :tear_down do
     puts("Tearing down the test infrastructure ...\n")
-    Rake::Task['litmus:tear_down'].invoke(master.uri)
+    Rake::Task['litmus:tear_down'].invoke(puppetserver.uri)
     FileUtils.rm_f('spec/fixtures/litmus_inventory.yaml')
   end
 

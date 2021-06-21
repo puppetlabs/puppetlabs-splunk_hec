@@ -15,4 +15,6 @@ fixtures:
     facts: 'git://github.com/puppetlabs/puppetlabs-facts.git'
     puppet_agent: 'git://github.com/puppetlabs/puppetlabs-puppet_agent.git'
     provision: "git://github.com/puppetlabs/provision.git"
+    puppet_conf:
+      repo: 'https://github.com/puppetlabs/puppet_conf.git'
     common_events_library: 'https://github.com/puppetlabs/puppetlabs-common_events.git'
