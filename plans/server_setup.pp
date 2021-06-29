@@ -1,3 +1,10 @@
+# This plan installs open source Puppet adds Puppet to the path variable, and
+# adds a puppet hosts entry. It also restarts the Puppet service and starts a
+# puppet agent run.
+# @summary Installs open source Puppet.
+#
+# @param [Optional[String]] collection
+#   puppet version collection name
 plan splunk_hec::server_setup(
   Optional[String] $collection = 'puppet7'
 ) {

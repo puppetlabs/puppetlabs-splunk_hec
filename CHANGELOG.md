@@ -2,9 +2,23 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
-## [v0.8.2](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v0.8.2) (2020-12-02)
+## [v0.9.0](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v0.9.0) (2021-06-29)
 
-[Full Changelog](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v0.8.1...v0.8.2)
+[Full Changelog](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v0.8.1...v0.9.0)
+
+### Fixed
+
+- Puppet open source compatibility [\#76](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/76) Thanks [@southalc](https://github.com/southalc)
+
+- Deprecation warning only when report parameter defined [\#85](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/85)
+
+### Added
+
+- Added array resource format option [\#40](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/40)
+
+- Added Puppet Alert Actions documentation to README.md [\#115](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/115) Thanks [@coreymbe](https://github.com/coreymbe)
+
+- Added splunk_hec disabling feature [\#120](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/120)
 
 ### Changed
 

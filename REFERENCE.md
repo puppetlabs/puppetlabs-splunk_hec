@@ -17,7 +17,9 @@
 ### Plans
 
 * [`splunk_hec::apply_example`](#splunk_hecapply_example): Example of submitting the report from a bolt apply block to Splunk users PE for pcp/hosts
+* [`splunk_hec::provision_machines`](#splunk_hecprovision_machines): Provisions machines
 * [`splunk_hec::result_example`](#splunk_hecresult_example): An example of submitting an a task or functions results to splunk as a task itself uses pcp/pe hosts
+* [`splunk_hec::server_setup`](#splunk_hecserver_setup): Installs open source Puppet.
 
 ## Classes
 
@@ -368,7 +370,54 @@ Data type: `Optional[String[1]]`
 
 The name of the plan being run (shouldn't change each run)
 
+### <a name="splunk_hecprovision_machines"></a>`splunk_hec::provision_machines`
+
+Provisions machines
+
+#### Parameters
+
+The following parameters are available in the `splunk_hec::provision_machines` plan:
+
+* [`using`](#using)
+* [`image`](#image)
+
+##### <a name="using"></a>`using`
+
+Data type: `Optional[String]`
+
+provision service
+
+Default value: `'abs'`
+
+##### <a name="image"></a>`image`
+
+Data type: `Optional[String]`
+
+os image
+
+Default value: `'centos-7-x86_64'`
+
 ### <a name="splunk_hecresult_example"></a>`splunk_hec::result_example`
 
 An example of submitting an a task or functions results to splunk as a task itself uses pcp/pe hosts
+
+### <a name="splunk_hecserver_setup"></a>`splunk_hec::server_setup`
+
+This plan installs open source Puppet adds Puppet to the path variable, and
+adds a puppet hosts entry. It also restarts the Puppet service and starts a
+puppet agent run.
+
+#### Parameters
+
+The following parameters are available in the `splunk_hec::server_setup` plan:
+
+* [`collection`](#collection)
+
+##### <a name="collection"></a>`collection`
+
+Data type: `Optional[String]`
+
+puppet version collection name
+
+Default value: `'puppet7'`
 
