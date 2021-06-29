@@ -35,8 +35,8 @@ jobs:
 
     - name: Publish module to the forge
       env:
-        BLACKSMITH_FORGE_USERNAME: {{ secrets.FORGE_USERNAME }}
-        BLACKSMITH_FORGE_PASSWORD: {{ secrets.FORGE_PASSWORD }}
+        BLACKSMITH_FORGE_USERNAME: ${{ secrets.FORGE_USERNAME }}
+        BLACKSMITH_FORGE_PASSWORD: ${{ secrets.FORGE_PASSWORD }}
       run: | 
         bundle install --with release
         bundle exec rake module:build
