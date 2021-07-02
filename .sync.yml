@@ -37,3 +37,7 @@ Gemfile:
 Rakefile:
   requires:
   use_litmus_tasks: true
+
+.gitignore:
+  required: &ignorepaths
+    - '**/litmus_inventory.yaml'
