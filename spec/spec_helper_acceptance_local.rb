@@ -86,7 +86,7 @@ end
 def puppet_service_name
   service_name = ''
   run_shell('[ -f /opt/puppetlabs/server/pe_version ]', expect_failures: true) do |result|
-    service_name = result.exit_code == 0 ? 'pe_puppetserver' : 'puppetserver'
+    service_name = result.exit_code == 0 ? 'pe-puppetserver' : 'puppetserver'
   end
   service_name
 end
