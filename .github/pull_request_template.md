@@ -16,6 +16,7 @@ checked as work continues.
   [ ] Any changes to existing documentation
   [ ] Anything new added
   [ ] Link to external Puppet documentation
+  [ ] Review [Support Playbook](https://confluence.puppetlabs.com/display/SUP/Splunk+HEC+Module+Support+Playbook) for any needed updates
 [ ] Tags
 [ ] Unit Tests
 [ ] Acceptance Tests
