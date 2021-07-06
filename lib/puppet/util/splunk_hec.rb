@@ -104,8 +104,8 @@ module Puppet::Util::Splunk_hec
   end
 
   # standard function to make sure we're using the same time format our sourcetypes are set to parse
-  def sourcetypetime(timestamp)
-    time = Time.parse(timestamp)
-    '%10.3f' % time.to_f
+  def sourcetypetime(time, total)
+    total = Time.parse((time + metrics['time']['total']).iso8601(3))
+    '%10.3f' % total.to_f
   end
 end
