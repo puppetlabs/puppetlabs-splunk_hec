@@ -1,6 +1,6 @@
 {
   "name": "puppetlabs-splunk_hec",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "author": "puppetlabs",
   "summary": "Puppet report processor using Splunk HEC",
   "license": "Apache-2.0",
