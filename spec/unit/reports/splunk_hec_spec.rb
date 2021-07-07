@@ -5,10 +5,21 @@ describe 'Splunk_hec report processor: miscellaneous tests' do
   let(:settings_hash) { default_settings_hash }
   let(:expected_credentials) { default_credentials }
   let(:facts) { default_facts }
+  let(:run_start_time) { Time.now }
 
   before(:each) do
     mock_settings_file(settings_hash)
     allow(processor).to receive(:facts).and_return(facts)
+  end
+
+  context 'metrics' do
+    it 'sends the correct timestamp' do
+      expect_sent_event do |event|
+        expect(event['time']).to eql(epoch_time)
+        expect(event['event']['time']).to eql(run_total_time)
+      end
+      processor.process
+    end
   end
 
   context 'testing splunk_hec disabling feature' do

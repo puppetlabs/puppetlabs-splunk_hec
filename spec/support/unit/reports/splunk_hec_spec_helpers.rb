@@ -9,7 +9,7 @@ def new_processor
   allow(processor).to receive(:host).and_return 'host'
   allow(processor).to receive(:environment).and_return 'production'
   allow(processor).to receive(:job_id).and_return '1'
-  allow(processor).to receive(:time).and_return(Time.now)
+  allow(processor).to receive(:time).and_return(run_start_time)
   allow(processor).to receive(:metrics).and_return(metrics_hash)
   # The report processor logs all exceptions to Puppet.err. Thus, we mock it out
   # so that we can see them (and avoid false-positives).
@@ -21,10 +21,18 @@ end
 
 def metrics_hash
   {
-    'time'      => { 'total' => 0 },
+    'time'      => { 'total' => 5 },
     'resources' => { 'total' => 0 },
     'changes'   => { 'total' => 0 },
   }
+end
+
+def run_total_time
+  (run_start_time + metrics_hash['time']['total']).iso8601(3)
+end
+
+def epoch_time
+  '%10.3f' % Time.parse(run_total_time).to_f
 end
 
 def default_credentials
