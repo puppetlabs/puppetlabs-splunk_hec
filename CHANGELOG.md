@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file. The format 
 
 [Current Diff](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v0.9.0..main)
 
+## [v0.9.1](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v0.9.1) (2021-07-07)
+
+[Full Changelog](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v0.9.0...v0.9.1)
+
 ## Fixed
 
 - Timestamp now matches timestamp value in the console [#130](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/130)
