@@ -1,6 +1,6 @@
 {
   "name": "puppetlabs-splunk_hec",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "author": "puppetlabs",
   "summary": "Puppet report processor using Splunk HEC",
   "license": "Apache-2.0",
@@ -10,7 +10,7 @@
   "dependencies": [
     {
       "name": "puppetlabs/puppet_metrics_collector",
-      "version_requirement": ">= 6.0.0 < 7.0"
+      "version_requirement": ">= 6.0.0 < 8.0"
     }
   ],
   "operatingsystem_support": [
@@ -57,7 +57,7 @@
   "requirements": [
     {
       "name": "puppet",
-      "version_requirement": ">= 4.7.0 < 7.0.0"
+      "version_requirement": ">= 4.7.0 < 8.0.0"
     }
   ],
   "pdk-version": "2.1.0",
