@@ -4,11 +4,17 @@ All notable changes to this project will be documented in this file. The format 
 
 ## [Unreleased](https://github.com/puppetlabs/puppetlabs-splunk_hec)
 
-[Current Diff](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v0.9.0..main)
+[Current Diff](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v0.9.2..main)
+
+## [v0.9.2](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v0.9.2) (2021-08-02)
+
+[Full Changelog](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v0.9.1...v0.9.2)
 
 ### Fixed
 
 - Fixed sourcetypetime to allow metrics to be sent without issue. [#135](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/135)
+
+- Module metadata now supports latest versions of Puppet and Puppets Metrics Collector
 
 ## [v0.9.1](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v0.9.1) (2021-07-07)
 
