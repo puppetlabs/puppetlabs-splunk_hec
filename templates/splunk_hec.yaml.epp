@@ -15,6 +15,9 @@
 <% if $splunk_hec::ssl_ca { -%>
 "ssl_ca" : "<%= $splunk_hec::ssl_ca %>"
 <% } -%>
+<% if $splunk_hec::ignore_system_cert_store { -%>
+"ignore_system_cert_store" : "<%= $splunk_hec::ignore_system_cert_store %>"
+<% } -%>
 <% if $splunk_hec::record_event { -%>
 "record_event" : "<%= $splunk_hec::record_event %>"
 <% } -%>

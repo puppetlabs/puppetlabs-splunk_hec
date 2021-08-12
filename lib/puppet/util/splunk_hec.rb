@@ -18,6 +18,12 @@ module Puppet::Util::Splunk_hec
     @settings = YAML.load_file(@settings_file)
   end
 
+  def build_ca_store(cert_store_file_path)
+    store = OpenSSL::X509::Store.new
+    store.add_file(cert_store_file_path)
+    store
+  end
+
   def create_http(source_type)
     splunk_url = get_splunk_url(source_type)
     @uri = URI.parse(splunk_url)
@@ -28,11 +34,18 @@ module Puppet::Util::Splunk_hec
     http.use_ssl = @uri.scheme == 'https'
     if http.use_ssl?
       if settings['ssl_ca'] && !settings['ssl_ca'].empty?
-        Puppet.info "Will verify #{splunk_url} SSL identity"
         ssl_ca = File.join(Puppet[:confdir], 'splunk_hec', settings['ssl_ca'])
-        http.ca_file = ssl_ca
         raise Puppet::Error, "CA file #{ssl_ca} does not exist" unless File.exist? ssl_ca
+        ssl_info_message = "Will verify #{splunk_url} SSL identity"
 
+        if settings['ignore_system_cert_store']
+          http.cert_store = build_ca_store(ssl_ca)
+          ssl_info_message = "#{ssl_info_message} ignoring system cert store"
+        else
+          http.ca_file = ssl_ca
+        end
+
+        Puppet.info ssl_info_message
         http.verify_mode = OpenSSL::SSL::VERIFY_PEER
       else
         Puppet.info "Will NOT verify #{splunk_url} SSL identity"

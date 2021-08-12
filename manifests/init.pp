@@ -35,6 +35,11 @@
 #   Timeout limit for for both open and read sessions
 # @param [Optional[String]] ssl_ca
 #   The name of the ca certification/bundle for ssl validation of the splunk_hec endpoint
+# @param [Optional[Boolean]] ignore_system_cert_store
+#   By default, the certificate provided to the ssl_ca parameter is a supplement
+#   to the system ca certificate store. If that cert store contains invalid
+#   certificates, ssl validation could fail. Set this parameter to true to
+#   ignore those certificates and use only the provided file.
 # @param [Optional[String]] token_summary
 #   Corresponds to puppet:summary in the Puppet Report Viewer
 #   When storing summary in a different index than the default token
@@ -83,6 +88,7 @@ class splunk_hec (
   Optional[String] $pe_console                           = $settings::report_server,
   Optional[Integer] $timeout                             = undef,
   Optional[String] $ssl_ca                               = undef,
+  Optional[Boolean] $ignore_system_cert_store            = false,
   Optional[String] $token_summary                        = undef,
   Optional[String] $token_facts                          = undef,
   Optional[String] $token_metrics                        = undef,

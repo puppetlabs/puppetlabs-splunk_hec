@@ -16,7 +16,7 @@ splunk:
   http_port: 8000
   hec:
     enable: True
-    ssl: False
+    ssl: false
     port: 8088
     token: abcd1234
   smartstore: null

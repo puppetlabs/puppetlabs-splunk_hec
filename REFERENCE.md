@@ -57,6 +57,7 @@ The following parameters are available in the `splunk_hec` class:
 * [`pe_console`](#pe_console)
 * [`timeout`](#timeout)
 * [`ssl_ca`](#ssl_ca)
+* [`ignore_system_cert_store`](#ignore_system_cert_store)
 * [`token_summary`](#token_summary)
 * [`token_facts`](#token_facts)
 * [`token_metrics`](#token_metrics)
@@ -170,6 +171,17 @@ Data type: `Optional[String]`
 The name of the ca certification/bundle for ssl validation of the splunk_hec endpoint
 
 Default value: ``undef``
+
+##### <a name="ignore_system_cert_store"></a>`ignore_system_cert_store`
+
+Data type: `Optional[Boolean]`
+
+By default, the certificate provided to the ssl_ca parameter is a supplement
+to the system ca certificate store. If that cert store contains invalid
+certificates, ssl validation could fail. Set this parameter to true to
+ignore those certificates and use only the provided file.
+
+Default value: ``false``
 
 ##### <a name="token_summary"></a>`token_summary`
 
