@@ -1,0 +1,95 @@
+#!/opt/puppetlabs/puppet/bin/ruby
+
+require 'fileutils'
+require 'net/http'
+require 'net/https'
+require 'uri'
+require 'yaml'
+require 'json'
+require 'time'
+
+confdir  = '<%= Puppet[:confdir] %>'
+certname = '<%= Puppet[:certname] %>'
+
+settings_file = "#{confdir}/splunk_hec.yaml"
+
+def build_ca_store(cert_store_file_path)
+  store = OpenSSL::X509::Store.new
+  store.add_file(cert_store_file_path)
+  store
+end
+
+def create_http(source_type)
+  splunk_url = get_splunk_url(source_type)
+  uri = URI.parse(splunk_url)
+  timeout = settings['timeout'] || '5'
+  http = Net::HTTP.new(uri.host, uri.port)
+  http.open_timeout = timeout.to_i
+  http.read_timeout = timeout.to_i
+  http.use_ssl = uri.scheme == 'https'
+  if http.use_ssl?
+    if settings['ssl_ca'] && !settings['ssl_ca'].empty?
+      ssl_ca = File.join(confdir, 'splunk_hec', settings['ssl_ca'])
+
+      raise "CA file #{ssl_ca} does not exist" unless File.exist? ssl_ca
+
+      ssl_info_message = "Will verify #{splunk_url} SSL identity"
+
+      if settings['ignore_system_cert_store']
+        http.cert_store = build_ca_store(ssl_ca)
+        ssl_info_message = "#{ssl_info_message} ignoring system cert store"
+      else
+        http.ca_file = ssl_ca
+      end
+
+      puts ssl_info_message
+      http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+    else
+      puts "Will NOT verify #{splunk_url} SSL identity"
+      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    end
+  end
+
+  http
+end
+
+def submit_request(body)
+  # we want users to be able to provide different tokens per sourcetype if they want
+  source_type = 'common_events'
+  token_name = "token_#{source_type}"
+  http = create_http(source_type)
+  token = settings[token_name] || settings['token'] || raise 'Must provide token parameter to splunk class'
+  req = Net::HTTP::Post.new(uri.path.to_str)
+  req.add_field('Authorization', "Splunk #{token}")
+  req.add_field('Content-Type', 'application/json')
+  req.content_type = 'application/json'
+  req.body = body.to_json
+  http.request(req)
+end
+
+def get_splunk_url(source_type)
+  url_name = "url_#{source_type}"
+  settings[url_name] || settings['url'] || raise 'Must provide url parameter to splunk class'
+
+end
+
+def pe_console
+  settings['pe_console'] || certname
+end
+
+def record_event
+  result = if settings['record_event'] == 'true'
+             true
+           else
+             false
+           end
+  result
+end
+
+# standard function to make sure we're using the same time format our sourcetypes are set to parse
+def sourcetypetime(time, duration = 0)
+  parsed_time = time.is_a?(String) ? Time.parse(time) : time
+  total = Time.parse((parsed_time + duration).iso8601(3))
+  '%10.3f' % total.to_f
+end
+
