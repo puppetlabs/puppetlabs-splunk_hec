@@ -105,4 +105,32 @@ describe 'splunk_hec' do
 
     it { is_expected.to compile }
   end
+
+  context 'events_reporting_enabled' do
+    let(:confdir) { 'confdir' }
+    let(:confdir_expectation) { File.join(Dir.pwd, 'confdir') }
+    let(:params) do
+      p = super()
+      p['events_reporting_enabled'] = true
+      p
+    end
+
+    it {
+      is_expected.to contain_file("#{confdir_expectation}/processors.d")
+        .with(ensure: 'directory')
+    }
+
+    it {
+      is_expected.to contain_file("#{confdir_expectation}/processors.d/splunk_hec")
+        .with(ensure: 'directory')
+    }
+
+    it {
+      is_expected.to contain_file("#{confdir_expectation}/processors.d/splunk_hec/splunk_hec.rb")
+        .with(
+        ensure: 'file',
+        mode: '0755',
+      )
+    }
+  end
 end
