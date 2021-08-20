@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file. The format 
 
 [Current Diff](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v0.9.2..main)
 
+### Added
+
+- Ignore System CA Certificate Store. [#137](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/137)
+
 ## [v0.9.2](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v0.9.2) (2021-08-02)
 
 [Full Changelog](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v0.9.1...v0.9.2)
