@@ -66,3 +66,6 @@
 <% if $splunk_hec::disabled { -%>
 "disabled" : "<%= $splunk_hec::disabled %>"
 <% } -%>
+<% if $splunk_hec::events_reporting_enabled { -%>
+"events_reporting_enabled" : "<%= $splunk_hec::events_reporting_enabled %>"
+<% } -%>

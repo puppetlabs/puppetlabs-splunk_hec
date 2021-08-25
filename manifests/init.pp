@@ -82,6 +82,7 @@ class splunk_hec (
   Boolean $record_event                                  = false,
   Boolean $disabled                                      = false,
   Boolean $manage_routes                                 = false,
+  Boolean $events_reporting_enabled                      = false,
   String $facts_terminus                                 = "puppetdb",
   String $facts_cache_terminus                           = "splunk_hec",
   Optional[String] $reports                              = undef,
@@ -168,6 +169,28 @@ class splunk_hec (
       value   => '/etc/puppetlabs/puppet/splunk_hec_routes.yaml',
       require => File['/etc/puppetlabs/puppet/splunk_hec_routes.yaml'],
       notify  => Service[$service],
+    }
+  }
+
+  if $events_reporting_enabled {
+    file { "${settings::confdir}/processors.d":
+      ensure => directory,
+      owner  => $owner,
+      group  => $group,
+    }
+
+    file { "${settings::confdir}/processors.d/splunk_hec":
+      ensure => directory,
+      owner  => $owner,
+      group  => $group,
+    }
+
+    file { "${settings::confdir}/processors.d/splunk_hec/splunk_hec.rb":
+      ensure => file,
+      owner  => $owner,
+      group  => $group,
+      mode   => '0755',
+      source => "file:/etc/puppetlabs/code/environments/${settings::environment}/modules/splunk_hec/lib/puppet/util/splunk_hec.rb"
     }
   }
 
