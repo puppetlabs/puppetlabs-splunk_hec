@@ -185,12 +185,12 @@ class splunk_hec (
       group  => $group,
     }
 
-    file { "${settings::confdir}/processors.d/splunk_hec/splunk_hec.rb":
+    file { "${settings::confdir}/processors.d/splunk_hec/util_splunk_hec.rb":
       ensure => file,
       owner  => $owner,
       group  => $group,
       mode   => '0755',
-      source => "file:/etc/puppetlabs/code/environments/${settings::environment}/modules/splunk_hec/lib/puppet/util/splunk_hec.rb"
+      content => template('splunk_hec/util_splunk_hec.erb')
     }
   }
 

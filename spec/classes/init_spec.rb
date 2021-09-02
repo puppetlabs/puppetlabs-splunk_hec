@@ -126,7 +126,7 @@ describe 'splunk_hec' do
     }
 
     it {
-      is_expected.to contain_file("#{confdir_expectation}/processors.d/splunk_hec/splunk_hec.rb")
+      is_expected.to contain_file("#{confdir_expectation}/processors.d/splunk_hec/util_splunk_hec.rb")
         .with(
         ensure: 'file',
         mode: '0755',
