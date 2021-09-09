@@ -13,7 +13,7 @@ describe 'Verify the minimum install' do
       before_run = earliest
       trigger_puppet_run(puppetserver)
       after_run = Time.now.utc
-      report_count = get_splunk_report_count(before_run, after_run)
+      report_count = report_count(get_splunk_report(before_run, after_run))
       expect(report_count).to be 1
     end
 
@@ -32,7 +32,7 @@ describe 'Verify the minimum install' do
       before_run = earliest
       server_agent_run(setup_manifest(disabled: true))
       after_run = Time.now.utc
-      expect(get_splunk_report_count(before_run, after_run)).to be 0
+      expect(report_count(get_splunk_report(before_run, after_run))).to be 0
     end
   end
 end

@@ -18,4 +18,4 @@ fixtures:
     provision: "git://github.com/puppetlabs/provision.git"
     puppet_conf:
       repo: 'https://github.com/puppetlabs/puppet_conf.git'
-    common_events_library: 'https://github.com/puppetlabs/puppetlabs-common_events.git'
+    pe_event_forwarding: 'https://github.com/puppetlabs/puppetlabs-pe_event_forwarding.git'

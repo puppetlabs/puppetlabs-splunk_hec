@@ -30,6 +30,7 @@ group :development do
   gem "rspec_junit_formatter",                                     require: false
   gem "rb-readline", '= 0.5.5',                                    require: false, platforms: [:mswin, :mingw, :x64_mingw]
   gem "pdk",                                                       require: false
+  gem "rspec-puppet-utils",                                        require: false
 end
 group :system_tests do
   gem "puppet-module-posix-system-r#{minor_version}", '~> 1.0', require: false, platforms: [:ruby]
