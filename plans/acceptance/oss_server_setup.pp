@@ -5,7 +5,7 @@
 #
 # @param [Optional[String]] collection
 #   puppet version collection name
-plan splunk_hec::server_setup(
+plan splunk_hec::acceptance::oss_server_setup(
   Optional[String] $collection = 'puppet7'
 ) {
   # get server

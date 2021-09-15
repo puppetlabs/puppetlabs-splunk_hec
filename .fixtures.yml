@@ -7,6 +7,7 @@ fixtures:
     inifile:
       repo: "puppetlabs/inifile"
       ref: "4.2.0"
+    deploy_pe: 'jarretlavallee/deploy_pe'
   repositories:
     "stdlib":
       "repo": "git://github.com/puppetlabs/puppetlabs-stdlib.git"

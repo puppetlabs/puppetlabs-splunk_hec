@@ -4,7 +4,7 @@
 #   provision service
 # @param [Optional[String]] image
 #   os image
-plan splunk_hec::provision_machines(
+plan splunk_hec::acceptance::provision_machines(
   Optional[String] $using = 'abs',
   Optional[String] $image = 'centos-7-x86_64'
 ) {
