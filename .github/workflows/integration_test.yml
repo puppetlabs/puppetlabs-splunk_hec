@@ -14,9 +14,11 @@ jobs:
       matrix:
         platform:
           - centos-7
-        collection:
+        puppet_version:
           - puppet6-nightly
           - puppet7-nightly
+          - 2019.8.7
+          - 2019.8.8
 
     env:
       BUILDEVENT_FILE: "../buildevents.txt"
@@ -26,18 +28,18 @@ jobs:
     steps:
       - run: |
           echo 'platform=${{ matrix.platform }}' >> $BUILDEVENT_FILE
-          echo 'collection=${{ matrix.collection }}' >> $BUILDEVENT_FILE
+          echo 'puppet_version=${{ matrix.puppet_version }}' >> $BUILDEVENT_FILE
       - name: "Honeycomb: Start recording"
         uses: puppetlabs/kvrhdn-gha-buildevents@pdk-templates-v1
         with:
           apikey: ${{ env.HONEYCOMB_WRITEKEY }}
           dataset: ${{ env.HONEYCOMB_DATASET }}
           job-status: ${{ job.status }}
-          matrix-key: ${{ matrix.platform }}-${{ matrix.collection }}
+          matrix-key: ${{ matrix.platform }}-${{ matrix.puppet_version }}
 
       - name: "Honeycomb: start first step"
         run: |
-          echo STEP_ID=${{ matrix.platform }}-${{ matrix.collection }}-1 >> $GITHUB_ENV
+          echo STEP_ID=${{ matrix.platform }}-${{ matrix.puppet_version }}-1 >> $GITHUB_ENV
           echo STEP_START=$(date +%s) >> $GITHUB_ENV
       - name: Checkout Source
         uses: actions/checkout@v2
@@ -62,11 +64,11 @@ jobs:
         if: ${{ always() }}
         run: |
           buildevents step $TRACE_ID $STEP_ID $STEP_START 'Setup Environment'
-          echo STEP_ID=${{ matrix.platform }}-${{ matrix.collection }}-2 >> $GITHUB_ENV
+          echo STEP_ID=${{ matrix.platform }}-${{ matrix.puppet_version }}-2 >> $GITHUB_ENV
           echo STEP_START=$(date +%s) >> $GITHUB_ENV
       - name: Provision test environment
         run: |
-          buildevents cmd $TRACE_ID $STEP_ID 'bolt plan run splunk_hec::provision_machines' -- bundle exec bolt --modulepath spec/fixtures/modules plan run splunk_hec::provision_machines using='provision_service' image='${{ matrix.platform }}'
+          buildevents cmd $TRACE_ID $STEP_ID 'bolt plan run splunk_hec::provision_machines' -- bundle exec bolt --modulepath spec/fixtures/modules plan run splunk_hec::acceptance::provision_machines using='provision_service' image='${{ matrix.platform }}'
           echo ::group::=== REQUEST ===
           cat request.json || true
           echo
@@ -82,7 +84,7 @@ jobs:
           echo INVENTORY_PATH=$FILE >> $GITHUB_ENV
       - name: Install server
         run: |
-          buildevents cmd $TRACE_ID $STEP_ID 'bolt plan run splunk_hec::server_setup' -- bundle exec bolt --modulepath spec/fixtures/modules plan run splunk_hec::server_setup collection='${{ matrix.collection }}' -i ./$INVENTORY_PATH
+          buildevents cmd $TRACE_ID $STEP_ID 'bolt plan run splunk_hec::acceptance::server_setup' -- bundle exec bolt --modulepath spec/fixtures/modules plan run splunk_hec::acceptance::server_setup puppet_version='${{ matrix.puppet_version }}' -i ./$INVENTORY_PATH
 
       - name: Install module
         run: |
@@ -101,7 +103,7 @@ jobs:
         run: |
           echo ::group::honeycomb step
           buildevents step $TRACE_ID $STEP_ID $STEP_START 'Deploy test system'
-          echo STEP_ID=${{ matrix.platform }}-${{ matrix.collection }}-3 >> $GITHUB_ENV
+          echo STEP_ID=${{ matrix.platform }}-${{ matrix.puppet_version }}-3 >> $GITHUB_ENV
           echo STEP_START=$(date +%s) >> $GITHUB_ENV
           echo ::endgroup::
 
