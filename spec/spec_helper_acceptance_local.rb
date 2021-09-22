@@ -5,6 +5,8 @@ require 'support/acceptance/helpers.rb'
 include PuppetLitmus
 PuppetLitmus.configure!
 
+EVENT_FORWARDING_CONFDIR = '/etc/puppetlabs/pe_event_forwarding'.freeze
+
 RSpec.configure do |config|
   include TargetHelpers
 
@@ -14,6 +16,7 @@ RSpec.configure do |config|
     shell_command = 'puppet resource service puppet ensure=stopped; '\
       'puppet module install puppetlabs-inifile --version 5.1.0'
     puppetserver.run_shell(shell_command)
+    puppetserver.bolt_upload_file('./spec/fixtures/modules/pe_event_forwarding', '/etc/puppetlabs/code/environments/production/modules')
   end
 end
 
@@ -67,7 +70,7 @@ def report_dir
   @report_dir ||= puppetserver.run_shell(cmd).stdout.chomp
 end
 
-def setup_manifest(disabled: false, url: 'http://localhost:8088/services/collector/event')
+def setup_manifest(disabled: false, url: 'http://localhost:8088/services/collector/event', with_event_forwarding: false)
   params = {
     url:            url,
     token:          'abcd1234',
@@ -82,8 +85,11 @@ def setup_manifest(disabled: false, url: 'http://localhost:8088/services/collect
     params[:facts_terminus] = 'yaml'
   end
 
+  params[:events_reporting_enabled] = true if with_event_forwarding
+
   manifest = declare(:class, :splunk_hec, params)
   manifest << add_service_resource unless puppet_user == 'pe-puppet'
+  manifest << add_event_forwarding if with_event_forwarding
   manifest
 end
 
@@ -94,6 +100,15 @@ def add_service_resource
     restart: 'puppetserver reload'
   }
   declare(:service, :puppetserver, params)
+end
+
+def add_event_forwarding
+  token = puppetserver.run_shell('puppet access show').stdout.chomp
+  params = {
+    pe_token: token,
+    disabled: true
+  }
+  declare(:class, :pe_event_forwarding, params)
 end
 
 def puppet_user
@@ -108,18 +123,26 @@ def query_puppet_user
   service_name
 end
 
-def get_splunk_report_count(earliest, latest)
+def get_splunk_report(earliest, latest, sourcetype = 'puppet:summary')
   start_time =  earliest.strftime('%m/%d/%Y:%H:%M:%S')
   end_time   = (latest + 2).strftime('%m/%d/%Y:%H:%M:%S')
   query_command = 'curl -u admin:piepiepie -k '\
     'https://localhost:8089/services/search/jobs/export -d output_mode=json '\
-    "-d search='search sourcetype=\"puppet:summary\" AND earliest=\"#{start_time}\" AND latest=\"#{end_time}\"'"
+    "-d search='search sourcetype=\"#{sourcetype}\" AND earliest=\"#{start_time}\" AND latest=\"#{end_time}\"'"
+  sleep 1
   response = puppetserver.run_shell(query_command).stdout
-  data = JSON.parse("[#{response.split.join(',')}]")
-  data[0]['result'].nil? ? 0 : data.count
+  JSON.parse("[#{response.split.join(',')}]")
+end
+
+def report_count(report)
+  report[0]['result'].nil? ? 0 : report.count
 end
 
 def server_agent_run(manifest)
   set_sitepp_content(manifest)
   trigger_puppet_run(puppetserver)
+end
+
+def console_host_fqdn
+  @console_host_fqdn ||= puppetserver.run_shell('hostname -A').stdout.strip
 end

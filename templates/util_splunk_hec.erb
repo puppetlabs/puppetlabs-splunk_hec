@@ -8,10 +8,23 @@ require 'yaml'
 require 'json'
 require 'time'
 
-confdir  = '<%= Puppet[:confdir] %>'
-certname = '<%= Puppet[:certname] %>'
 
-settings_file = "#{confdir}/splunk_hec.yaml"
+@confdir  = '/etc/puppetlabs/puppet'
+@certname = 'arrowed-poet.delivery.puppetlabs.net'
+
+INDICES = {
+  'orchestrator' => 'puppet:jobs',
+  'rbac'         => 'puppet:activities_rbac',
+  'classifier'   => 'puppet:activities_classifier',
+  'pe-console'   => 'puppet:activities_console',
+  'code-manager' => 'puppet:activities_code_manager'
+}
+
+@settings_file = "#{@confdir}/splunk_hec.yaml"
+
+def settings
+  @settings ||= YAML.load_file(@settings_file)
+end
 
 def build_ca_store(cert_store_file_path)
   store = OpenSSL::X509::Store.new
@@ -21,12 +34,12 @@ end
 
 def create_http(source_type)
   splunk_url = get_splunk_url(source_type)
-  uri = URI.parse(splunk_url)
+  @uri = URI.parse(splunk_url)
   timeout = settings['timeout'] || '5'
-  http = Net::HTTP.new(uri.host, uri.port)
+  http = Net::HTTP.new(@uri.host, @uri.port)
   http.open_timeout = timeout.to_i
   http.read_timeout = timeout.to_i
-  http.use_ssl = uri.scheme == 'https'
+  http.use_ssl = @uri.scheme == 'https'
   if http.use_ssl?
     if settings['ssl_ca'] && !settings['ssl_ca'].empty?
       ssl_ca = File.join(confdir, 'splunk_hec', settings['ssl_ca'])
@@ -58,18 +71,19 @@ def submit_request(body)
   source_type = 'common_events'
   token_name = "token_#{source_type}"
   http = create_http(source_type)
-  token = settings[token_name] || settings['token'] || raise 'Must provide token parameter to splunk class'
-  req = Net::HTTP::Post.new(uri.path.to_str)
+  token = settings[token_name] || settings['token'] || raise('Must provide token parameter to splunk class')
+  req = Net::HTTP::Post.new(@uri.path.to_str)
   req.add_field('Authorization', "Splunk #{token}")
   req.add_field('Content-Type', 'application/json')
   req.content_type = 'application/json'
-  req.body = body.to_json
+  # req.body = body.to_json
+  req.body = body
   http.request(req)
 end
 
 def get_splunk_url(source_type)
   url_name = "url_#{source_type}"
-  settings[url_name] || settings['url'] || raise 'Must provide url parameter to splunk class'
+  settings[url_name] || settings['url'] || raise('Must provide url parameter to splunk class')
 
 end
 
@@ -93,3 +107,28 @@ def sourcetypetime(time, duration = 0)
   '%10.3f' % total.to_f
 end
 
+def extract_jobs(jobs_data)
+  items_collector = []
+  jobs_data['items'].map do |item|
+    items_collector << {
+      'time'       => sourcetypetime(item['created_timestamp']),
+      'host'       => settings['pe_console'],
+      'sourcetype' => INDICES['orchestrator'],
+      'event'      => item
+    }.to_json
+  end
+  "#{items_collector.join("\n")}\n"
+end
+
+def extract_commits(commits, index)
+  commits_collector = []
+  commits.map do |commit|
+    commits_collector << {
+      'time'       => sourcetypetime(commit['timestamp']),
+      'host'       => settings['pe_console'],
+      'sourcetype' => index,
+      'event'      => commit
+    }.to_json
+  end
+  "#{commits_collector.join("\n")}\n"
+end

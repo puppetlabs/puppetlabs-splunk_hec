@@ -172,28 +172,6 @@ class splunk_hec (
     }
   }
 
-  if $events_reporting_enabled {
-    file { "${settings::confdir}/processors.d":
-      ensure => directory,
-      owner  => $owner,
-      group  => $group,
-    }
-
-    file { "${settings::confdir}/processors.d/splunk_hec":
-      ensure => directory,
-      owner  => $owner,
-      group  => $group,
-    }
-
-    file { "${settings::confdir}/processors.d/splunk_hec/util_splunk_hec.rb":
-      ensure => file,
-      owner  => $owner,
-      group  => $group,
-      mode   => '0755',
-      content => template('splunk_hec/util_splunk_hec.erb')
-    }
-  }
-
   file { "${settings::confdir}/splunk_hec.yaml":
     ensure  => file,
     owner   => $owner,
@@ -201,5 +179,37 @@ class splunk_hec (
     mode    => '0640',
     content => epp('splunk_hec/splunk_hec.yaml.epp'),
     notify  => Service[$service],
+  }
+
+  if $events_reporting_enabled {
+    $confdir_base_path = pe_event_forwarding::base_path($settings::confdir, undef)
+
+    file { "${confdir_base_path}/pe_event_forwarding/processors.d/splunk_hec":
+      ensure  => directory,
+      owner   => $owner,
+      group   => $group,
+      require => [
+        Class['pe_event_forwarding'],
+        File["${settings::confdir}/splunk_hec.yaml"]
+      ]
+    }
+
+    file { "${confdir_base_path}/pe_event_forwarding/processors.d/splunk_hec/util_splunk_hec.rb":
+      ensure  => file,
+      owner   => $owner,
+      group   => $group,
+      mode    => '0755',
+      content => template('splunk_hec/util_splunk_hec.erb'),
+      require => File["${confdir_base_path}/pe_event_forwarding/processors.d/splunk_hec"]
+    }
+
+    file { "${confdir_base_path}/pe_event_forwarding/processors.d/splunk_hec.rb":
+      ensure  => file,
+      owner   => $owner,
+      group   => $group,
+      mode    => '0755',
+      source  => 'puppet:///modules/splunk_hec/splunk_hec.rb',
+      require => File["${confdir_base_path}/pe_event_forwarding/processors.d/splunk_hec/util_splunk_hec.rb"]
+    }
   }
 }

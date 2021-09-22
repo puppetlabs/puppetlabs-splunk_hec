@@ -19,6 +19,11 @@ namespace :acceptance do
     Rake::Task['litmus:provision_list'].invoke(provision_list)
   end
 
+  desc 'clone puppetlabs-pe_event_forwarding module to test host'
+  task :upload_pe_event_forwarding_module do
+    puppetserver.bolt_upload_file('./spec/fixtures/modules/pe_event_forwarding', '/etc/puppetlabs/code/environments/production/modules')
+  end
+
   desc 'Sets up PE on puppetserver'
   task :setup_pe do
     puppetserver.bolt_run_script('spec/support/acceptance/install_pe.sh')
@@ -85,6 +90,7 @@ namespace :acceptance do
       :setup_pe,
       :setup_splunk_instance,
       :install_module,
+      :clone_event_forwarding_module,
     ]
 
     tasks.each do |task|

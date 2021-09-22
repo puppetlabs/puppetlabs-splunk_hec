@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
+require 'rspec-puppet-utils'
 
 describe 'splunk_hec' do
   let(:pre_condition) do
@@ -45,6 +46,10 @@ describe 'splunk_hec' do
         subsetting_separator => $subsetting_separator,
       }
     }
+
+    class pe_event_forwarding () {}
+
+    class {pe_event_forwarding:}
     MANIFEST
   end
 
@@ -107,26 +112,32 @@ describe 'splunk_hec' do
   end
 
   context 'events_reporting_enabled' do
-    let(:confdir) { 'confdir' }
-    let(:confdir_expectation) { File.join(Dir.pwd, 'confdir') }
+    let(:confdir) { Dir.pwd }
     let(:params) do
       p = super()
       p['events_reporting_enabled'] = true
       p
     end
 
+    before(:each) do
+      MockFunction.new('pe_event_forwarding::base_path').expected.returns(Dir.pwd)
+    end
+
     it {
-      is_expected.to contain_file("#{confdir_expectation}/processors.d")
+      is_expected.to contain_file("#{Dir.pwd}/pe_event_forwarding/processors.d/splunk_hec")
         .with(ensure: 'directory')
     }
 
     it {
-      is_expected.to contain_file("#{confdir_expectation}/processors.d/splunk_hec")
-        .with(ensure: 'directory')
+      is_expected.to contain_file("#{Dir.pwd}/pe_event_forwarding/processors.d/splunk_hec/util_splunk_hec.rb")
+        .with(
+        ensure: 'file',
+        mode: '0755',
+      )
     }
 
     it {
-      is_expected.to contain_file("#{confdir_expectation}/processors.d/splunk_hec/util_splunk_hec.rb")
+      is_expected.to contain_file("#{Dir.pwd}/pe_event_forwarding/processors.d/splunk_hec.rb")
         .with(
         ensure: 'file',
         mode: '0755',
