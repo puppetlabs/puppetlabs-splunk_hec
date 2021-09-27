@@ -5,7 +5,11 @@ require 'support/acceptance/helpers.rb'
 include PuppetLitmus
 PuppetLitmus.configure!
 
-EVENT_FORWARDING_CONFDIR = '/etc/puppetlabs/pe_event_forwarding'.freeze
+EVENT_FORWARDING_CONFDIR     = '/etc/puppetlabs/pe_event_forwarding'.freeze
+DIR_TEST_COMMAND             = '[[ -d /etc/puppetlabs/code/environments/production/modules/pe_event_forwarding ]] '\
+                               '&& rm -r /etc/puppetlabs/code/environments/production/modules/pe_event_forwarding'.freeze
+EVENT_FORWARDING_LOCAL_PATH  = './spec/fixtures/modules/pe_event_forwarding'.freeze
+EVENT_FORWARDING_REMOTE_PATH = '/etc/puppetlabs/code/environments/production/modules'.freeze
 
 RSpec.configure do |config|
   include TargetHelpers
@@ -16,7 +20,8 @@ RSpec.configure do |config|
     shell_command = 'puppet resource service puppet ensure=stopped; '\
       'puppet module install puppetlabs-inifile --version 5.1.0'
     puppetserver.run_shell(shell_command)
-    puppetserver.bolt_upload_file('./spec/fixtures/modules/pe_event_forwarding', '/etc/puppetlabs/code/environments/production/modules')
+    puppetserver.run_shell(DIR_TEST_COMMAND, expect_failures: true)
+    puppetserver.bolt_upload_file(EVENT_FORWARDING_LOCAL_PATH, EVENT_FORWARDING_REMOTE_PATH)
   end
 end
 
