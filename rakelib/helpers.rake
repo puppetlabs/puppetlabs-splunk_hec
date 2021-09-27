@@ -90,7 +90,7 @@ namespace :acceptance do
       :setup_pe,
       :setup_splunk_instance,
       :install_module,
-      :clone_event_forwarding_module,
+      :upload_pe_event_forwarding_module,
     ]
 
     tasks.each do |task|
