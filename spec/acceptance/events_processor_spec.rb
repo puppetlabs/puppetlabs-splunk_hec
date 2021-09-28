@@ -26,7 +26,6 @@ describe 'Event Forwarding' do
     it 'Successfully sends a job event to splunk' do
       # ensure the indexes.yaml file is created
       puppetserver.run_shell("#{EVENT_FORWARDING_CONFDIR}/collect_api_events.rb")
-
       count = report_count(report)
       expect(count).to be 1
     end

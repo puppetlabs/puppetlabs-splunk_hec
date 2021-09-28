@@ -107,28 +107,16 @@ def sourcetypetime(time, duration = 0)
   '%10.3f' % total.to_f
 end
 
-def extract_jobs(jobs_data)
-  items_collector = []
-  jobs_data['items'].map do |item|
-    items_collector << {
-      'time'       => sourcetypetime(item['created_timestamp']),
-      'host'       => settings['pe_console'],
-      'sourcetype' => INDICES['orchestrator'],
-      'event'      => item
-    }.to_json
-  end
-  "#{items_collector.join("\n")}\n"
-end
-
-def extract_commits(commits, index)
-  commits_collector = []
-  commits.map do |commit|
-    commits_collector << {
-      'time'       => sourcetypetime(commit['timestamp']),
+def extract_events(events_data, index)
+  events_collector = []
+  return unless !events_data['events'].nil?
+  events_data['events'].map do |event|
+    events_collector << {
+      'time'       => sourcetypetime(event['created_timestamp'] || event['timestamp']),
       'host'       => settings['pe_console'],
       'sourcetype' => index,
-      'event'      => commit
+      'event'      => event
     }.to_json
   end
-  "#{commits_collector.join("\n")}\n"
+  "#{events_collector.join("\n")}\n"
 end
