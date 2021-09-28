@@ -17,31 +17,36 @@
 
 ## Overview
 
-This is a [report processor](https://puppet.com/docs/puppet/7/reporting_write_processors.html) & fact terminus for Puppet to submit data to Splunk's logging system using Splunk's [HTTP Event Collector](https://docs.splunk.com/Documentation/Splunk/8.0.1/Data/UsetheHTTPEventCollector) service. There is a complimentary app in SplunkBase called [Puppet Report Viewer](https://splunkbase.splunk.com/app/4413/) that generates useful dashboards and makes searching this data easier. Please note that the Puppet Report Viewer app should be installed in Splunk before configuring this module.
+This module provides three services to Puppet and Splunk users.
+
+1. A report processor to allow sending Puppet Agent run reports to Splunk. When a Puppet agent completes a run and submits some of the report data to Puppet, this module's processor can be invoked to send that report to Splunk. After this module is installed in your environment, to enable sending node reports to Splunk, do the following:
+    * Classify your Puppet Servers with the `splunk_hec` class.
+    * Set the `url` parameter which refers to your Splunk Hec url.
+    * Set the `token` parameter which will be the HEC token you create in Splunk.
+    * Set the `enable_reports` parameter to **true**.
+
+    For more advanced configuration options including sending reports based on specific conditions see the [Customized Reporting](#customized-reporting) section below.
+
+2. A fact terminus to submit node facts to Splunk. See [Fact Terminus Support](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/v0.8.1/docs/fact_terminus_support.md) for details.
+
+3. A PE Event Forwarding processor for sending data received from the [PE Event Forwarding](https://forge.puppet.com/modules/puppetlabs/pe_event_forwarding) module to Splunk. This data can include the details of Task and Plan executions that were initiated by the Puppet Orchestrator (clicking execute task|plan from the console or puppet command line), or it can be events from rbac, the node classifier, the console, or code-manager. To enable this feature, after the PE Event Forwarding module has been installed, set the `events_reporting_enabled` parameter on the `splunk` class to `true`.
+
+    **Note**: This is a PE only feature and depends on the [PE Event Forwarding](https://forge.puppet.com/modules/puppetlabs/pe_event_forwarding) module being installed and classified on the Puppet Server nodes in your environment. Please see the documentation in that module for details on how to install and configure that module.
 
 There is also the [Puppet Alert Actions](https://splunkbase.splunk.com/app/4928/) app, which contains the alert actions that were previously shipped in the Puppet Report Viewer:
 
 > The Puppet Alert Actions app allows you to run custom Tasks in Puppet Enterprise or retrieve detailed Report information about a particular Puppet Event that would be sent to the Puppet Report Viewer. For additional information on configuring Puppet Alert Actions, please see our documentation located [here](https://github.com/puppetlabs/TA-puppet-alert-actions).
 
-It is possible to only include data in reports based on specific conditions (Puppet Agent Run failure, compilation failure, change, etc.) See the [Customized Reporting](#customized-reporting) section for details on using that.
-
-To enable this module:
-
-  * Classify your Puppet Servers with the `splunk_hec` class.
-  * Set the `url` parameter which refers to your Splunk url.
-  * Set the `token` parameter which will be the HEC token you create in Splunk.
-  * Set the `enable_reports` parameter to **true**.
-
-This module sends data to Splunk by modifying your report processor settings and indirector `routes.yaml`.
-
 There are two Tasks included in this module, `splunk_hec:bolt_apply` and `splunk_hec:bolt_result`, that provide a pre-packaged way to compose Bolt Plans that submit data to Splunk every time they are run. Example plans are included which demonstrate task usage.
 
 ## Requirements
 
-* Puppet Enterprise (PE) or Open Source Puppet
+* Puppet Enterprise (PE) or Open Source Puppet*
 * Splunk
 
-This was tested on both PE 2019.8.1 & Puppet 6, using stock gems of `yaml`, `json`, and `net::https`.
+This was tested on PE 2019.8.7, Puppet 6 and Puppet 7, using stock gems of `yaml`, `json`, and `net::https`.
+
+\* While most of this module is PE and Open Source, using the PE Event Forwarding processor is PE only because it gathers data from API's that exist only in Puppet Enterprise.
 
 ## Installation
 
@@ -72,16 +77,49 @@ Instructions assume you are using Puppet Enterprise. For Open Source Puppet inst
   * Configure the following parameters:
 
       ```
-      enable_reports = true
-      manage_routes  = true
-      token          = <TOKEN GENERATED IN STEP 2>
-      url            = something like https://splunk-8.splunk.internal:8088/services/collector
+      enable_reports           = true
+      manage_routes            = true
+      events_reporting_enabled = true
+      token                    = <TOKEN GENERATED IN STEP 2>
+      url                      = something like https://splunk-8.splunk.internal:8088/services/collector
       ```
 
   * Commit the changes.
   * Run Puppet on the node group; this will cause a restart of the `pe-puppetserver` service.
 
 4. Log into the Splunk console and search `index=* sourcetype=puppet:summary`, if everything was done properly you should see the reports (and soon facts) from the systems in your Puppet environment.
+
+## Source Types
+
+1. puppet:summary
+
+    Puppet agent node reports.
+
+2. puppet:facts
+
+    Node facts sent by the facts terminus enabled by setting `manage_routes` to true.
+
+3. puppet:jobs
+
+    Events gathered from the [Puppet Jobs API](https://puppet.com/docs/pe/2019.8/orchestrator_api_jobs_endpoint.html#get_jobs)
+
+The following source types all refer to different types of events gathered from the [Puppet Activities API](https://puppet.com/docs/pe/2021.2/activity_api_events.html#activity-api-v2-get-events)
+
+4. puppet:activities_rbac
+
+    RBAC events such user login or creating or modifying users and groups.
+
+5. puppet:activities_classifier
+
+    Classifier events such as creating node groups, or modifying the properties of node groups.
+
+6. puppet:activities_console
+
+    Console events such as requesting Task or Plan runs via the console.
+
+7. puppet:activities_code_manager
+
+    Code manager events.
 
 ## Custom Installation
 
