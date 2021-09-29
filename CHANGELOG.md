@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file. The format 
 
 [Current Diff](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v0.10.0..main)
 
+## [v1.0.0](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v1.0.0) (2021-09-29)
+
+[Full Changelog](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v0.10.0...v1.0.0)
+
 ### Added
 
 - Event Forwarding Processor to handle events from PE Event Fowarding. [#142](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/142)
