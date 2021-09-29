@@ -16,10 +16,12 @@
 
 ### Plans
 
+* [`splunk_hec::acceptance::oss_server_setup`](#splunk_hecacceptanceoss_server_setup): Installs open source Puppet.
+* [`splunk_hec::acceptance::pe_server_setup`](#splunk_hecacceptancepe_server_setup): Install PE Server
+* [`splunk_hec::acceptance::provision_machines`](#splunk_hecacceptanceprovision_machines): Provisions machines
+* [`splunk_hec::acceptance::server_setup`](#splunk_hecacceptanceserver_setup): Install PE Server
 * [`splunk_hec::apply_example`](#splunk_hecapply_example): Example of submitting the report from a bolt apply block to Splunk users PE for pcp/hosts
-* [`splunk_hec::provision_machines`](#splunk_hecprovision_machines): Provisions machines
 * [`splunk_hec::result_example`](#splunk_hecresult_example): An example of submitting an a task or functions results to splunk as a task itself uses pcp/pe hosts
-* [`splunk_hec::server_setup`](#splunk_hecserver_setup): Installs open source Puppet.
 
 ## Classes
 
@@ -70,6 +72,7 @@ The following parameters are available in the `splunk_hec` class:
 * [`include_resources_status`](#include_resources_status)
 * [`include_resources_corrective_change`](#include_resources_corrective_change)
 * [`summary_resources_format`](#summary_resources_format)
+* [`events_reporting_enabled`](#events_reporting_enabled)
 
 ##### <a name="url"></a>`url`
 
@@ -289,6 +292,14 @@ Allowed values are: 'hash', 'array'
 
 Default value: `'hash'`
 
+##### <a name="events_reporting_enabled"></a>`events_reporting_enabled`
+
+Data type: `Boolean`
+
+
+
+Default value: ``false``
+
 ## Tasks
 
 ### <a name="bolt_apply"></a>`bolt_apply`
@@ -359,6 +370,114 @@ Username configured in Puppet Report Viewer
 
 ## Plans
 
+### <a name="splunk_hecacceptanceoss_server_setup"></a>`splunk_hec::acceptance::oss_server_setup`
+
+This plan installs open source Puppet adds Puppet to the path variable, and
+adds a puppet hosts entry. It also restarts the Puppet service and starts a
+puppet agent run.
+
+#### Parameters
+
+The following parameters are available in the `splunk_hec::acceptance::oss_server_setup` plan:
+
+* [`collection`](#collection)
+
+##### <a name="collection"></a>`collection`
+
+Data type: `Optional[String]`
+
+puppet version collection name
+
+Default value: `'puppet7'`
+
+### <a name="splunk_hecacceptancepe_server_setup"></a>`splunk_hec::acceptance::pe_server_setup`
+
+Install PE Server
+
+#### Examples
+
+##### 
+
+```puppet
+pe_event_forwarding::acceptance::pe_server_setup
+```
+
+#### Parameters
+
+The following parameters are available in the `splunk_hec::acceptance::pe_server_setup` plan:
+
+* [`version`](#version)
+* [`pe_settings`](#pe_settings)
+
+##### <a name="version"></a>`version`
+
+Data type: `Optional[String]`
+
+
+
+Default value: `'2019.8.7'`
+
+##### <a name="pe_settings"></a>`pe_settings`
+
+Data type: `Optional[Hash]`
+
+
+
+Default value: `{password => 'puppetlabs'}`
+
+### <a name="splunk_hecacceptanceprovision_machines"></a>`splunk_hec::acceptance::provision_machines`
+
+Provisions machines
+
+#### Parameters
+
+The following parameters are available in the `splunk_hec::acceptance::provision_machines` plan:
+
+* [`using`](#using)
+* [`image`](#image)
+
+##### <a name="using"></a>`using`
+
+Data type: `Optional[String]`
+
+provision service
+
+Default value: `'abs'`
+
+##### <a name="image"></a>`image`
+
+Data type: `Optional[String]`
+
+os image
+
+Default value: `'centos-7-x86_64'`
+
+### <a name="splunk_hecacceptanceserver_setup"></a>`splunk_hec::acceptance::server_setup`
+
+Install PE Server
+
+#### Examples
+
+##### 
+
+```puppet
+pe_event_forwarding::acceptance::pe_server
+```
+
+#### Parameters
+
+The following parameters are available in the `splunk_hec::acceptance::server_setup` plan:
+
+* [`puppet_version`](#puppet_version)
+
+##### <a name="puppet_version"></a>`puppet_version`
+
+Data type: `Optional[String]`
+
+
+
+Default value: `'2019.8.7'`
+
 ### <a name="splunk_hecapply_example"></a>`splunk_hec::apply_example`
 
 Example of submitting the report from a bolt apply block to Splunk users PE for pcp/hosts
@@ -382,54 +501,7 @@ Data type: `Optional[String[1]]`
 
 The name of the plan being run (shouldn't change each run)
 
-### <a name="splunk_hecprovision_machines"></a>`splunk_hec::provision_machines`
-
-Provisions machines
-
-#### Parameters
-
-The following parameters are available in the `splunk_hec::provision_machines` plan:
-
-* [`using`](#using)
-* [`image`](#image)
-
-##### <a name="using"></a>`using`
-
-Data type: `Optional[String]`
-
-provision service
-
-Default value: `'abs'`
-
-##### <a name="image"></a>`image`
-
-Data type: `Optional[String]`
-
-os image
-
-Default value: `'centos-7-x86_64'`
-
 ### <a name="splunk_hecresult_example"></a>`splunk_hec::result_example`
 
 An example of submitting an a task or functions results to splunk as a task itself uses pcp/pe hosts
-
-### <a name="splunk_hecserver_setup"></a>`splunk_hec::server_setup`
-
-This plan installs open source Puppet adds Puppet to the path variable, and
-adds a puppet hosts entry. It also restarts the Puppet service and starts a
-puppet agent run.
-
-#### Parameters
-
-The following parameters are available in the `splunk_hec::server_setup` plan:
-
-* [`collection`](#collection)
-
-##### <a name="collection"></a>`collection`
-
-Data type: `Optional[String]`
-
-puppet version collection name
-
-Default value: `'puppet7'`
 
