@@ -4,7 +4,12 @@ All notable changes to this project will be documented in this file. The format 
 
 ## [Unreleased](https://github.com/puppetlabs/puppetlabs-splunk_hec)
 
-[Current Diff](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v0.10.0..main)
+[Current Diff](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v1.0.0..main)
+
+### Fixed
+
+- Removed hardcoded certname in util_splunk_hec template. [#149](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/149)
+- Updated sourcetype from common_events to pe_event_forwarding in util_splunk_hec template. [#149](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/149)
 
 ## [v1.0.0](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v1.0.0) (2021-09-29)
 
