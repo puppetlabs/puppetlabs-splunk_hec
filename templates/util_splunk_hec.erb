@@ -10,7 +10,6 @@ require 'time'
 
 
 @confdir  = '/etc/puppetlabs/puppet'
-@certname = 'arrowed-poet.delivery.puppetlabs.net'
 
 INDICES = {
   'orchestrator' => 'puppet:jobs',
@@ -68,7 +67,7 @@ end
 
 def submit_request(body)
   # we want users to be able to provide different tokens per sourcetype if they want
-  source_type = 'common_events'
+  source_type = 'pe_event_forwarding'
   token_name = "token_#{source_type}"
   http = create_http(source_type)
   token = settings[token_name] || settings['token'] || raise('Must provide token parameter to splunk class')
