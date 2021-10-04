@@ -25,4 +25,4 @@
 .project
 .envrc
 /inventory.yaml
-**/litmus_inventory.yaml
+/spec/fixtures/litmus_inventory.yaml
