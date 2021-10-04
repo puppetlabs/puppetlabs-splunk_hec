@@ -27,7 +27,6 @@ Gemfile:
           - mswin
           - mingw
           - x64_mingw
-      - gem: 'pdk'
 
 .travis.yml:
   delete: true
