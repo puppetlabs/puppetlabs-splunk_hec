@@ -9,7 +9,9 @@ data = JSON.parse(File.read(data_path))
 
 data_to_send = ''
 
-INDICES.each_key do |index|
+EVENT_SOURCETYPE = INDICES.select { |index| settings['event_types'].include? index }
+
+EVENT_SOURCETYPE.each_key do |index|
   next unless data[index]
   data_to_send << extract_events(data[index], INDICES[index])
 end

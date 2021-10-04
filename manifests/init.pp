@@ -74,6 +74,9 @@
 #   If include_resource_corrective_change or include_resources_status is set and thus resource_events
 #   are being sent as part of puppet:summary events, then can choose format.
 #   Allowed values are: 'hash', 'array'
+# @param [Optional[Array]] event_types
+#   Determines which events should be forwarded to Splunk
+#   Allowed values are: 'orchestrator','rbac','classifier','pe-console','code-manager'
 class splunk_hec (
   String $url,
   String $token,
@@ -102,6 +105,7 @@ class splunk_hec (
   Optional[Array] $include_resources_status              = undef,
   Optional[Boolean] $include_resources_corrective_change = false,
   String $summary_resources_format                       = 'hash',
+  Optional[Array] $event_types                           = ['orchestrator','rbac','classifier','pe-console','code-manager'],
 ) {
 
   # Account for the differences in Puppet Enterprise and open source

@@ -225,6 +225,16 @@ By default this type of reporting is not enabled.
 
 **Parameters**:
 
+##### event_types (Requires `puppetlabs-pe_event_forwarding` module)
+
+`Array`: Determines which event types should be forwarded to Splunk. Default value includes all event types. This can be one, or any of the following:
+
+  * `classifier`
+  * `code-manager`
+  * `orchestrator`
+  * `pe-console`
+  * `rbac`
+
 ##### include_logs_status
 
 `Array`: Determines if [logs](https://puppet.com/docs/puppet/latest/format_report.html#puppet::util::log) should be included based on the return status of the puppet agent run. This can be none, one, or any of the following:

@@ -69,3 +69,4 @@
 <% if $splunk_hec::events_reporting_enabled { -%>
 "events_reporting_enabled" : "<%= $splunk_hec::events_reporting_enabled %>"
 <% } -%>
+"event_types" : "<%= $splunk_hec::event_types %>"

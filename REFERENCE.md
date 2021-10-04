@@ -72,6 +72,7 @@ The following parameters are available in the `splunk_hec` class:
 * [`include_resources_status`](#include_resources_status)
 * [`include_resources_corrective_change`](#include_resources_corrective_change)
 * [`summary_resources_format`](#summary_resources_format)
+* [`event_types`](#event_types)
 * [`events_reporting_enabled`](#events_reporting_enabled)
 
 ##### <a name="url"></a>`url`
@@ -92,7 +93,7 @@ Data type: `Array`
 
 The list of facts that will be collected in the report
 
-Default value: `["dmi","disks","partitions","processors","networking"]`
+Default value: `['dmi','disks','partitions','processors','networking']`
 
 ##### <a name="enable_reports"></a>`enable_reports`
 
@@ -132,7 +133,7 @@ Data type: `String`
 
 Ensure that facts get saved to puppetdb
 
-Default value: `"puppetdb"`
+Default value: `'puppetdb'`
 
 ##### <a name="facts_cache_terminus"></a>`facts_cache_terminus`
 
@@ -140,7 +141,7 @@ Data type: `String`
 
 Makes sure that the facts get sent to splunk_hec
 
-Default value: `"splunk_hec"`
+Default value: `'splunk_hec'`
 
 ##### <a name="reports"></a>`reports`
 
@@ -291,6 +292,15 @@ are being sent as part of puppet:summary events, then can choose format.
 Allowed values are: 'hash', 'array'
 
 Default value: `'hash'`
+
+##### <a name="event_types"></a>`event_types`
+
+Data type: `Optional[Array]`
+
+Determines which events should be forwarded to Splunk
+Allowed values are: 'orchestrator','rbac','classifier','pe-console','code-manager'
+
+Default value: `['orchestrator','rbac','classifier','pe-console','code-manager']`
 
 ##### <a name="events_reporting_enabled"></a>`events_reporting_enabled`
 
