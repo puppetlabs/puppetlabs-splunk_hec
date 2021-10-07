@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file. The format 
 
 [Current Diff](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v1.0.1..main)
 
+### Added
+
+- Forwarding from Non Puppet Server nodes. [#154](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/154)
+
  ## [v1.0.1](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v1.0.1) (2021-10-04)
 
 [Full Changelog](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v1.0.0..v1.0.1)

@@ -108,8 +108,14 @@ class splunk_hec (
   Optional[Array] $event_types                           = ['orchestrator','rbac','classifier','pe-console','code-manager'],
 ) {
 
-  # Account for the differences in Puppet Enterprise and open source
-  if $facts['splunk_hec_is_pe'] {
+  $agent_node = $facts['fqdn'] != $facts['puppet_server']
+
+  # Account for the differences in Puppet Enterprise and Open Source and Agent
+  if $agent_node {
+    $owner          = 'root'
+    $group          = 'root'
+  }
+  elsif $facts['splunk_hec_is_pe'] {
     $ini_setting    = 'pe_ini_setting'
     $ini_subsetting = 'pe_ini_subsetting'
     $service        = 'pe-puppetserver'
@@ -176,13 +182,26 @@ class splunk_hec (
     }
   }
 
-  file { "${settings::confdir}/splunk_hec.yaml":
-    ensure  => file,
-    owner   => $owner,
-    group   => $group,
-    mode    => '0640',
-    content => epp('splunk_hec/splunk_hec.yaml.epp'),
-    notify  => Service[$service],
+  # Decide whether to write a settings file, and if so, how to write it. A
+  # settings file written to an agent node does not need to notify a service
+  # to restart.
+  if !$agent_node {
+    file { "${settings::confdir}/splunk_hec.yaml":
+      ensure  => file,
+      owner   => $owner,
+      group   => $group,
+      mode    => '0640',
+      content => epp('splunk_hec/splunk_hec.yaml.epp'),
+      notify  => Service[$service],
+    }
+  } elsif $agent_node and $events_reporting_enabled {
+    file { "${settings::confdir}/splunk_hec.yaml":
+      ensure  => file,
+      owner   => $owner,
+      group   => $group,
+      mode    => '0640',
+      content => epp('splunk_hec/splunk_hec.yaml.epp'),
+    }
   }
 
   if $events_reporting_enabled {

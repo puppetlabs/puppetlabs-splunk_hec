@@ -60,88 +60,144 @@ describe 'splunk_hec' do
     }
   end
 
-  let(:facts) do
-    { splunk_hec_is_pe: true }
+  let(:confdir) { Dir.pwd }
+  let(:event_forwarding_base) { "#{confdir}/pe_event_forwarding/processors.d" }
+
+  context 'on a server node' do
+    let(:facts) do
+      {
+        splunk_hec_is_pe: true,
+        fqdn:             'myhost.example.com',
+        puppet_server:    'myhost.example.com'
+      }
+    end
+
+    context 'enable_reports is false' do
+      let(:params) do
+        p = super()
+        p['enable_reports'] = false
+        p
+      end
+
+      it { is_expected.to have_pe_ini_setting_resource_count(0)    }
+      it { is_expected.to have_pe_ini_subsetting_resource_count(0) }
+      it { is_expected.not_to contain_file("#{event_forwarding_base}/splunk_hec") }
+      it { is_expected.not_to contain_file("#{event_forwarding_base}/splunk_hec/util_splunk_hec.rb") }
+      it { is_expected.not_to contain_file("#{event_forwarding_base}/splunk_hec.rb") }
+    end
+
+    context 'enable_reports is true' do
+      let(:params) do
+        p = super()
+        p['enable_reports'] = true
+        p
+      end
+
+      context "sets 'reports' setting to 'splunk_hec' (default behavior)" do
+        it { is_expected.to contain_pe_ini_subsetting('enable splunk_hec').with_subsetting('splunk_hec') }
+        it { is_expected.to have_pe_ini_setting_resource_count(0) }
+        it { is_expected.to have_pe_ini_subsetting_resource_count(1) }
+      end
+
+      context "set 'reports' setting to $reports if $reports != ''" do
+        let(:params) do
+          p = super()
+          p['reports'] = 'foo,bar,baz'
+          p
+        end
+
+        it { is_expected.to contain_notify('reports param deprecation warning') }
+        it { is_expected.to contain_pe_ini_setting('enable splunk_hec').with_value('foo,bar,baz') }
+        it { is_expected.to have_pe_ini_subsetting_resource_count(0) }
+      end
+    end
+
+    context 'disabled is set to true' do
+      let(:params) do
+        p = super()
+        p['disabled'] = true
+        p
+      end
+
+      it { is_expected.to compile }
+    end
+
+    context 'events_reporting_enabled' do
+      let(:params) do
+        p = super()
+        p['events_reporting_enabled'] = true
+        p
+      end
+
+      before(:each) do
+        MockFunction.new('pe_event_forwarding::base_path').expected.returns(Dir.pwd)
+      end
+
+      it {
+        is_expected.to contain_file("#{event_forwarding_base}/splunk_hec")
+          .with(ensure: 'directory')
+      }
+
+      it {
+        is_expected.to contain_file("#{event_forwarding_base}/splunk_hec/util_splunk_hec.rb")
+          .with(
+          ensure: 'file',
+          mode: '0755',
+        )
+      }
+
+      it {
+        is_expected.to contain_file("#{event_forwarding_base}/splunk_hec.rb")
+          .with(
+          ensure: 'file',
+          mode: '0755',
+        )
+      }
+    end
   end
 
-  context 'enable_reports is false' do
+  context 'on an agent node' do
+    let(:facts) do
+      {
+        fqdn:          'myagent.example.com',
+        puppet_server: 'mypuppetserver.example.com'
+      }
+    end
+
+    # enable_reports should always be false on an agent node.
     let(:params) do
       p = super()
       p['enable_reports'] = false
       p
     end
 
-    it { is_expected.to have_pe_ini_setting_resource_count(0) }
-    it { is_expected.to have_pe_ini_subsetting_resource_count(0) }
-  end
-
-  context 'enable_reports is true' do
-    let(:params) do
-      p = super()
-      p['enable_reports'] = true
-      p
+    context 'events_reporting not enabled' do
+      it { is_expected.to have_pe_ini_setting_resource_count(0)    }
+      it { is_expected.to have_pe_ini_subsetting_resource_count(0) }
+      it { is_expected.not_to contain_file("#{event_forwarding_base}/splunk_hec") }
+      it { is_expected.not_to contain_file("#{event_forwarding_base}/splunk_hec/util_splunk_hec.rb") }
+      it { is_expected.not_to contain_file("#{event_forwarding_base}/splunk_hec.rb") }
     end
 
-    context "sets 'reports' setting to 'splunk_hec' (default behavior)" do
-      it { is_expected.to contain_pe_ini_subsetting('enable splunk_hec').with_subsetting('splunk_hec') }
-      it { is_expected.to have_pe_ini_setting_resource_count(0) }
-      it { is_expected.to have_pe_ini_subsetting_resource_count(1) }
-    end
-
-    context "set 'reports' setting to $reports if $reports != ''" do
+    context 'events_reporting enabled' do
       let(:params) do
         p = super()
-        p['reports'] = 'foo,bar,baz'
+        p['events_reporting_enabled'] = true
         p
       end
 
-      it { is_expected.to contain_notify('reports param deprecation warning') }
-      it { is_expected.to contain_pe_ini_setting('enable splunk_hec').with_value('foo,bar,baz') }
+      it { is_expected.to have_pe_ini_setting_resource_count(0)    }
       it { is_expected.to have_pe_ini_subsetting_resource_count(0) }
+      it {
+        is_expected.to contain_file("#{confdir}/splunk_hec.yaml")
+          .with(
+            owner: 'root',
+            group: 'root',
+          )
+      }
+      it { is_expected.to contain_file("#{event_forwarding_base}/splunk_hec") }
+      it { is_expected.to contain_file("#{event_forwarding_base}/splunk_hec/util_splunk_hec.rb") }
+      it { is_expected.to contain_file("#{event_forwarding_base}/splunk_hec.rb") }
     end
-  end
-
-  context 'disabled is set to true' do
-    let(:params) do
-      p = super()
-      p['disabled'] = true
-      p
-    end
-
-    it { is_expected.to compile }
-  end
-
-  context 'events_reporting_enabled' do
-    let(:confdir) { Dir.pwd }
-    let(:params) do
-      p = super()
-      p['events_reporting_enabled'] = true
-      p
-    end
-
-    before(:each) do
-      MockFunction.new('pe_event_forwarding::base_path').expected.returns(Dir.pwd)
-    end
-
-    it {
-      is_expected.to contain_file("#{Dir.pwd}/pe_event_forwarding/processors.d/splunk_hec")
-        .with(ensure: 'directory')
-    }
-
-    it {
-      is_expected.to contain_file("#{Dir.pwd}/pe_event_forwarding/processors.d/splunk_hec/util_splunk_hec.rb")
-        .with(
-        ensure: 'file',
-        mode: '0755',
-      )
-    }
-
-    it {
-      is_expected.to contain_file("#{Dir.pwd}/pe_event_forwarding/processors.d/splunk_hec.rb")
-        .with(
-        ensure: 'file',
-        mode: '0755',
-      )
-    }
   end
 end
