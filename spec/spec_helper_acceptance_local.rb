@@ -76,6 +76,7 @@ def report_dir
 end
 
 def setup_manifest(disabled: false, url: 'http://localhost:8088/services/collector/event', with_event_forwarding: false)
+  manifest = ''
   params = {
     url:            url,
     token:          'abcd1234',
@@ -90,11 +91,14 @@ def setup_manifest(disabled: false, url: 'http://localhost:8088/services/collect
     params[:facts_terminus] = 'yaml'
   end
 
-  params[:events_reporting_enabled] = true if with_event_forwarding
+  if with_event_forwarding
+    manifest << add_event_forwarding
+    params[:events_reporting_enabled] = true
+    params[:orchestrator_data_filter] = ['options.scope.nodes', 'options.scope.blah', 'environment.name']
+  end
 
-  manifest = declare(:class, :splunk_hec, params)
+  manifest << declare(:class, :splunk_hec, params)
   manifest << add_service_resource unless puppet_user == 'pe-puppet'
-  manifest << add_event_forwarding if with_event_forwarding
   manifest
 end
 

@@ -70,3 +70,34 @@
 "events_reporting_enabled" : "<%= $splunk_hec::events_reporting_enabled %>"
 <% } -%>
 "event_types" : "<%= $splunk_hec::event_types %>"
+<% if $splunk_hec::orchestrator_data_filter { -%>
+"orchestrator_data_filter" :
+<% $splunk_hec::orchestrator_data_filter.each |$subset| {-%>
+        - <%= $subset %>
+<% } -%>
+<% } -%>
+<% if $splunk_hec::rbac_data_filter { -%>
+"rbac_data_filter" :
+<% $splunk_hec::rbac_data_filter.each |$subset| {-%>
+        - <%= $subset %>
+<% } -%>
+<% } -%>
+<% if $splunk_hec::classifier_data_filter { -%>
+"classifier_data_filter" :
+<% $splunk_hec::classifier_data_filter.each |$subset| {-%>
+        - <%= $subset %>
+<% } -%>
+<% } -%>
+<% if $splunk_hec::pe_console_data_filter { -%>
+"pe_console_data_filter" :
+<% $splunk_hec::pe_console_data_filter.each |$subset| {-%>
+        - <%= $subset %>
+<% } -%>
+<% } -%>
+<% if $splunk_hec::code_manager_data_filter { -%>
+"code_manager_data_filter" :
+<% $splunk_hec::code_manager_data_filter.each |$subset| {-%>
+        - <%= $subset %>
+<% } -%>
+<% } -%>
+

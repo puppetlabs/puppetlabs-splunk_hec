@@ -8,6 +8,13 @@ require 'yaml'
 require 'json'
 require 'time'
 
+# Rails has deep merge, but pure ruby does not. So we need to implement it ourselves.
+class ::Hash
+  def deep_merge(second)
+      merger = proc { |key, v1, v2| Hash === v1 && Hash === v2 ? v1.merge(v2, &merger) : v2 }
+      self.merge(second, &merger)
+  end
+end
 
 @confdir  = '/etc/puppetlabs/puppet'
 
@@ -106,16 +113,45 @@ def sourcetypetime(time, duration = 0)
   '%10.3f' % total.to_f
 end
 
-def extract_events(events_data, index)
+def extract_events(events_data, index, selectors)
   events_collector = []
+
   return unless !events_data['events'].nil?
+
   events_data['events'].map do |event|
+    collector = {}
+    data      = {}
+
+    selectors.each do |selector|
+      build_data(collector, event, selector.split('.'))
+      data = data.deep_merge(collector)
+    end unless selectors.nil?
+
     events_collector << {
       'time'       => sourcetypetime(event['created_timestamp'] || event['timestamp']),
       'host'       => settings['pe_console'],
       'sourcetype' => index,
-      'event'      => event
+      'event'      => data.empty? ? event : data
     }.to_json
   end
+
   "#{events_collector.join("\n")}\n"
+end
+
+def build_data(final_data, event, path)
+  if path.count == 1
+    if event[path[0]].nil?
+      puts "ERROR with last FILTER KEY; Check your filter parameter"
+    end
+    final_data[path[0]] = event[path[0]]
+    final_data
+  else
+    begin
+      dig_result          = event.dig(*path[0,1])
+      final_data[path[0]] = {}
+      build_data(final_data[path[0]], dig_result, path[1..-1])
+    rescue => e
+      puts "Potential ERROR with middle FILTER KEY: #{e.backtrace}"
+    end
+  end
 end
