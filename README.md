@@ -215,6 +215,32 @@ class profile::splunk_hec {
 
 The certificate provided to the `ssl_ca` parameter is a supplement to the system ca certificates store. By default, the Ruby classes that perform certificate validation will attempt to use the system certificates first, and then if the certificate cannot be validated there, it will load the ca file in `ssl_ca`. Occasionally, the system cert store will cause validation errors prior to checking the file at `ssl_ca`. To avoid this you can set `ignore_system_cert_store` to `true`. This will allow the code to use ONLY the file at `ssl_ca` to perform certificate validation.
 
+## PE Event Forwarding
+
+PE Customers can install the [`puppetlabs-pe_event_forwarding`](https://forge.puppet.com/modules/puppetlabs/pe_event_forwarding) module to gather events from the Puppet Orchestrator API and from the Activities API, and then use this module to process that data and send it to Splunk. To enable this feature in a standard installation where this module is already classified to a Puppet Server node and sending reports to Splunk:
+
+1. See the documenation for [`puppetlabs-pe_event_forwarding`](https://forge.puppet.com/modules/puppetlabs/pe_event_forwarding) for details on installing and configuring that module. That module will need to be installed and configured before moving on to the next step.
+2. Set the `events_reporting_enabled` parameter to `true`.
+
+By default the `event_types` parameter is configured to send all event types. You can choose which event types to send by setting this parameter to one or more of `orchestrator`, `rbac`, `classifier`, `pe-console`, or `code-manager`.
+
+### Sending from Non Server Nodes
+
+This feature can be configured to send these events from non server nodes if needed. To do this, on the chosen server:
+
+1. Classify and configure the [`puppetlabs-pe_event_forwarding`](https://forge.puppet.com/modules/puppetlabs/pe_event_forwarding) according to that module's documentation.
+
+2. Classify this module with the following parameter values:
+    ```puppet
+    class {'splunk_hec':
+      events_reporting_enabled => true,
+      url                      => "http://<splunk server name>:8088/services/collector/event",
+      token                    => '<splunk token>'
+    }
+    ```
+    Note: This manifest shows an end point with no SSL protection. To do SSL validation with this module you will have to do all of the steps detailed in the [SSL Configuration](#ssl-configuration) section, but ensuring you copy the certificate to the correct location on the chosen server where you are classifying `splunk_hec` and `pe_event_forwarding`, not the Puppet Server.
+
+
 ## Customized Reporting
 
 As of `0.8.0` and later the report processor can be configured to include [**Logs**](https://puppet.com/blog/which-logs-should-i-check-when-things-go-wrong/) and **Resource Events** along with the existing summary data. Because this data varies between runs and agents in Puppet, it is difficult to predict how much data you will use in Splunk as a result. However, this removes the need for configuring the **Detailed Report Generation** alerts in Splunk to retrieve that information; which may be useful for large installations that need to retrieve a large amount of data. You can now just send the information from Puppet directly.
