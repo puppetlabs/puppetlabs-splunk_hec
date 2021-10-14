@@ -3,3 +3,8 @@ acceptance:
   images: ['ubuntu-1804-x86_64']
   vars: |
     role: server
+fips_acceptance:
+  provisioner: abs
+  images:
+  - redhat-fips-7-x86_64
+  - ubuntu-1804-x86_64

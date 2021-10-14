@@ -17,6 +17,23 @@ namespace :acceptance do
 
     provision_list = ENV['PROVISION_LIST'] || 'acceptance'
     Rake::Task['litmus:provision_list'].invoke(provision_list)
+    inventory_hash = LitmusHelpers.inventory_hash_from_inventory_file
+    begin
+      # If a fips node is present, assign the correct roles to the fips node and the splunk node
+      fips_node = inventory_hash['groups'].detect {|g| g['name'] == 'ssh_nodes'}['targets'].detect {|t| t['facts']['platform'].match(/fips/)}
+      fips_node['vars'] = {'role' => 'server'}
+      splunk_node = inventory_hash['groups'].detect {|g| g['name'] == 'ssh_nodes'}['targets'].detect {|t| !t['facts']['platform'].match(/fips/)}
+      splunk_node['vars'] = {'role' => 'splunk_node'}
+    rescue => exception
+      puts 'no fips node found.'
+    end
+
+      # Remove bad username and password keys as a result of a provision module bug
+      inventory_hash['groups'].detect {|g| g['name'] == 'ssh_nodes'}['targets'].each do |target|
+        target['config']['ssh'].delete("password") if target['config']['ssh']['password'].nil?
+        target['config']['ssh'].delete("user") if target['config']['ssh']['user'].nil?
+      end
+      write_to_inventory_file(inventory_hash, 'spec/fixtures/litmus_inventory.yaml')
   end
 
   desc 'clone puppetlabs-pe_event_forwarding module to test host'
@@ -24,18 +41,33 @@ namespace :acceptance do
     puppetserver.bolt_upload_file('./spec/fixtures/modules/pe_event_forwarding', '/etc/puppetlabs/code/environments/production/modules')
   end
 
-  desc 'Sets up PE on puppetserver'
+  desc 'Sets up PE on the server'
   task :setup_pe do
-    puppetserver.bolt_run_script('spec/support/acceptance/install_pe.sh')
+    include ::BoltSpec::Run
+    inventory_hash = inventory_hash_from_inventory_file
+    target_nodes = find_targets(inventory_hash, 'ssh_nodes')
+
+    config = { 'modulepath' => File.join(Dir.pwd, 'spec', 'fixtures', 'modules') }
+
+    params = {}
+
+    params.merge(puppet_version: ENV['PUPPET_VERSION']) unless ENV['PUPPET_VERSION'].nil?
+
+    bolt_result = run_plan('splunk_hec::acceptance::server_setup', params, config: config, inventory: inventory_hash.clone)
   end
 
   desc 'Sets up the Splunk instance'
   task :setup_splunk_instance do
-    puts("Starting the Splunk instance at the puppetserver (#{puppetserver.uri})")
-    puppetserver.bolt_upload_file('./spec/support/acceptance/splunk', '/tmp/splunk')
-    puts puppetserver.bolt_run_script('spec/support/acceptance/start_splunk_instance.sh').stdout.chomp
+    splunk_setup_target = begin
+                            splunk_node
+                          rescue TargetNotFoundError
+                            puppetserver
+                          end
+    puts("Starting the Splunk instance at the puppetserver (#{splunk_setup_target.uri})")
+    splunk_setup_target.bolt_upload_file('./spec/support/acceptance/splunk', '/tmp/splunk')
+    puts splunk_setup_target.bolt_run_script('spec/support/acceptance/start_splunk_instance.sh').stdout.chomp
     # HEC token is hard coded because it will always be the same in the splunk container
-    instance, hec_token = "#{puppetserver.uri}:8088", 'abcd1234'
+    instance, hec_token = "#{splunk_setup_target.uri}:8088", 'abcd1234'
 
     # Update the inventory file
     puts('Updating the inventory.yaml file with the Splunk HEC credentials')
@@ -101,10 +133,15 @@ namespace :acceptance do
     end
   end
 
-  desc 'Teardown the setup'
+  desc 'Tear down the setup'
   task :tear_down do
     puts("Tearing down the test infrastructure ...\n")
     Rake::Task['litmus:tear_down'].invoke(puppetserver.uri)
+    begin
+      Rake::Task['litmus:tear_down'].invoke(splunk_node.uri)
+    rescue TargetNotFoundError
+      # This error means splunk server container was run on the puppetserver node.
+    end
     FileUtils.rm_f('spec/fixtures/litmus_inventory.yaml')
   end
 
