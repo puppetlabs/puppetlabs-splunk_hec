@@ -240,6 +240,12 @@ This feature can be configured to send these events from non server nodes if nee
     ```
     Note: This manifest shows an end point with no SSL protection. To do SSL validation with this module you will have to do all of the steps detailed in the [SSL Configuration](#ssl-configuration) section, but ensuring you copy the certificate to the correct location on the chosen server where you are classifying `splunk_hec` and `pe_event_forwarding`, not the Puppet Server.
 
+### Supported Puppet Versions For Event Forwarding
+
+The puppetlabs-pe_event_forwarding module that this feature depends on is compatible with PE versions in the 2019 range starting at 2019.8.7 and above, and then 2021 versions from 2021.2 and above.
+
+Versions in the PE 2019 series below 2019.8.7 and in the 2021 series in versions below 2021.2 did not recieve an update to some of the API methods in PE that are required for the puppetlabs-pe_event_forwarding module to function properly.
+
 
 ## Customized Reporting
 
