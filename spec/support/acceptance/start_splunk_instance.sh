@@ -28,7 +28,7 @@ function start_splunk() {
   echo 'Splunk container start succeeded.'
 }
 
-function centos_install_docker() {
+function yum_install_docker() {
   yum install -y yum-utils
   yum-config-manager \
     --add-repo \
@@ -55,15 +55,15 @@ function wait_for_compose() {
   done
 }
 
-CENTOS=$(cat /etc/*-release | grep CentOS)
+YUM=$(cat /etc/*-release | grep 'CentOS\|rhel')
 
 nodocker=$(which docker 2>&1 | grep "no docker")
 status=$?
 
 if [ ! -z "$nodocker" ]
 then
-  if [ ! -z "$CENTOS" ]; then
-    centos_install_docker
+  if [ ! -z "$YUM" ]; then
+    yum_install_docker
   fi
 else
   apt-get -qq update -y 1>&- 2>&-
