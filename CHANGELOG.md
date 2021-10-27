@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file. The format 
 
 - Forwarding from Non Puppet Server nodes. [#154](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/154)
 - Filtering of event types data. [#156](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/156)
+- FIPS Compatability [#159](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/159)
 
  ## [v1.0.1](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v1.0.1) (2021-10-04)
 

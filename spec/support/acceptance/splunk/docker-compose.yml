@@ -15,7 +15,7 @@ services:
     volumes:
       # default.yml is a mechanism to load splunk settings that would normally
       # be configured through the ui.
-      - ./default.yml:/tmp/defaults/default.yml
+      - ./defaults:/tmp/defaults
     ports:
       # localhost:8000 will bring up the web interface
       - "0.0.0.0:8000:8000"
