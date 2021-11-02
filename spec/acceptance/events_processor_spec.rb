@@ -33,10 +33,13 @@ describe 'Event Forwarding' do
     it 'Sets event properties correctly' do
       data   = report[0]['result']
       event  = JSON.parse(data['_raw'])
-      expect(data['source']).to                eql('http:splunk_hec_token')
-      expect(data['sourcetype']).to            eql('puppet:jobs')
-      expect(event['command']).to              eql('task')
-      expect(event['options']['transport']).to eql('pxp')
+
+      expect(data['source']).to                     eql('http:splunk_hec_token')
+      expect(data['sourcetype']).to                 eql('puppet:jobs')
+      expect(event['options']['scope']['nodes']).to eql([host_name])
+      expect(event['options']['blah']).to           be_nil
+      expect(event['environment']['name']).to       eql('production')
+      expect(event['options']['transport']).to      be_nil
     end
   end
 end

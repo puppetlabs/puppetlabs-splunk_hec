@@ -73,6 +73,11 @@ The following parameters are available in the `splunk_hec` class:
 * [`include_resources_corrective_change`](#include_resources_corrective_change)
 * [`summary_resources_format`](#summary_resources_format)
 * [`event_types`](#event_types)
+* [`orchestrator_data_filter`](#orchestrator_data_filter)
+* [`rbac_data_filter`](#rbac_data_filter)
+* [`classifier_data_filter`](#classifier_data_filter)
+* [`pe_console_data_filter`](#pe_console_data_filter)
+* [`code_manager_data_filter`](#code_manager_data_filter)
 * [`events_reporting_enabled`](#events_reporting_enabled)
 
 ##### <a name="url"></a>`url`
@@ -301,6 +306,46 @@ Determines which events should be forwarded to Splunk
 Allowed values are: 'orchestrator','rbac','classifier','pe-console','code-manager'
 
 Default value: `['orchestrator','rbac','classifier','pe-console','code-manager']`
+
+##### <a name="orchestrator_data_filter"></a>`orchestrator_data_filter`
+
+Data type: `Optional[Array]`
+
+Filters the jobs event data
+
+Default value: ``undef``
+
+##### <a name="rbac_data_filter"></a>`rbac_data_filter`
+
+Data type: `Optional[Array]`
+
+Filters the rbac event data
+
+Default value: ``undef``
+
+##### <a name="classifier_data_filter"></a>`classifier_data_filter`
+
+Data type: `Optional[Array]`
+
+Filters the classifier event data
+
+Default value: ``undef``
+
+##### <a name="pe_console_data_filter"></a>`pe_console_data_filter`
+
+Data type: `Optional[Array]`
+
+Filters the pe_console event data
+
+Default value: ``undef``
+
+##### <a name="code_manager_data_filter"></a>`code_manager_data_filter`
+
+Data type: `Optional[Array]`
+
+Filters the code_manager event data
+
+Default value: ``undef``
 
 ##### <a name="events_reporting_enabled"></a>`events_reporting_enabled`
 

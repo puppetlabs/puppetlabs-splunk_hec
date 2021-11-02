@@ -13,7 +13,7 @@ EVENT_SOURCETYPE = INDICES.select { |index| settings['event_types'].include? ind
 
 EVENT_SOURCETYPE.each_key do |index|
   next unless data[index]
-  data_to_send << extract_events(data[index], INDICES[index])
+  data_to_send << extract_events(data[index], INDICES[index], settings["#{index}_data_filter"])
 end
 
 submit_request data_to_send

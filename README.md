@@ -224,6 +224,27 @@ PE Customers can install the [`puppetlabs-pe_event_forwarding`](https://forge.pu
 
 By default the `event_types` parameter is configured to send all event types. You can choose which event types to send by setting this parameter to one or more of `orchestrator`, `rbac`, `classifier`, `pe-console`, or `code-manager`.
 
+### Filtering Event Data
+
+To filter the event data, one can set the following parameters:
+* `orchestrator_data_filter`
+* `rbac_data_filter`
+* `classifier_data_filter`
+* `pe_console_data_filter`
+* `code_manager_data_filter`
+
+The default (no filter set) will send all the data received from the event type. The filters must begin with the top level keys of the event data. One can look at the data in Splunk to see/determine what the top level keys are in the event data.
+
+The format of setting these filters is an array of strings and within the string, you separate the different properties of a single path with a dot `.` and continue till the desired value.
+Here's an example of a correctly constructed filter:
+`['options.scope.nodes', 'report.id', 'environment.name']`
+
+**NOTE:**
+
+* You cannot step into arrays. The result of attempting this will return the selected key containing the array as a key of an empty hash.
+* If a key selected does not exist (ie. `['options.foo']`), it will return the key with a `null` value.
+* If there are two incorrect keys such as `['options.foo.baz']`, it will query only up until the first invalid key and return the first incorrect key as an empty hash.
+
 ### Sending from Non Server Nodes
 
 This feature can be configured to send these events from non server nodes if needed. To do this, on the chosen server:

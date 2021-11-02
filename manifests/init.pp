@@ -77,6 +77,16 @@
 # @param [Optional[Array]] event_types
 #   Determines which events should be forwarded to Splunk
 #   Allowed values are: 'orchestrator','rbac','classifier','pe-console','code-manager'
+# @param [Optional[Array]] orchestrator_data_filter
+#   Filters the jobs event data
+# @param [Optional[Array]] rbac_data_filter
+#   Filters the rbac event data
+# @param [Optional[Array]] classifier_data_filter
+#   Filters the classifier event data
+# @param [Optional[Array]] pe_console_data_filter
+#   Filters the pe_console event data
+# @param [Optional[Array]] code_manager_data_filter
+#   Filters the code_manager event data
 class splunk_hec (
   String $url,
   String $token,
@@ -106,6 +116,11 @@ class splunk_hec (
   Optional[Boolean] $include_resources_corrective_change = false,
   String $summary_resources_format                       = 'hash',
   Optional[Array] $event_types                           = ['orchestrator','rbac','classifier','pe-console','code-manager'],
+  Optional[Array] $orchestrator_data_filter              = undef,
+  Optional[Array] $rbac_data_filter                      = undef,
+  Optional[Array] $classifier_data_filter                = undef,
+  Optional[Array] $pe_console_data_filter                = undef,
+  Optional[Array] $code_manager_data_filter              = undef,
 ) {
 
   $agent_node = $facts['fqdn'] != $facts['puppet_server']
