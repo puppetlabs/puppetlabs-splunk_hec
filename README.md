@@ -271,7 +271,7 @@ Versions in the PE 2019 series below 2019.8.7 and in the 2021 series in versions
 
 ## Customized Reporting
 
-As of `0.8.0` and later the report processor can be configured to include [**Logs**](https://puppet.com/blog/which-logs-should-i-check-when-things-go-wrong/) and **Resource Events** along with the existing summary data. Because this data varies between runs and agents in Puppet, it is difficult to predict how much data you will use in Splunk as a result. However, this removes the need for configuring the **Detailed Report Generation** alerts in Splunk to retrieve that information; which may be useful for large installations that need to retrieve a large amount of data. You can now just send the information from Puppet directly.
+As of `0.8.0` and later the report processor can be configured to include [**Logs**](https://puppet.com/docs/puppet/latest/format_report.html#puppet::util::log) and [**Resource Events**](https://puppet.com/docs/puppet/latest/format_report.html#puppet::resource::status) along with the existing summary data. Because this data varies between runs and agents in Puppet, it is difficult to predict how much data you will use in Splunk as a result. However, this removes the need for configuring the **Detailed Report Generation** alerts in Splunk to retrieve that information; which may be useful for large installations that need to retrieve a large amount of data. You can now just send the information from Puppet directly.
 
 Add one or more of these parameters based on the desired outcome, these apply to the state of the puppet runs. You cannot filter by facts on which nodes these are in effect for. As such, you can get ***logs when a puppet run fails***, but not *logs when a `windows` server puppet run fails*.
 
@@ -299,14 +299,14 @@ By default this type of reporting is not enabled.
 
 ##### include_logs_catalog_failure
 
-`Boolean`: Include logs if a [catalog](https://puppet.com/docs/puppet/6/subsystem_catalog_compilation.html) fails to compile. This is a more specific type of failure that indicates a server-side issue.
+`Boolean`: Include logs if a [catalog](https://puppet.com/docs/puppet/latest/subsystem_catalog_compilation.html) fails to compile. This is a more specific type of failure that indicates a server-side issue.
 
   * `true`
   * `false`
 
 ##### include_logs_corrective_change
 
-`Boolean`: Include logs if a there is a [corrective change](https://puppet.com/docs/pe/2019.8/analyze_changes_across_runs.html) (a PE only feature) - indicating drift was detected from the last time puppet ran on the system.
+`Boolean`: Include logs if a there is a [corrective change](https://puppet.com/docs/pe/latest/analyze_changes_across_runs.html) (a PE only feature) - indicating drift was detected from the last time puppet ran on the system.
 
   * `true`
   * `false`
