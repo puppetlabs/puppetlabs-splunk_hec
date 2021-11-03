@@ -45,6 +45,7 @@ class Puppet::Application::Splunk_hec < Puppet::Application
         event = event_template.clone
         event['host'] = name
         event['event'] = content[serv.to_s]
+        event['event']['pe_console'] = pe_console
         event['event']['pe_service'] = serv.to_s
         Puppet.info 'Submitting metrics to Splunk'
         submit_request(event)
