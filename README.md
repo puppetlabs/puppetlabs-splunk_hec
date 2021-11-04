@@ -10,10 +10,11 @@
 6. [Customized Reporting](#customized-reporting)
 7. [Tasks](#tasks)
 8. [Advanced Settings](#advanced-settings)
-9. [Advanced Topics](#advanced-topics)
-10. [Known Issues](#known-issues)
-11. [Breaking Changes](#breaking-changes)
-12. [Release Process](#release-process)
+9. [FIPS Mode](#fips-mode)
+10. [Advanced Topics](#advanced-topics)
+11. [Known Issues](#known-issues)
+12. [Breaking Changes](#breaking-changes)
+13. [Release Process](#release-process)
 
 ## Overview
 
@@ -407,6 +408,24 @@ If you are already using a custom `splunk_routes.yaml`, these are the equivalent
   ```
   puppet config set route_file /etc/puppetlabs/puppet/splunk_routes.yaml --section master
   ```
+
+## FIPS Mode
+
+This module has some limitations in a FIPS environment.
+
+1. SSL configuration steps and parameters are different under FIPS
+
+    - The CA certificate PEM file must be appended to the end of the `localcacert` file. Find the path to the file by running [`puppet config print localcacert`](https://puppet.com/docs/puppet/7/configuration.html#localcacert). Keep in mind that this file will be overwritten any time the puppetserver is upgraded to a new version and this step will have to be done again. Consider copying a backup of this file to a safe location before attempting to add content to it until correct funtioning of the Puppet Server and this module can be validated.
+
+      ```
+      ca_file=`puppet config print localcacert`
+      cp $ca_file ~/$ca_file
+      cat my_splunk_hec_ca.pem >> $ca_file
+      ```
+
+    - None of the SSL parameters for the module will now have any effect, but ignoring the system certificate store will be the default behavior, so there is no need to use the `ignore_system_certificate_store` parameter.
+
+2. None of the timeout parameters will have any effect. The module must use a different FIPS compliant HTTP client. This client does not support setting custom request timeouts and so those parameters are ignored when running in FIPS mode.
 
 ## Advanced Topics
 

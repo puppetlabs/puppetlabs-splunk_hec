@@ -2,7 +2,6 @@ require 'puppet'
 require 'puppet/util'
 require 'fileutils'
 require 'net/http'
-require 'net/https'
 require 'uri'
 require 'yaml'
 require 'json'
@@ -60,14 +59,26 @@ module Puppet::Util::Splunk_hec
     # we want users to be able to provide different tokens per sourcetype if they want
     source_type = body['sourcetype'].split(':')[1]
     token_name = "token_#{source_type}"
-    http = create_http(source_type)
     token = settings[token_name] || settings['token'] || raise(Puppet::Error, 'Must provide token parameter to splunk class')
-    req = Net::HTTP::Post.new(@uri.path.to_str)
-    req.add_field('Authorization', "Splunk #{token}")
-    req.add_field('Content-Type', 'application/json')
-    req.content_type = 'application/json'
-    req.body = body.to_json
-    http.request(req)
+    if settings['fips_enabled']
+      splunk_url = URI.parse(get_splunk_url(source_type))
+      headers = {
+        'Authorization' => "Splunk #{token}",
+        'Content-Type'  => 'application/json'
+      }
+
+      client = Puppet.runtime[:http]
+      client.post(splunk_url, body.to_json, headers: headers)
+    else
+      require 'net/https'
+      http = create_http(source_type)
+      req = Net::HTTP::Post.new(@uri.path.to_str)
+      req.add_field('Authorization', "Splunk #{token}")
+      req.add_field('Content-Type', 'application/json')
+      req.content_type = 'application/json'
+      req.body = body.to_json
+      http.request(req)
+    end
   end
 
   def store_event(event)

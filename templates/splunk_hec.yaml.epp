@@ -100,4 +100,6 @@
         - <%= $subset %>
 <% } -%>
 <% } -%>
-
+<% if $facts['fips_enabled'] { -%>
+"fips_enabled" : "true"
+<% } -%>
