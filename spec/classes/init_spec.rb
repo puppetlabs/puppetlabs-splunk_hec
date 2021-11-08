@@ -10,6 +10,10 @@ describe 'splunk_hec' do
     Service { 'pe-puppetserver':
     }
 
+    # Define the puppetserver service
+    Service { 'puppetserver':
+    }
+
     # pe_ini_setting is a PE-only resource. Since PE modules are private, we
     # make the resource a defined type for the unit tests. Note that we still
     # have to use pe_ini_setting instead of ini_setting for backwards compatibility.
@@ -62,13 +66,16 @@ describe 'splunk_hec' do
 
   let(:confdir) { Dir.pwd }
   let(:event_forwarding_base) { "#{confdir}/pe_event_forwarding/processors.d" }
+  let(:facts) do
+    {
+      splunk_hec_agent_only_node: false
+    }
+  end
 
   context 'on a server node' do
     let(:facts) do
       {
-        splunk_hec_is_pe: true,
-        fqdn:             'myhost.example.com',
-        puppet_server:    'myhost.example.com'
+        splunk_hec_is_pe: true
       }
     end
 
@@ -157,18 +164,16 @@ describe 'splunk_hec' do
   end
 
   context 'on an agent node' do
-    let(:facts) do
-      {
-        fqdn:          'myagent.example.com',
-        puppet_server: 'mypuppetserver.example.com'
-      }
-    end
-
     # enable_reports should always be false on an agent node.
     let(:params) do
       p = super()
       p['enable_reports'] = false
       p
+    end
+    let(:facts) do
+      {
+        splunk_hec_agent_only_node: true
+      }
     end
 
     context 'events_reporting not enabled' do
