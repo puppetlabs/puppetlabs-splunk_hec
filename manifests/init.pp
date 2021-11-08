@@ -22,6 +22,8 @@
 #   Disables the splunk_hec report processor
 # @param [Boolean] manage_routes
 #   When false, will not automatically send facts to splunk_hec
+# @param [Boolean] events_reporting_enabled
+#   When true, will send data from PE Event Forwarding module to Splunk
 # @param [String] facts_terminus
 #   Ensure that facts get saved to puppetdb
 # @param [String] facts_cache_terminus
