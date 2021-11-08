@@ -4,6 +4,9 @@
 #
 # @example
 #   pe_event_forwarding::acceptance::pe_server
+#
+# @param [Optional[String]] puppet_version
+#   Sets the version of Puppet Server to install
 plan splunk_hec::acceptance::server_setup(
   Optional[String] $puppet_version = '2019.8.7',
 ) {

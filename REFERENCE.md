@@ -53,6 +53,7 @@ The following parameters are available in the `splunk_hec` class:
 * [`record_event`](#record_event)
 * [`disabled`](#disabled)
 * [`manage_routes`](#manage_routes)
+* [`events_reporting_enabled`](#events_reporting_enabled)
 * [`facts_terminus`](#facts_terminus)
 * [`facts_cache_terminus`](#facts_cache_terminus)
 * [`reports`](#reports)
@@ -78,7 +79,6 @@ The following parameters are available in the `splunk_hec` class:
 * [`classifier_data_filter`](#classifier_data_filter)
 * [`pe_console_data_filter`](#pe_console_data_filter)
 * [`code_manager_data_filter`](#code_manager_data_filter)
-* [`events_reporting_enabled`](#events_reporting_enabled)
 
 ##### <a name="url"></a>`url`
 
@@ -129,6 +129,14 @@ Default value: ``false``
 Data type: `Boolean`
 
 When false, will not automatically send facts to splunk_hec
+
+Default value: ``false``
+
+##### <a name="events_reporting_enabled"></a>`events_reporting_enabled`
+
+Data type: `Boolean`
+
+When true, will send data from PE Event Forwarding module to Splunk
 
 Default value: ``false``
 
@@ -347,14 +355,6 @@ Filters the code_manager event data
 
 Default value: ``undef``
 
-##### <a name="events_reporting_enabled"></a>`events_reporting_enabled`
-
-Data type: `Boolean`
-
-
-
-Default value: ``false``
-
 ## Tasks
 
 ### <a name="bolt_apply"></a>`bolt_apply`
@@ -468,7 +468,7 @@ The following parameters are available in the `splunk_hec::acceptance::pe_server
 
 Data type: `Optional[String]`
 
-
+Sets the version of the PE to install
 
 Default value: `'2019.8.7'`
 
@@ -476,7 +476,7 @@ Default value: `'2019.8.7'`
 
 Data type: `Optional[Hash]`
 
-
+Sets PE settings including password
 
 Default value: `{password => 'puppetlabs'}`
 
@@ -529,7 +529,7 @@ The following parameters are available in the `splunk_hec::acceptance::server_se
 
 Data type: `Optional[String]`
 
-
+Sets the version of Puppet Server to install
 
 Default value: `'2019.8.7'`
 

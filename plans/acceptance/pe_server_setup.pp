@@ -4,6 +4,11 @@
 #
 # @example
 #   pe_event_forwarding::acceptance::pe_server_setup
+#
+# @param [Optional[String]] version
+#   Sets the version of the PE to install
+# @param [Optional[Hash]] pe_settings
+#   Sets PE settings including password
 plan splunk_hec::acceptance::pe_server_setup(
   Optional[String] $version = '2019.8.7',
   Optional[Hash] $pe_settings = {password => 'puppetlabs'}
