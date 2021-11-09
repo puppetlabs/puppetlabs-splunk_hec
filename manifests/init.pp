@@ -125,7 +125,7 @@ class splunk_hec (
   Optional[Array] $code_manager_data_filter              = undef,
 ) {
 
-  $agent_node = $facts['fqdn'] != $facts['puppet_server']
+  $agent_node = $facts['splunk_hec_agent_only_node']
 
   # Account for the differences in Puppet Enterprise and Open Source and Agent
   if $agent_node {
