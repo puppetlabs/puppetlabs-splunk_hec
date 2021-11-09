@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       module_version:
+        description: 'The new version you would like to release'
         required: true
 
 jobs:
@@ -44,11 +45,15 @@ jobs:
           echo "COMMIT_BODY_NOTE=$(echo -n "${commit_body} **Note:** You can use https://github.com/${{ github.repository }}/compare/${{ steps.most_recent_tag.outputs.tag  }}...${{ env.GITHUB_BRANCH }} to see all the new commits that have landed since the previous release.")" >> $GITHUB_ENV
         fi
 
+    - name: Release Prep
+      uses: docker://puppet/pdk:nightly
+      with:
+        args: 'release prep --version=${{ github.event.inputs.module_version }} --skip-changelog'
+
     - name: Generate the release prep commit
       run: |
         git checkout -b release_prep
-        bundle install --with release_prep
-        pdk release prep --version=${{ github.event.inputs.module_version }} --skip-changelog
+        bundle install
         git add .
         git -c user.name=${{ github.actor }} -c user.email=${{ github.actor }}@users.noreply.github.com commit -m "${{ env.COMMIT_TITLE }}" -m "${{ env.COMMIT_BODY_MAIN }}" -m '' -m '${{ env.COMMIT_BODY_NOTE }}'
         git push --set-upstream origin release_prep --force
