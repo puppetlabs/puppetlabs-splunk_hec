@@ -1,4 +1,5 @@
 # @summary Install PE Server
+# @api private
 #
 # Install PE Server
 #

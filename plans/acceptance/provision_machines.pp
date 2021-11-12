@@ -1,4 +1,5 @@
 # @summary Provisions machines
+# @api private
 #
 # @param [Optional[String]] using
 #   provision service

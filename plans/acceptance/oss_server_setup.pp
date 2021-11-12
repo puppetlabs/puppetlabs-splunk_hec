@@ -2,6 +2,7 @@
 # adds a puppet hosts entry. It also restarts the Puppet service and starts a
 # puppet agent run.
 # @summary Installs open source Puppet.
+# @api private
 #
 # @param [Optional[String]] collection
 #   puppet version collection name
