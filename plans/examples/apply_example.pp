@@ -1,9 +1,9 @@
-# Example of submitting the report from a bolt apply block to Splunk users PE for pcp/hosts
+# Example of submitting a report from apply Function to Splunk.
 # @param [Optional[String[1]]] plan_guid
 #   A guid used to identify invocation of the plan (should change each run)
 # @param [Optional[String[1]]] plan_name
 #   The name of the plan being run (shouldn't change each run)
-plan splunk_hec::apply_example (
+plan splunk_hec::examples::apply_example (
   Optional[String[1]] $plan_guid,
   Optional[String[1]] $plan_name,
 ) {
