@@ -28,12 +28,17 @@ namespace :acceptance do
       puts 'no fips node found.'
     end
 
-      # Remove bad username and password keys as a result of a provision module bug
-      inventory_hash['groups'].detect {|g| g['name'] == 'ssh_nodes'}['targets'].each do |target|
-        target['config']['ssh'].delete("password") if target['config']['ssh']['password'].nil?
-        target['config']['ssh'].delete("user") if target['config']['ssh']['user'].nil?
-      end
-      write_to_inventory_file(inventory_hash, 'spec/fixtures/litmus_inventory.yaml')
+    # Remove bad username and password keys as a result of a provision module bug
+    inventory_hash['groups'].detect {|g| g['name'] == 'ssh_nodes'}['targets'].each do |target|
+      target['config']['ssh'].delete("password") if target['config']['ssh']['password'].nil?
+      target['config']['ssh'].delete("user") if target['config']['ssh']['user'].nil?
+    end
+    write_to_inventory_file(inventory_hash, 'spec/fixtures/litmus_inventory.yaml')
+
+    # if provision_list == 'fips_acceptance_pooler'
+    #   output = puppetserver.bolt_run_script('spec/support/acceptance/enable-fips.sh')
+    #   puts "stdout:\n#{output.stdout}\n\nstderr:\n#{output.stderr}"
+    # end
   end
 
   desc 'clone puppetlabs-pe_event_forwarding module to test host'
