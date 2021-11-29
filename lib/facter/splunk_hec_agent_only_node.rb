@@ -5,6 +5,6 @@
 # easier to code different code paths through the init.pp file.
 Facter.add(:splunk_hec_agent_only_node) do
   setcode do
-    Puppet.settings['server'] != Puppet.settings['node_name_value']
+    Dir['/lib/systemd/system/*puppetserver.service'].empty?
   end
 end
