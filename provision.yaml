@@ -3,12 +3,6 @@ acceptance:
   images: ['ubuntu-1804-x86_64']
   vars: |
     role: server
-fips_acceptance_pooler:
-  provisioner: abs
-  images:
-  - centos-8-x86_64
-  vars: |
-    role: server
 fips_acceptance:
   provisioner: abs
   images:

@@ -2,6 +2,54 @@ namespace :acceptance do
   require_relative '../spec/support/acceptance/helpers'
   include TargetHelpers
 
+  def get_fips_node(inventory)
+    pre_prepped_node = inventory['groups'].detect {|g| g['name'] == 'ssh_nodes'}['targets'].detect {|t| t['facts']['platform'].match(/fips/)}
+    first_node = if inventory['groups'].detect {|g| g['name'] == 'ssh_nodes'}['targets'].count == 2
+                   inventory['groups'].detect {|g| g['name'] == 'ssh_nodes'}['targets'][0]
+                 end
+    pre_prepped_node || first_node
+  end
+
+  def get_splunk_node(inventory)
+    inventory['groups'].detect {|g| g['name'] == 'ssh_nodes'}['targets'][1]
+  end
+
+  desc 'Add node roles and fix username/pass bug'
+  task :fix_inventory_file do
+    inventory_hash = LitmusHelpers.inventory_hash_from_inventory_file
+    begin
+      # If there is more than one node in the inventory, we will assume that one is going ot fips and one will run the container
+      if fips_node = get_fips_node(inventory_hash)
+        fips_node['vars'] = {'role' => 'server'}
+        splunk_node = get_splunk_node(inventory_hash)
+        splunk_node['vars'] = {'role' => 'splunk_node'}
+      end
+    end
+
+    # Remove bad username and password keys as a result of a provision module bug unless your in CLOUD_CI
+    unless ENV['CLOUD_CI']
+      inventory_hash['groups'].detect {|g| g['name'] == 'ssh_nodes'}['targets'].each do |target|
+        target['config']['ssh'].delete("password") if target['config']['ssh']['password'].nil?
+        target['config']['ssh'].delete("user") if target['config']['ssh']['user'].nil?
+      end
+    end
+
+    write_to_inventory_file(inventory_hash, 'spec/fixtures/litmus_inventory.yaml')
+  end
+
+  desc 'Fips prep a centos machine'
+  task :fips_prep do
+    if fips_node
+      output = puppetserver.bolt_run_script('spec/support/acceptance/enable-fips.sh')
+
+      # After the enable fips script, we need to restart the server node, but this will always result
+      # in an error. We put this in it's own command because we're going to swallow this error and
+      # we don't want to swallow any other errors along with it.
+      puppetserver.run_shell('shutdown -r now') rescue nil
+      puts "stdout:\n#{output.stdout}\n\nstderr:\n#{output.stderr}"
+    end
+  end
+
   desc 'Provisions the VMs. This is currently just the puppetserver'
   task :provision_vms do
     if File.exist?('spec/fixtures/litmus_inventory.yaml')
@@ -9,36 +57,16 @@ namespace :acceptance do
       begin
         uri = puppetserver.uri
         puts("A puppetserver VM at '#{uri}' has already been set up")
+        raise 'oopsie'
         next
       rescue TargetNotFoundError
       # Pass-thru, this means that we haven't set up the puppetserver VM
       end
     end
-
     provision_list = ENV['PROVISION_LIST'] || 'acceptance'
     Rake::Task['litmus:provision_list'].invoke(provision_list)
-    inventory_hash = LitmusHelpers.inventory_hash_from_inventory_file
-    begin
-      # If a fips node is present, assign the correct roles to the fips node and the splunk node
-      fips_node = inventory_hash['groups'].detect {|g| g['name'] == 'ssh_nodes'}['targets'].detect {|t| t['facts']['platform'].match(/fips/)}
-      fips_node['vars'] = {'role' => 'server'}
-      splunk_node = inventory_hash['groups'].detect {|g| g['name'] == 'ssh_nodes'}['targets'].detect {|t| !t['facts']['platform'].match(/fips/)}
-      splunk_node['vars'] = {'role' => 'splunk_node'}
-    rescue => exception
-      puts 'no fips node found.'
-    end
-
-    # Remove bad username and password keys as a result of a provision module bug
-    inventory_hash['groups'].detect {|g| g['name'] == 'ssh_nodes'}['targets'].each do |target|
-      target['config']['ssh'].delete("password") if target['config']['ssh']['password'].nil?
-      target['config']['ssh'].delete("user") if target['config']['ssh']['user'].nil?
-    end
-    write_to_inventory_file(inventory_hash, 'spec/fixtures/litmus_inventory.yaml')
-
-    # if provision_list == 'fips_acceptance_pooler'
-    #   output = puppetserver.bolt_run_script('spec/support/acceptance/enable-fips.sh')
-    #   puts "stdout:\n#{output.stdout}\n\nstderr:\n#{output.stderr}"
-    # end
+    Rake::Task['acceptance:fix_inventory_file'].invoke
+    Rake::Task['acceptance:fips_prep'].invoke
   end
 
   desc 'clone puppetlabs-pe_event_forwarding module to test host'

@@ -15,6 +15,10 @@ plan splunk_hec::acceptance::server_setup(
   $localhost = get_targets('localhost')
   run_command('sleep 15s', $localhost)
 
+  $puppet_server =  get_targets('*').filter |$n| { $n.vars['role'] == 'server' }
+
+  wait_until_available($puppet_server)
+
   if $puppet_version =~ /puppet/ {
     run_plan(
       'splunk_hec::acceptance::oss_server_setup',
