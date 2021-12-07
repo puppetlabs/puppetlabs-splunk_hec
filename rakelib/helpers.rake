@@ -39,7 +39,8 @@ namespace :acceptance do
 
   desc 'Fips prep a centos machine'
   task :fips_prep do
-    if fips_node
+    inventory_hash = LitmusHelpers.inventory_hash_from_inventory_file
+    if fips_node = get_fips_node(inventory_hash)
       output = puppetserver.bolt_run_script('spec/support/acceptance/enable-fips.sh')
 
       # After the enable fips script, we need to restart the server node, but this will always result

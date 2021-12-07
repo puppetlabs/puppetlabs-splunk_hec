@@ -1,0 +1,33 @@
+Starting: plan splunk_hec::acceptance::server_setup
+Starting: command 'sleep 15s' on localhost
+Finished: command 'sleep 15s' with 0 failures in 15.0 sec
+Starting: plan splunk_hec::acceptance::pe_server_setup
+Starting: command 'sleep 15s' on localhost
+Finished: command 'sleep 15s' with 0 failures in 15.0 sec
+Starting: plan deploy_pe::provision_master
+Starting: command 'mktemp' on localhost
+Finished: command 'mktemp' with 0 failures in 0.0 sec
+Starting: file upload from /tmp/tmp.0X9OSMruK3 to /tmp/tmp.0X9OSMruK3 on unruly-hostler.delivery.puppetlabs.net
+Finished: file upload from /tmp/tmp.0X9OSMruK3 to /tmp/tmp.0X9OSMruK3 with 0 failures in 0.66 sec
+Starting: Determining if FIPS is enabled on unruly-hostler.delivery.puppetlabs.net
+Finished: Determining if FIPS is enabled with 0 failures in 0.34 sec
+Starting: Downloading the PE tarball on unruly-hostler.delivery.puppetlabs.net
+Finished: Downloading the PE tarball with 0 failures in 17.27 sec
+Starting: Installing PE, this may take a while on unruly-hostler.delivery.puppetlabs.net
+Finished: Installing PE, this may take a while with 0 failures in 298.76 sec
+Starting: task deploy_pe::run_agent on unruly-hostler.delivery.puppetlabs.net
+Finished: task deploy_pe::run_agent with 0 failures in 195.11 sec
+Finished: plan deploy_pe::provision_master in 8 min, 33 sec
+Starting: command 'puppet infra console_password --password=pie
+echo 'pie' | puppet access login --lifetime 1y --username admin
+puppet infrastructure tune | sed "s,\\x1B\\[[0-9;]*[a-zA-Z],,g" > /etc/puppetlabs/code/environments/production/data/common.yaml
+puppet agent -t
+' on unruly-hostler.delivery.puppetlabs.net
+Finished: command 'puppet infra console_password --password=pie
+echo 'pie' | puppet access login --lifetime 1y --username admin
+puppet infrastructure tune | sed "s,\\x1B\\[[0-9;]*[a-zA-Z],,g" > /etc/puppetlabs/code/environments/production/data/common.yaml
+puppet agent -t
+' with 1 failure in 160.24 sec
+Finished: plan splunk_hec::acceptance::pe_server_setup in 11 min, 28 sec
+Finished: plan splunk_hec::acceptance::server_setup in 11 min, 43 sec
+Plan completed successfully with no result
