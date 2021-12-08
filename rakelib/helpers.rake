@@ -46,7 +46,10 @@ namespace :acceptance do
       # After the enable fips script, we need to restart the server node, but this will always result
       # in an error. We put this in it's own command because we're going to swallow this error and
       # we don't want to swallow any other errors along with it.
-      puppetserver.run_shell('shutdown -r now') rescue nil
+      puppetserver.run_shell('shutdown -r +1') rescue nil
+      sleep 70
+      puts puppetserver.run_shell('cat /proc/sys/crypto/fips_enabled').stdout
+      puts puppetserver.run_shell('puppet facts | grep \'platform_tag\\|fips_enabled\'').stdout
       puts "stdout:\n#{output.stdout}\n\nstderr:\n#{output.stderr}"
     end
   end
@@ -134,6 +137,7 @@ namespace :acceptance do
   desc 'Installs the module on the puppetserver'
   task :install_module do
     puppetserver.run_shell("rm -rf '/etc/puppetlabs/puppet/splunk_hec.yaml'")
+    puts puppetserver.run_shell('cat /etc/profile.d/puppet-agent.sh').stdout
     Rake::Task['litmus:install_module'].invoke(puppetserver.uri)
     puppetserver.bolt_upload_file('./spec/support/acceptance/splunk_hec.yaml', '/etc/puppetlabs/puppet/splunk_hec.yaml')
   end

@@ -36,5 +36,6 @@ plan splunk_hec::acceptance::pe_server_setup(
           puppet agent -t
           | CMD
 
-  run_command($cmd, $puppet_server, '_catch_errors' => true)
+  $infra_command_result = run_command($cmd, $puppet_server, '_catch_errors' => true)
+  out::message(run_command('puppet facts | grep fips', $puppet_server))
 }
