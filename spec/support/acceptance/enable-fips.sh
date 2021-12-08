@@ -2,6 +2,8 @@
 #
 # Script to enable FIPS on centos/rhel. This has been tested on centos-7.
 
+CLOUD_CI=$1
+
 # Step 1: Disable PRELINKING.
 if [ ! -f /etc/sysconfig/prelink ]; then
     echo "PRELINKING=no" > /etc/sysconfig/prelink

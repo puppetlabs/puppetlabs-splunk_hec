@@ -41,7 +41,7 @@ namespace :acceptance do
   task :fips_prep do
     inventory_hash = LitmusHelpers.inventory_hash_from_inventory_file
     if fips_node = get_fips_node(inventory_hash)
-      output = puppetserver.bolt_run_script('spec/support/acceptance/enable-fips.sh')
+      output = puppetserver.bolt_run_script('spec/support/acceptance/enable-fips.sh', arguments: [ENV['CLOUD_CI']])
 
       # After the enable fips script, we need to restart the server node, but this will always result
       # in an error. We put this in it's own command because we're going to swallow this error and
