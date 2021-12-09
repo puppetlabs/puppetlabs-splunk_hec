@@ -24,15 +24,11 @@ yum -y install openssl-1.0.2k-8.el7.x86_64
 yum -y install dracut-fips
 yum -y install dracut-fips-aesni
 
-[ "$CLOUD_CI" =  PROD ] &&
-   SERVER_LOGIN=foobar123@prod.example.com ||
-   SERVER_LOGIN=foobar987@test.example.com
-
 if [ -n $CLOUD_CI ]
 then
   if [ $CLOUD_CI == "true" ]
   then
-    yum install -y https://download-ib01.fedoraproject.org/pub/epel/8/Everything/x86_64/Packages/h/haveged-1.9.14-1.el8.x86_64.rpm
+    yum -y install https://download-ib01.fedoraproject.org/pub/epel/8/Everything/x86_64/Packages/h/haveged-1.9.14-1.el8.x86_64.rpm
   else
     yum -y install https://artifactory.delivery.puppetlabs.net/artifactory/rpm__remote_epel/8/Everything/x86_64/Packages/h/haveged-1.9.14-1.el8.x86_64.rpm
   fi

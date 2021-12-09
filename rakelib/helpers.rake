@@ -52,7 +52,7 @@ namespace :acceptance do
         # we don't want to swallow any other errors along with it.
       end
       sleep 70
-      puts puppetserver.run_shell('cat /proc/sys/crypto/fips_enabled').stdout
+      puts "fips_enabled: #{puppetserver.run_shell('cat /proc/sys/crypto/fips_enabled').stdout}"
     end
   end
 
