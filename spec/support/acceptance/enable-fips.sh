@@ -32,7 +32,7 @@ if [ -n $CLOUD_CI ]
 then
   if [ $CLOUD_CI == "true" ]
   then
-    yum install -y haveged-1.9.14-1
+    yum install -y https://download-ib01.fedoraproject.org/pub/epel/8/Everything/x86_64/Packages/h/haveged-1.9.14-1.el8.x86_64.rpm
   else
     yum -y install https://artifactory.delivery.puppetlabs.net/artifactory/rpm__remote_epel/8/Everything/x86_64/Packages/h/haveged-1.9.14-1.el8.x86_64.rpm
   fi
