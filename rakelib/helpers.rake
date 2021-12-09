@@ -42,15 +42,17 @@ namespace :acceptance do
     inventory_hash = LitmusHelpers.inventory_hash_from_inventory_file
     if fips_node = get_fips_node(inventory_hash)
       output = puppetserver.bolt_run_script('spec/support/acceptance/enable-fips.sh', arguments: [ENV['CLOUD_CI']])
+      puts "stdout:\n#{output.stdout}\n\nstderr:\n#{output.stderr}"
 
-      # After the enable fips script, we need to restart the server node, but this will always result
-      # in an error. We put this in it's own command because we're going to swallow this error and
-      # we don't want to swallow any other errors along with it.
-      puppetserver.run_shell('shutdown -r +1') rescue nil
+      begin
+        shutdown = puppetserver.run_shell('shutdown -r now')
+      rescue => exception
+        # After the enable fips script, we need to restart the server node, but this will always result
+        # in an error. We put this in it's own command because we're going to swallow this error and
+        # we don't want to swallow any other errors along with it.
+      end
       sleep 70
       puts puppetserver.run_shell('cat /proc/sys/crypto/fips_enabled').stdout
-      puts puppetserver.run_shell('puppet facts | grep \'platform_tag\\|fips_enabled\'').stdout
-      puts "stdout:\n#{output.stdout}\n\nstderr:\n#{output.stderr}"
     end
   end
 
