@@ -1,0 +1,34 @@
+---
+version: 2
+groups:
+- name: docker_nodes
+  targets: []
+- name: ssh_nodes
+  targets:
+  - uri: illicit-paean.delivery.puppetlabs.net
+    config:
+      transport: ssh
+      ssh:
+        host-key-check: false
+    facts:
+      provisioner: abs
+      platform: ubuntu-1804-x86_64
+      job_id: iac-task-pid-27275-1638988205437
+    vars:
+      role: server
+- name: winrm_nodes
+  targets: []
+- name: splunk_nodes
+  targets:
+  - uri: illicit-paean.delivery.puppetlabs.net:8088
+    config:
+      transport: remote
+      remote:
+        hec_token: abcd1234
+    facts:
+      platform: splunk_hec
+      provisioner: docker
+      container_name: splunk_enterprise_1
+    vars:
+      roles:
+      - splunk_instance

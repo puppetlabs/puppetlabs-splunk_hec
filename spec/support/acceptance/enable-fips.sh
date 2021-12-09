@@ -65,10 +65,13 @@ grub2-mkconfig -o /boot/grub2/grub.cfg
 # Update rngd config to seed /dev/random from /dev/urandom - needed for testing, bad idea for production
 # Taken from https://developers.redhat.com/blog/2017/10/05/entropy-rhel-based-cloud-instances/
 systemctl enable haveged.service
-systemctl enable rngd.service
 mkdir -p /etc/systemd/system/rngd.d/
 cat <<'DOWNWITHENTROPY' > /etc/systemd/system/rngd.d/customexec.conf
 [Service]
 ExecStart=
 ExecStart=/sbin/rngd -f -r /dev/urandom
 DOWNWITHENTROPY
+
+systemctl daemon-reload
+
+systemctl enable rngd.service
