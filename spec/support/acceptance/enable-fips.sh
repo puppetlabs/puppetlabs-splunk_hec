@@ -15,7 +15,7 @@ if [ -f /usr/sbin/prelink ]; then
     prelink -u -a
 fi
 
-# Step 1.5: Experimental 
+# Step 1.5: Experimental
 # Install updated version of system openssl that is aligned with what gets installed
 # as part of openssl-devel install
 yum -y install openssl-1.0.2k-8.el7.x86_64
@@ -43,7 +43,7 @@ init_ramfs="/boot/initramfs-2.6.32-358.el6.x86_64.img"
 #cp $init_ramfs "$init_ramfs".back
 dracut -v -f
 
-# Step 5: Manipulate /etc/default/grub to enable FIPs 
+# Step 5: Manipulate /etc/default/grub to enable FIPs
 grub_file="/etc/default/grub"
 
 fips_bootblk="fips=1 boot="$boot_blkid
@@ -56,7 +56,7 @@ sed -i "/GRUB_DISABLE_RECOVERY/i \
   $grub_linux_cmdline" $grub_file
 
 # Step 6: Generate /etc/grub2.cfg
-grub2-mkconfig -o /boot/grub2/grub.cfg 
+grub2-mkconfig -o /boot/grub2/grub.cfg
 
 # Update rngd config to seed /dev/random from /dev/urandom - needed for testing, bad idea for production
 # Taken from https://developers.redhat.com/blog/2017/10/05/entropy-rhel-based-cloud-instances/

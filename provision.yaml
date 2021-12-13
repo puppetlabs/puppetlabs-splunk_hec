@@ -8,3 +8,8 @@ fips_acceptance:
   images:
   - redhat-fips-7-x86_64
   - ubuntu-1804-x86_64
+fips_acceptance_testing:
+  provisioner: abs
+  images:
+  - centos-7-x86_64
+  - centos-7-x86_64

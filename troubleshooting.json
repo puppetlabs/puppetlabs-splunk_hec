@@ -1,0 +1,151 @@
+[{
+  "date": "2021-11-19 13:36:01 -0500",
+  "severity": "DEBUG",
+  "source": "pe_event_forwarding",
+  "message": "Starting classifier with 715 event(s)",
+  "exit_code": 0
+}, {
+  "date": "2021-11-19 13:36:02 -0500",
+  "severity": "DEBUG",
+  "source": "pe_event_forwarding",
+  "message": "Starting rbac with 34544 event(s)",
+  "exit_code": 0
+}, {
+  "date": "2021-11-19 13:36:03 -0500",
+  "severity": "DEBUG",
+  "source": "pe_event_forwarding",
+  "message": "Starting pe-console with 37892 event(s)",
+  "exit_code": 0
+}, {
+  "date": "2021-11-19 13:36:03 -0500",
+  "severity": "DEBUG",
+  "source": "pe_event_forwarding",
+  "message": "Starting code-manager with 236 event(s)",
+  "exit_code": 0
+}, {
+  "date": "2021-11-19 13:38:01 -0500",
+  "severity": "DEBUG",
+  "source": "pe_event_forwarding",
+  "message": "Lockfile was successfully created.",
+  "exit_code": 0
+}, {
+  "date": "2021-11-19 13:38:01 -0500",
+  "severity": "DEBUG",
+  "source": "pe_event_forwarding",
+  "message": "Starting classifier with 715 event(s)",
+  "exit_code": 0
+}, {
+  "date": "2021-11-19 13:38:02 -0500",
+  "severity": "DEBUG",
+  "source": "pe_event_forwarding",
+  "message": "Starting rbac with 34544 event(s)",
+  "exit_code": 0
+}, {
+  "date": "2021-11-19 13:38:03 -0500",
+  "severity": "DEBUG",
+  "source": "pe_event_forwarding",
+  "message": "Starting pe-console with 37892 event(s)",
+  "exit_code": 0
+}, {
+  "date": "2021-11-19 13:38:03 -0500",
+  "severity": "DEBUG",
+  "source": "pe_event_forwarding",
+  "message": "Starting code-manager with 236 event(s)",
+  "exit_code": 0
+}, {
+  "date": "2021-11-19 13:38:03 -0500",
+  "severity": "DEBUG",
+  "source": "splunk_hec.rb",
+  "message": "",
+  "exit_code": 0
+}, {
+  "date": "2021-11-19 13:38:03 -0500",
+  "severity": "DEBUG",
+  "source": "pe_event_forwarding",
+  "message": "Invoked splunk_hec.rb took 0.195776593 second(s) to complete.",
+  "exit_code": 0
+}, {
+  "date": "2021-11-19 13:38:03 -0500",
+  "severity": "DEBUG",
+  "source": "pe_event_forwarding",
+  "message": "Total execution time is: 2.173369754 second(s)",
+  "exit_code": 0
+}, {
+  "date": "2021-11-19 13:40:01 -0500",
+  "severity": "DEBUG",
+  "source": "pe_event_forwarding",
+  "message": "Lockfile was successfully created.",
+  "exit_code": 0
+}, {
+  "date": "2021-11-19 13:40:02 -0500",
+  "severity": "DEBUG",
+  "source": "pe_event_forwarding",
+  "message": "Starting classifier with 715 event(s)",
+  "exit_code": 0
+}, {
+  "date": "2021-11-19 13:40:02 -0500",
+  "severity": "DEBUG",
+  "source": "pe_event_forwarding",
+  "message": "Starting rbac with 34546 event(s)",
+  "exit_code": 0
+}, {
+  "date": "2021-11-19 13:40:03 -0500",
+  "severity": "DEBUG",
+  "source": "pe_event_forwarding",
+  "message": "Starting pe-console with 37892 event(s)",
+  "exit_code": 0
+}, {
+  "date": "2021-11-19 13:40:03 -0500",
+  "severity": "DEBUG",
+  "source": "pe_event_forwarding",
+  "message": "Starting code-manager with 236 event(s)",
+  "exit_code": 0
+}, {
+  "date": "2021-11-19 13:40:04 -0500",
+  "severity": "DEBUG",
+  "source": "splunk_hec.rb",
+  "message": "",
+  "exit_code": 0
+}, {
+  "date": "2021-11-19 13:40:04 -0500",
+  "severity": "DEBUG",
+  "source": "pe_event_forwarding",
+  "message": "Invoked splunk_hec.rb took 0.185067465 second(s) to complete.",
+  "exit_code": 0
+}, {
+  "date": "2021-11-19 13:40:04 -0500",
+  "severity": "DEBUG",
+  "source": "pe_event_forwarding",
+  "message": "Total execution time is: 2.322863675 second(s)",
+  "exit_code": 0
+}, {
+  "date": "2021-11-19 13:42:02 -0500",
+  "severity": "DEBUG",
+  "source": "pe_event_forwarding",
+  "message": "Lockfile was successfully created.",
+  "exit_code": 0
+}, {
+  "date": "2021-11-19 13:42:02 -0500",
+  "severity": "DEBUG",
+  "source": "pe_event_forwarding",
+  "message": "Starting classifier with 715 event(s)",
+  "exit_code": 0
+}, {
+  "date": "2021-11-19 13:42:02 -0500",
+  "severity": "DEBUG",
+  "source": "pe_event_forwarding",
+  "message": "Starting rbac with 34546 event(s)",
+  "exit_code": 0
+}, {
+  "date": "2021-11-19 13:42:03 -0500",
+  "severity": "DEBUG",
+  "source": "pe_event_forwarding",
+  "message": "Starting pe-console with 37893 event(s)",
+  "exit_code": 0
+}, {
+  "date": "2021-11-19 13:42:03 -0500",
+  "severity": "DEBUG",
+  "source": "pe_event_forwarding",
+  "message": "Starting code-manager with 236 event(s)",
+  "exit_code": 0
+}]

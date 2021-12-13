@@ -46,12 +46,13 @@ namespace :acceptance do
 
       begin
         shutdown = puppetserver.run_shell('shutdown -r now')
-      rescue => exception
+      rescue Exception => ex
         # After the enable fips script, we need to restart the server node, but this will always result
         # in an error. We put this in it's own command because we're going to swallow this error and
         # we don't want to swallow any other errors along with it.
+        puts 'Gulp'
       end
-      sleep 70
+      sleep 30
       puts "fips_enabled: #{puppetserver.run_shell('cat /proc/sys/crypto/fips_enabled').stdout}"
     end
   end
