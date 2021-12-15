@@ -239,4 +239,13 @@ echo;grep $uuid /etc/default/grub
 mydate=`date '+%Y%m%d_%H_%M_%S'`;echo $mydate
 cp -v /etc/ssh/sshd_config{,.$mydate}
 
+
+###### the command to check this after reboot is: sysctl crypto.fips_enabled
+echo -e "\n\tScript has completed.  \n\tSystem must be rebooted for fips to be enabled.  \n\tPlease check the following 2 files for sane entries:\n\t/etc/default/grub \n\t${mygrub}.  \n\n\tAlso, --AFTER--REBOOT--as-root-- run sysctl crypto.fips_enabled and the output must be \n\t'crypto.fips_enabled = 1' \n"
+
+##### without this, the disa provided stig checker fails fips compliance, you're welcome
+rpm -q prelink > /dev/null && rpm -e prelink > /dev/null
+##### Same with this...
+/bin/chmod 0600 /etc/ssh/ssh_host*key
+
 exit 0
