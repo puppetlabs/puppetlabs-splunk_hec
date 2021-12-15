@@ -233,5 +233,10 @@ echo -e "\n\tThe next line shows the new grub line with fips in the two location
 grep $uuid ${mygrub} | grep linux16
 echo;grep $uuid /etc/default/grub
 
+### warning ### warning ###
+### Note, if you do not change Ciphers and MACs prior to reboot, you will NOT be able to ssh to the system.  That could be a problem depending on the distance or difficulty of getting a console or physical access to fix after reboot.  Be warned.
+###
+mydate=`date '+%Y%m%d_%H_%M_%S'`;echo $mydate
+cp -v /etc/ssh/sshd_config{,.$mydate}
 
 exit 0
