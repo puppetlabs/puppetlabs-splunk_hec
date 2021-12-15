@@ -44,15 +44,15 @@ namespace :acceptance do
       output = puppetserver.bolt_run_script('spec/support/acceptance/enable-fips.sh', arguments: [ENV['CLOUD_CI']])
       puts "stdout:\n#{output.stdout}\n\nstderr:\n#{output.stderr}"
 
-      begin
-        shutdown = puppetserver.run_shell('shutdown -r now')
-      rescue Exception => ex
-        # After the enable fips script, we need to restart the server node, but this will always result
-        # in an error. We put this in it's own command because we're going to swallow this error and
-        # we don't want to swallow any other errors along with it.
-        puts 'Gulp'
-      end
-      sleep 30
+      # begin
+      #   shutdown = puppetserver.run_shell('shutdown -r now')
+      # rescue Exception => ex
+      #   # After the enable fips script, we need to restart the server node, but this will always result
+      #   # in an error. We put this in it's own command because we're going to swallow this error and
+      #   # we don't want to swallow any other errors along with it.
+      #   puts 'Gulp'
+      # end
+      # sleep 30
       puts "fips_enabled: #{puppetserver.run_shell('cat /proc/sys/crypto/fips_enabled').stdout}"
       puts "Centos-release: #{puppetserver.run_shell('cat /etc/centos-release').stdout}"
     end
