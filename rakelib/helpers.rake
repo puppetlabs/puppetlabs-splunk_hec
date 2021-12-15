@@ -54,6 +54,7 @@ namespace :acceptance do
       end
       sleep 30
       puts "fips_enabled: #{puppetserver.run_shell('cat /proc/sys/crypto/fips_enabled').stdout}"
+      puts "Centos-release: #{puppetserver.run_shell('cat /etc/centos-release').stdout}"
     end
   end
 
