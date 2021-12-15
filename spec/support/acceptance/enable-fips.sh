@@ -208,5 +208,30 @@ mydate=`date '+%Y%m%d_%H_%M_%S'`
 /bin/cp ${mygrub}{,.$mydate}
 grubby --update-kernel=$(grubby --default-kernel) --args=fips=1
 
+###### this displays the kernel lines in grub with fips
+grep fips ${mygrub} | grep linux16
+
+###### that Red Hat solution I cited earlier in the comments, this is where this came from
+# set the uuid variable to be used later
+uuid=$(findmnt -no uuid /boot)
+echo -e "\n\t Just for reference, the /boot uuid is: ($uuid)\n"
+
+###### that Red Hat solution I cited earlier in the comments, this is where this came from
+# update  the boot uuid for fips in ${mygrub}
+# the 2nd line is to satisfy the disa stig checker which checks every single menu entry linux16 line.  without it, the check fails.
+[[ -n $uuid ]] && grubby --update-kernel=$(grubby --default-kernel) --args=boot=UUID=${uuid}
+# update 7/23/2019.  The next line is excessive.  The impact of the next line, when the system goes to emergency mode, and you select **any** kernel at grub, you are faced with a system that **will not** accept any password.  I've removed it for the rescue kernel.
+## so maybe your security people require this. **IF** the do, then know that when you go to emergency mode, you **will** require the grub password (know it in advance!) and you ought to set **one time only** the grub line to fips=0 **for a one time only boot**
+# 
+#sed -i "/linux16 \/vmlinuz-0-rescue/ s/$/ fips=1 boot=UUID=${uuid}/"  ${mygrub}
+
+###### that Red Hat solution I cited earlier in the comments, this is where this came from
+# update /etc/default/grub for subsequent kernel updates. this APPENDS to the end of the line.  
+sed -i "/^GRUB_CMDLINE_LINUX/ s/\"$/  fips=1 boot=UUID=${uuid}\"/" /etc/default/grub
+grep -q GRUB_CMDLINE_LINUX_DEFAULT /etc/default/grub || echo 'GRUB_CMDLINE_LINUX_DEFAULT="fips=1"' >> /etc/default/grub
+echo -e "\n\tThe next line shows the new grub line with fips in the two locations below:\n"
+grep $uuid ${mygrub} | grep linux16
+echo;grep $uuid /etc/default/grub
+
 
 exit 0
