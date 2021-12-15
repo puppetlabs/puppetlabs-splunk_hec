@@ -163,4 +163,50 @@ fi
 ############################################################################################
 ############################################################################################
 
+##### this is where the script actually begins to make modifications.  
+# -- everything before was either a check, or a backup of a config
+# Only install dracut-fips if it is not installed (that's the "||" below)
+rpm -q dracut-fips > /dev/null || yum -y install dracut-fips
+
+if [ "$(egrep -qw aes /proc/cpuinfo && echo YES || echo no)" == "YES" ]; then
+   yum -y install dracut-fips-aesni
+fi
+
+##### warn people not to bail at this point, pause 4 seconds so they might see it if they're watching the screen.
+echo -e "\n\n\n\tWARNING!!!: \n\tWARNING!!!DO NOT INTERRUPT THIS SCRIPT OR IT CAN CAUSE \n\tTHE SYSTEM TO BECOME UNBOOTABLE!!!!\n\tPlease be patient it will take some time...\n\tWARNING!!!\n\tWARNING\n\n\n"
+sleep 4
+##### next disable prelinking
+rpm -q prelink >/dev/null && grep PRELINKING /etc/sysconfig/prelink 
+
+##### slightly lesser known use of sed, it only flips PRELINKING to "no"
+# this flips "yes" to "no" in the prelink config file, next kills prelinking
+rpm -q prelink >/dev/null && sed -i '/^PRELINKING/s,yes,no,' /etc/sysconfig/prelink
+rpm -q prelink >/dev/null && prelink -uav 2>/tmp/err
+/bin/cp -v /etc/aide.conf{,.undofips}
+rpm -q prelink >/dev/null && sed -i 's/^NORMAL.*/NORMAL = FIPSR+sha512/' /etc/aide.conf
+
+##### update the $mydate variable which is used to copy off backups of various configs throughout the rest of this script.
+mydate=`date '+%Y%m%d_%H_%M_%S'`;echo $mydate
+
+###-----###
+# back up existing initramfs
+mv -v /boot/initramfs-$(uname -r).img{,.$mydate}
+
+##### warn people not to bail at this point, pause 4 seconds so they might see it if they're watching the screen.
+##### really, don't interrupt this portion.
+echo -e "\n\n\n\tWARNING!!!: \n\tWARNING!!!DO NOT INTERRUPT THIS SCRIPT OR IT CAN CAUSE \n\tTHE SYSTEM TO BECOME UNBOOTABLE!!!!\n\tPlease be patient it will take some time...\n\tWARNING!!!\n\tWARNING!!!\n\n\n"
+# this pauses as before so the person running this script gets a chance to see the above, it also is to allow the $mydate variable below to get a new value
+sleep 3
+# run dracut
+dracut
+mydate=`date '+%Y%m%d_%H_%M_%S'`
+###-----###
+
+###### The Red Hat solution I cited earlier in the comments, this is where this came from
+# this section below updates /boot/grub/grub.cfg with fips and the uuid of the boot device
+# first back it up
+/bin/cp ${mygrub}{,.$mydate}
+grubby --update-kernel=$(grubby --default-kernel) --args=fips=1
+
+
 exit 0
