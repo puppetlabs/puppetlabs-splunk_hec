@@ -225,6 +225,9 @@ echo -e "\n\t Just for reference, the /boot uuid is: ($uuid)\n"
 # 
 #sed -i "/linux16 \/vmlinuz-0-rescue/ s/$/ fips=1 boot=UUID=${uuid}/"  ${mygrub}
 
+###### that Red Hat solution I cited earlier in the comments, this is where this came from
+# update /etc/default/grub for subsequent kernel updates. this APPENDS to the end of the line.  
+sed -i "/^GRUB_CMDLINE_LINUX/ s/\"$/  fips=1 boot=UUID=${uuid}\"/" /etc/default/grub
 
 ### warning ### warning ###
 ### Note, if you do not change Ciphers and MACs prior to reboot, you will NOT be able to ssh to the system.  That could be a problem depending on the distance or difficulty of getting a console or physical access to fix after reboot.  Be warned.
