@@ -233,4 +233,6 @@ echo -e "\n\tThe next line shows the new grub line with fips in the two location
 grep $uuid ${mygrub} | grep linux16
 echo;grep $uuid /etc/default/grub
 
+
+
 exit 0
