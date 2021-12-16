@@ -239,10 +239,10 @@ echo;grep $uuid /etc/default/grub
 mydate=`date '+%Y%m%d_%H_%M_%S'`;echo $mydate
 cp -v /etc/ssh/sshd_config{,.$mydate}
 
+# without this, no ssh, really, ask me how I know
+sed -i 's/^Cipher.*/Ciphers aes128-ctr,aes192-ctr,aes256-ctr/' /etc/ssh/sshd_config
+sed -i 's/^MACs.*/MACs hmac-sha2-256,hmac-sha2-512/' /etc/ssh/sshd_config
 
-# bread crumbs
-touch /root/fipsinstalled
-chattr +i /root/fipsinstalled
 
 ###### the command to check this after reboot is: sysctl crypto.fips_enabled
 echo -e "\n\tScript has completed.  \n\tSystem must be rebooted for fips to be enabled.  \n\tPlease check the following 2 files for sane entries:\n\t/etc/default/grub \n\t${mygrub}.  \n\n\tAlso, --AFTER--REBOOT--as-root-- run sysctl crypto.fips_enabled and the output must be \n\t'crypto.fips_enabled = 1' \n"
