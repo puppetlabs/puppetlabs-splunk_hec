@@ -233,21 +233,21 @@ jobs:
         run: |
           buildevents cmd $TRACE_ID $STEP_ID 'rake acceptance:fips_prep' -- bundle exec rake 'acceptance:fips_prep'
 
-      # - name: Install server
-      #   run: |
-      #     buildevents cmd $TRACE_ID $STEP_ID 'bolt plan run splunk_hec::acceptance::server_setup' -- bundle exec bolt --modulepath spec/fixtures/modules plan run splunk_hec::acceptance::server_setup puppet_version='${{ matrix.puppet_version }}' -i ./$INVENTORY_PATH
+      - name: Install server
+        run: |
+          buildevents cmd $TRACE_ID $STEP_ID 'bolt plan run splunk_hec::acceptance::server_setup' -- bundle exec bolt --modulepath spec/fixtures/modules plan run splunk_hec::acceptance::server_setup puppet_version='${{ matrix.puppet_version }}' -i ./$INVENTORY_PATH
 
-      # - name: Install module
-      #   run: |
-      #     buildevents cmd $TRACE_ID $STEP_ID 'rake litmus:install_module' -- bundle exec rake 'litmus:install_module'
+      - name: Install module
+        run: |
+          buildevents cmd $TRACE_ID $STEP_ID 'rake litmus:install_module' -- bundle exec rake 'litmus:install_module'
 
-      # - name: Set up Splunk instance
-      #   run: |
-      #     buildevents cmd $TRACE_ID $STEP_ID 'rake acceptance::setup_splunk_instance' -- bundle exec rake acceptance:setup_splunk_instance
+      - name: Set up Splunk instance
+        run: |
+          buildevents cmd $TRACE_ID $STEP_ID 'rake acceptance::setup_splunk_instance' -- bundle exec rake acceptance:setup_splunk_instance
 
-      # - name: Run tests
-      #   run: |
-      #     buildevents cmd $TRACE_ID $STEP_ID 'rake acceptance::run_tests' -- bundle exec rake acceptance:run_tests
+      - name: Run tests
+        run: |
+          buildevents cmd $TRACE_ID $STEP_ID 'rake acceptance::run_tests' -- bundle exec rake acceptance:run_tests
 
       - name: "Honeycomb: Record deployment times"
         if: ${{ always() }}
