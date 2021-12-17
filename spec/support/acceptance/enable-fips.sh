@@ -228,10 +228,8 @@ echo -e "\n\t Just for reference, the /boot uuid is: ($uuid)\n"
 ###### that Red Hat solution I cited earlier in the comments, this is where this came from
 # update /etc/default/grub for subsequent kernel updates. this APPENDS to the end of the line.  
 sed -i "/^GRUB_CMDLINE_LINUX/ s/\"$/  fips=1 boot=UUID=${uuid}\"/" /etc/default/grub
-# grep -q GRUB_CMDLINE_LINUX_DEFAULT /etc/default/grub || echo 'GRUB_CMDLINE_LINUX_DEFAULT="fips=1"' >> /etc/default/grub
-echo -e "\n\tThe next line shows the new grub line with fips in the two locations below:\n"
-grep $uuid ${mygrub} | grep linux16
-echo;grep $uuid /etc/default/grub
+grep -q GRUB_CMDLINE_LINUX_DEFAULT /etc/default/grub || echo 'GRUB_CMDLINE_LINUX_DEFAULT="fips=1"' >> /etc/default/grub
+
 
 ### warning ### warning ###
 ### Note, if you do not change Ciphers and MACs prior to reboot, you will NOT be able to ssh to the system.  That could be a problem depending on the distance or difficulty of getting a console or physical access to fix after reboot.  Be warned.
