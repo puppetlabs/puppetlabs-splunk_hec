@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file. The format 
 
 [Current Diff](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v1.1.0..main)
 
+### Added
+
+- Ability to collect all facts against a blocklist. [#170](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/170)
+
 ## [v1.1.0](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v1.1.0) (2021-11-09)
 
 [Full Changelog](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v1.0.1..v1.1.0)
