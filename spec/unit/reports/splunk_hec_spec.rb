@@ -48,4 +48,22 @@ describe 'Splunk_hec report processor: miscellaneous tests' do
       end
     end
   end
+
+  context 'when fips is enabled' do
+    let(:settings_hash) { super().merge('fips_enabled' => true) }
+
+    it 'the correct function get called' do
+      expect_requested_client(:fips)
+      processor.process
+    end
+  end
+
+  context 'when fips is not enabled' do
+    let(:settings_hash) { super().merge('fips_enabled' => false) }
+
+    it 'the correct function is called' do
+      expect_requested_client(:non_fips)
+      processor.process
+    end
+  end
 end

@@ -55,29 +55,36 @@ module Puppet::Util::Splunk_hec
     http
   end
 
+  def send_with_fips(body, source_type, token)
+    splunk_url = URI.parse(get_splunk_url(source_type))
+    headers = {
+      'Authorization' => "Splunk #{token}",
+      'Content-Type'  => 'application/json'
+    }
+
+    client = Puppet.runtime[:http]
+    client.post(splunk_url, body.to_json, headers: headers)
+  end
+
+  def send_with_nonfips(body, source_type, token)
+    http = create_http(source_type)
+    req = Net::HTTP::Post.new(@uri.path.to_str)
+    req.add_field('Authorization', "Splunk #{token}")
+    req.add_field('Content-Type', 'application/json')
+    req.content_type = 'application/json'
+    req.body = body.to_json
+    http.request(req)
+  end
+
   def submit_request(body)
     # we want users to be able to provide different tokens per sourcetype if they want
     source_type = body['sourcetype'].split(':')[1]
     token_name = "token_#{source_type}"
     token = settings[token_name] || settings['token'] || raise(Puppet::Error, 'Must provide token parameter to splunk class')
     if settings['fips_enabled']
-      splunk_url = URI.parse(get_splunk_url(source_type))
-      headers = {
-        'Authorization' => "Splunk #{token}",
-        'Content-Type'  => 'application/json'
-      }
-
-      client = Puppet.runtime[:http]
-      client.post(splunk_url, body.to_json, headers: headers)
+      send_with_fips(body, source_type, token)
     else
-      require 'net/https'
-      http = create_http(source_type)
-      req = Net::HTTP::Post.new(@uri.path.to_str)
-      req.add_field('Authorization', "Splunk #{token}")
-      req.add_field('Content-Type', 'application/json')
-      req.content_type = 'application/json'
-      req.body = body.to_json
-      http.request(req)
+      send_with_nonfips(body, source_type, token)
     end
   end
 

@@ -75,7 +75,19 @@ def report_dir
   @report_dir ||= puppetserver.run_shell(cmd).stdout.chomp
 end
 
-def setup_manifest(disabled: false, url: 'http://localhost:8088/services/collector/event', with_event_forwarding: false)
+def setup_manifest(disabled: false, url: nil, with_event_forwarding: false)
+  if url.nil?
+    # This block is for checking whether we are testing locally or on the CloudCI
+    # splunk_node.uri will work locally, but bc of the discrepancy of uri and hostname
+    # on the CloudCI, and we use localhost
+    begin
+      splunk_runner = splunk_node.uri
+    rescue
+      splunk_runner = 'localhost'
+    end
+    url = "http://#{splunk_runner}:8088/services/collector/event"
+  end
+
   manifest = ''
   params = {
     url:            url,
@@ -139,7 +151,12 @@ def get_splunk_report(earliest, latest, sourcetype = 'puppet:summary')
     'https://localhost:8089/services/search/jobs/export -d output_mode=json '\
     "-d search='search sourcetype=\"#{sourcetype}\" AND earliest=\"#{start_time}\" AND latest=\"#{end_time}\"'"
   sleep 1
-  response = puppetserver.run_shell(query_command).stdout
+  begin
+    splunk_runner = splunk_node
+  rescue
+    splunk_runner = puppetserver
+  end
+  response = splunk_runner.run_shell(query_command).stdout
   JSON.parse("[#{response.split.join(',')}]")
 end
 
