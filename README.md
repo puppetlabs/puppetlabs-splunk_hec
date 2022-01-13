@@ -7,14 +7,15 @@
 3. [Installation](#installation)
 4. [Custom Installation](#custom-installation)
 5. [SSL Configuration](#ssl-configuration)
-6. [Customized Reporting](#customized-reporting)
-7. [Tasks](#tasks)
-8. [Advanced Settings](#advanced-settings)
-9. [FIPS Mode](#fips-mode)
-10. [Advanced Topics](#advanced-topics)
-11. [Known Issues](#known-issues)
-12. [Breaking Changes](#breaking-changes)
-13. [Release Process](#release-process)
+6. [Fact Configuration](#fact-configuration)
+7. [Customized Reporting](#customized-reporting)
+8. [Tasks](#tasks)
+9. [Advanced Settings](#advanced-settings)
+10. [FIPS Mode](#fips-mode)
+11. [Advanced Topics](#advanced-topics)
+12. [Known Issues](#known-issues)
+13. [Breaking Changes](#breaking-changes)
+14. [Release Process](#release-process)
 
 ## Overview
 
@@ -215,6 +216,17 @@ class profile::splunk_hec {
 ```
 
 The certificate provided to the `ssl_ca` parameter is a supplement to the system ca certificates store. By default, the Ruby classes that perform certificate validation will attempt to use the system certificates first, and then if the certificate cannot be validated there, it will load the ca file in `ssl_ca`. Occasionally, the system cert store will cause validation errors prior to checking the file at `ssl_ca`. To avoid this you can set `ignore_system_cert_store` to `true`. This will allow the code to use ONLY the file at `ssl_ca` to perform certificate validation.
+
+## Fact Configuration
+
+The following parameters are utilized to configure which facts (including custom facts) you would like to send to Splunk:
+
+  * `collect_facts`
+  * `facts_blocklist` (**Optional**)
+
+To configure which facts to collect add the `collect_facts` parameter to the `splunk_hec` class and modify the array of facts presented.
+    * To collect **all facts** available at the time of the Puppet run, add the special value `all.facts` to the `collect_facts` array.
+    * When collecting **all facts**, you can configure the optional parameter `facts_blocklist` with an array of facts that should not be collected.
 
 ## PE Event Forwarding
 

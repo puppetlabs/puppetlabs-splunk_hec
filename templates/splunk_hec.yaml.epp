@@ -2,11 +2,17 @@
 ---
 "url" : "<%= $splunk_hec::url %>"
 "token" : "<%= $splunk_hec::token %>"
-"facts" :
+"facts.allowlist" :
 <% $splunk_hec::collect_facts.each |$fact| {-%>
         - <%= $fact %>
 <% } -%>
-<% if $splunk_hec::pe_console{ -%>
+<% unless $splunk_hec::facts_blocklist == undef { -%>
+"facts.blocklist" :
+<% [$splunk_hec::facts_blocklist].flatten.each |$fact| { -%>
+        - <%= $fact %>
+<% } -%>
+<% } -%>
+<% if $splunk_hec::pe_console { -%>
 "pe_console" : "<%= $splunk_hec::pe_console %>"
 <% } -%>
 <% if $splunk_hec::timeout { -%>

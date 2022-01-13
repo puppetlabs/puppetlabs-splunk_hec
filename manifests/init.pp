@@ -13,7 +13,7 @@
 # @param [String] token
 #   The user token
 # @param [Array] collect_facts
-#   The list of facts that will be collected in the report
+#   The list of facts that will be collected in the report. To collect all facts available add the special value 'all.facts'.
 # @param [Boolean] enable_reports
 #   Adds splunk_hec to the list of report processors
 # @param [Boolean] record_event
@@ -28,6 +28,8 @@
 #   Ensure that facts get saved to puppetdb
 # @param [String] facts_cache_terminus
 #   Makes sure that the facts get sent to splunk_hec
+# @param [Optional[Array]] facts_blocklist
+#   The list of facts that will not be collected in the report
 # @param [Optional[String]] reports
 #   Can specify report processors (other than puppetdb which is default)
 #   Deprecated; should not use (will give warning).
@@ -100,6 +102,7 @@ class splunk_hec (
   Boolean $events_reporting_enabled                      = false,
   String $facts_terminus                                 = 'puppetdb',
   String $facts_cache_terminus                           = 'splunk_hec',
+  Optional[Array] $facts_blocklist                       = undef,
   Optional[String] $reports                              = undef,
   Optional[String] $pe_console                           = $settings::report_server,
   Optional[Integer] $timeout                             = undef,

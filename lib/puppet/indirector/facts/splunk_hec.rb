@@ -49,11 +49,15 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Yaml
         ]
 
         # lets ensure user provided fact names are downcased
-        users = settings['facts'].map(&:downcase)
+        # settings['facts.allowlist'] is populated by the splunk_hec::collect_facts param
+        allow_list = (settings['facts.allowlist'].map(&:downcase) + hardcoded).uniq
+        block_list = settings['facts.blocklist'].nil? ? [] : settings['facts.blocklist'].map(&:downcase)
 
-        keep = (hardcoded + users).uniq
-
-        facts = incoming_facts.select { |k, _v| keep.include?(k) }
+        facts = if allow_list.include?('all.facts')
+                  incoming_facts.reject { |k, _v| block_list.include?(k) }
+                else
+                  incoming_facts.select { |k, _v| allow_list.include?(k) }
+                end
 
         facts['trusted'] = get_trusted_info(request.node)
         facts['environment'] = request.options[:environment] || request.environment.to_s
@@ -64,7 +68,7 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Yaml
         event = {
           'host' => host,
           'sourcetype' => 'puppet:facts',
-          'event' => facts,
+          'event' => facts
         }
 
         Puppet.info "Submitting facts to Splunk at #{get_splunk_url('facts')}"

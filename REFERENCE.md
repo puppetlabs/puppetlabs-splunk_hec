@@ -55,6 +55,7 @@ The following parameters are available in the `splunk_hec` class:
 * [`events_reporting_enabled`](#events_reporting_enabled)
 * [`facts_terminus`](#facts_terminus)
 * [`facts_cache_terminus`](#facts_cache_terminus)
+* [`facts_blocklist`](#facts_blocklist)
 * [`reports`](#reports)
 * [`pe_console`](#pe_console)
 * [`timeout`](#timeout)
@@ -95,7 +96,7 @@ The user token
 
 Data type: `Array`
 
-The list of facts that will be collected in the report
+The list of facts that will be collected in the report. To collect all facts available add the special value 'all.facts'.
 
 Default value: `['dmi','disks','partitions','processors','networking']`
 
@@ -154,6 +155,14 @@ Data type: `String`
 Makes sure that the facts get sent to splunk_hec
 
 Default value: `'splunk_hec'`
+
+##### <a name="facts_blocklist"></a>`facts_blocklist`
+
+Data type: `Optional[Array]`
+
+The list of facts that will not be collected in the report
+
+Default value: ``undef``
 
 ##### <a name="reports"></a>`reports`
 
