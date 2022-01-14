@@ -29,7 +29,7 @@ This module provides three services to Puppet and Splunk users.
 
     For more advanced configuration options including sending reports based on specific conditions see the [Customized Reporting](#customized-reporting) section below.
 
-2. A fact terminus to submit node facts to Splunk. See [Fact Terminus Support](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/v0.8.1/docs/fact_terminus_support.md) for details.
+2. A fact terminus to submit node facts to Splunk. See [Fact Terminus Support](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/main/docs/fact_terminus_support.md) for details.
 
 3. A PE Event Forwarding processor for sending data received from the [PE Event Forwarding](https://forge.puppet.com/modules/puppetlabs/pe_event_forwarding) module to Splunk. This data can include the details of Task and Plan executions that were initiated by the Puppet Orchestrator (clicking execute task|plan from the console or puppet command line), or it can be events from rbac, the node classifier, the console, or code-manager. To enable this feature, after the PE Event Forwarding module has been installed, set the `events_reporting_enabled` parameter on the `splunk` class to `true`.
 
@@ -46,16 +46,16 @@ There are two Tasks included in this module, `splunk_hec:bolt_apply` and `splunk
 * Puppet Enterprise (PE) or Open Source Puppet*
 * Splunk
 
-This was tested on PE 2019.8.7, Puppet 6 and Puppet 7, using stock gems of `yaml`, `json`, and `net::https`.
+This was tested on the Puppet Enterprise LTS release, Puppet 6 and Puppet 7, using stock gems of `yaml`, `json`, and `net::https`.
 
-\* While most of this module is PE and Open Source, using the PE Event Forwarding processor is PE only because it gathers data from API's that exist only in Puppet Enterprise.
+* While most of this module is PE and Open Source, using the PE Event Forwarding processor is PE only because it gathers data from API's that exist only in Puppet Enterprise.
 
 ## Installation
 
 Instructions assume you are using Puppet Enterprise. For Open Source Puppet installations please see the [Custom Installation](#custom-installation) section.
 
 1. Install the [Puppet Report Viewer](https://splunkbase.splunk.com/app/4413/) app in Splunk if not already installed.
-    * Please see [Splunk Installation](https://docs.splunk.com/Documentation/Splunk/8.0.3/SearchTutorial/InstallSplunk) if you need to install Splunk.
+    * Please see [Splunk Installation](https://docs.splunk.com/Documentation/Splunk/latest/SearchTutorial/InstallSplunk) if you need to install Splunk.
     * Alternatively you can [install Splunk via Bolt](https://forge.puppet.com/configuration-management/puppetlabs/deploy-splunk-enterprise-in-minutes).
 2. Create an HEC token in Splunk:
   * Navigate to `Settings` > `Data Input` in your Splunk console.
@@ -93,39 +93,39 @@ Instructions assume you are using Puppet Enterprise. For Open Source Puppet inst
 
 ## Source Types
 
-1. puppet:summary
+1. `puppet:summary`
 
     Puppet agent node reports.
 
-2. puppet:facts
+2. `puppet:facts`
 
     Node facts sent by the facts terminus enabled by setting `manage_routes` to true.
 
-3. puppet:jobs
+3. `puppet:jobs`
 
-    Events gathered from the [Puppet Jobs API](https://puppet.com/docs/pe/2019.8/orchestrator_api_jobs_endpoint.html#get_jobs)
+    Events gathered from the [Puppet Jobs API](https://puppet.com/docs/pe/latest/orchestrator_api_jobs_endpoint.html#get_jobs)
 
-The following source types all refer to different types of events gathered from the [Puppet Activities API](https://puppet.com/docs/pe/2021.2/activity_api_events.html#activity-api-v2-get-events)
+The following source types all refer to different types of events gathered from the [Puppet Activities API](https://puppet.com/docs/pe/latest/activity_api_events.html#activity-api-v2-get-events)
 
-4. puppet:activities_rbac
+4. `puppet:activities_rbac`
 
     RBAC events such user login or creating or modifying users and groups.
 
-5. puppet:activities_classifier
+5. `puppet:activities_classifier`
 
     Classifier events such as creating node groups, or modifying the properties of node groups.
 
-6. puppet:activities_console
+6. `puppet:activities_console`
 
     Console events such as requesting Task or Plan runs via the console.
 
-7. puppet:activities_code_manager
+7. `puppet:activities_code_manager`
 
     Code manager events.
 
 ## Custom Installation
 
-> **Please Note**: If you are installing this module using a [`control-repo`](https://puppet.com/docs/pe/2021.2/control_repo.html) you must have `splunk_hec` in your production environment's [`Puppetfile`](https://puppet.com/docs/pe/2019.8/puppetfile.html) so the Puppet Server process can properly load the required libraries. You can then create a feature branch to enable them and test the configuration, but the libraries **must be** in `production`; otherwise the feature branch won't work as expected. If your Puppet Server is in a different environment, please add this module to the `Puppetfile` in that environment as well.
+> **Please Note**: If you are installing this module using a [`control-repo`](https://puppet.com/docs/pe/latest/control_repo.html) you must have `splunk_hec` in your production environment's [`Puppetfile`](https://puppet.com/docs/pe/latest/puppetfile.html) so the Puppet Server process can properly load the required libraries. You can then create a feature branch to enable them and test the configuration, but the libraries **must be** in `production`; otherwise the feature branch won't work as expected. If your Puppet Server is in a different environment, please add this module to the `Puppetfile` in that environment as well.
 
 The steps below will help install and troubleshoot the report processor on a standard Puppet Primary Server; including manual steps to configure compilers (Puppet Servers), and to use the included `splunk_hec` class. Because one is modifying production machines, these steps allow you to validate your settings before deploying the changes live.
 
@@ -133,7 +133,7 @@ The steps below will help install and troubleshoot the report processor on a sta
 
 2. Create a Splunk HEC Token or use an existing one that sends to `main` index and **does not** have acknowledgement enabled. Follow the steps provided by Splunk's [Getting Data In Guide](http://docs.splunk.com/Documentation/Splunk/latest/Data/UsetheHTTPEventCollector) if you are new to HTTP Endpoint Collectors.
 
-3. [Install this Puppet module](https://puppet.com/docs/puppet/7/modules_installing.html) in the environment that your Puppet Servers are using (e.g. `production`).
+3. [Install this Puppet module](https://puppet.com/docs/puppet/latest/modules_installing.html) in the environment that your Puppet Servers are using (e.g. `production`).
 
 4. Run `puppet plugin download` on your Puppet Servers to sync the content. Some users with strict permissions may need to run `umask 022` first.
 
@@ -143,7 +143,7 @@ The steps below will help install and troubleshoot the report processor on a sta
       Could not find terminus splunk_hec for indirection facts
       ```
 
-5. Create `/etc/puppetlabs/puppet/splunk_hec.yaml` (see the [examples directory](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/v0.8.1/examples/splunk_hec.yaml)), adding your Splunk Server URL to the `url` parameter (e.g. `https://splunk-dev:8088/services/collector`) and HEC Token created during step 2 to the `splunk_token` parameter.
+5. Create `/etc/puppetlabs/puppet/splunk_hec.yaml` (see the [examples directory](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/main/examples/splunk_hec.yaml)), adding your Splunk Server URL to the `url` parameter (e.g. `https://splunk-dev:8088/services/collector`) and HEC Token created during step 2 to the `splunk_token` parameter.
   * You can add `timeout` as an optional parameter. The **default value** is `1` second for both open and read sessions, so take value x2 for real world use.
   * **PE Only**: Provide the `pe_console` parameter value. This is the FQDN for the PE console, which Splunk can use to lookup further information if the installation utilizes compilers (it is best practice to set this if you're anticipating scaling the installation in the future).
 
@@ -159,7 +159,7 @@ The steps below will help install and troubleshoot the report processor on a sta
 7. If configured properly the Puppet Report Viewer app in Splunk will show 1 node in the `Overview` tab.
 
 8. Now it is time to roll these settings out to the fleet of Puppet Servers in the installation. For PE users:
-  * In the [PE console](https://puppet.com/docs/pe/2021.2/console_accessing.html), navigate to `Node groups` and expand `PE Infrastructure`.
+  * In the [PE console](https://puppet.com/docs/pe/latest/console_accessing.html), navigate to `Node groups` and expand `PE Infrastructure`.
   * Select `PE Master` and navigate to the `Classes` tab.
   * Click **Refresh** to ensure that the `splunk_hec` class is loaded.
   * Add new class `splunk_hec`.
@@ -167,7 +167,7 @@ The steps below will help install and troubleshoot the report processor on a sta
       * Optionally set `enable_reports` to `true` if there isn't another component managing the servers reports setting. Otherwise manually add `splunk_hec` to the settings as described in the [manual steps](#manual-steps) below.
   * Commit changes and run Puppet. It is best to navigate to the `PE Certificate Authority` node group and run Puppet there first, before running Puppet on the remaining nodes.
 
-9. For Inventory support in the Puppet Report Viewer, see [Fact Terminus Support](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/v0.8.1/docs/fact_terminus_support.md).
+9. For Inventory support in the Puppet Report Viewer, see [Fact Terminus Support](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/main/docs/fact_terminus_support.md).
 
 #### Manual Steps:
 
@@ -181,7 +181,7 @@ The steps below will help install and troubleshoot the report processor on a sta
     reports = puppetdb,splunk_hec
     ```
 
-  * [Restart the `pe-puppetserver`](https://puppet.com/docs/puppetserver/5.3/restarting.html#:~:text=0%2C%20you%20can%20restart%20Puppet,stopping%20and%20restarting%20the%20process.) process (`puppet-server` for Open Source Puppet) for it to reload the configuration and the plugin.
+  * [Restart the `pe-puppetserver`](https://puppet.com/docs/puppetserver/latest/restarting.html) process (`puppet-server` for Open Source Puppet) for it to reload the configuration and the plugin.
 
   * Run `puppet agent -t` on an agent; if you are using the suggested name, use `source="http:puppet-report-summary"` in your Splunk search field to show the reports as they arrive.
 
@@ -195,7 +195,7 @@ You can manually update the `splunk_hec.yaml` file with these settings:
 "ssl_ca" : "splunk_ca.cert"
 ```
 
-Alternatively, you can create a [profile class](https://puppet.com/docs/pe/2019.8/osp/the_roles_and_profiles_method.html) that copies the `splunk_ca.cert` as part of invoking the splunk_hec class:
+Alternatively, you can create a [profile class](https://puppet.com/docs/pe/latest/osp/the_roles_and_profiles_method.html) that copies the `splunk_ca.cert` as part of invoking the splunk_hec class:
 
 ```
 class profile::splunk_hec {
@@ -225,8 +225,9 @@ The following parameters are utilized to configure which facts (including custom
   * `facts_blocklist` (**Optional**)
 
 To configure which facts to collect add the `collect_facts` parameter to the `splunk_hec` class and modify the array of facts presented.
-    * To collect **all facts** available at the time of the Puppet run, add the special value `all.facts` to the `collect_facts` array.
-    * When collecting **all facts**, you can configure the optional parameter `facts_blocklist` with an array of facts that should not be collected.
+
+  * To collect **all facts** available at the time of the Puppet run, add the special value `all.facts` to the `collect_facts` array.
+  * When collecting **all facts**, you can configure the optional parameter `facts_blocklist` with an array of facts that should not be collected.
 
 ## PE Event Forwarding
 
@@ -276,7 +277,7 @@ This feature can be configured to send these events from non server nodes if nee
 
 ### Supported Puppet Versions For Event Forwarding
 
-The puppetlabs-pe_event_forwarding module that this feature depends on is compatible with PE versions in the 2019 range starting at 2019.8.7 and above, and then 2021 versions from 2021.2 and above.
+The puppetlabs-pe_event_forwarding module that this feature depends on is compatible with PE versions in the 2019 range starting at **2019.8.7** and above, and then 2021 versions from **2021.2** and above.
 
 Versions in the PE 2019 series below 2019.8.7 and in the 2021 series in versions below 2021.2 did not recieve an update to some of the API methods in PE that are required for the puppetlabs-pe_event_forwarding module to function properly.
 
@@ -427,7 +428,7 @@ This module has some limitations in a FIPS environment.
 
 1. SSL configuration steps and parameters are different under FIPS
 
-    - The CA certificate PEM file must be appended to the end of the `localcacert` file. Find the path to the file by running [`puppet config print localcacert`](https://puppet.com/docs/puppet/7/configuration.html#localcacert). Keep in mind that this file will be overwritten any time the puppetserver is upgraded to a new version and this step will have to be done again. Consider copying a backup of this file to a safe location before attempting to add content to it until correct funtioning of the Puppet Server and this module can be validated.
+    - The CA certificate PEM file must be appended to the end of the `localcacert` file. Find the path to the file by running [`puppet config print localcacert`](https://puppet.com/docs/puppet/latest/configuration.html#localcacert). Keep in mind that this file will be overwritten any time the puppetserver is upgraded to a new version and this step will have to be done again. Consider copying a backup of this file to a safe location before attempting to add content to it until correct funtioning of the Puppet Server and this module can be validated.
 
       ```
       ca_file=`puppet config print localcacert`
@@ -441,11 +442,11 @@ This module has some limitations in a FIPS environment.
 
 ## Advanced Topics
 
-* [Advanced Puppet Configuration](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/v0.8.1/docs/advanced_puppet_configuration.md)
-* [Advanced Splunk Configuration](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/v0.8.1/docs/advanced_splunk_configuration.md)
-* [Fact Terminus Support](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/v0.8.1/docs/fact_terminus_support.md)
-* [Puppet Metrics Collection](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/v0.8.1/docs/puppet_metrics_collector_support.md)
-* [Troublshooting and Verification](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/v0.8.1/docs/troubleshooting_and_verification.md)
+* [Advanced Puppet Configuration](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/main/docs/advanced_puppet_configuration.md)
+* [Advanced Splunk Configuration](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/main/docs/advanced_splunk_configuration.md)
+* [Fact Terminus Support](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/main/docs/fact_terminus_support.md)
+* [Puppet Metrics Collection](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/main/docs/puppet_metrics_collector_support.md)
+* [Troubleshooting and Verification](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/main/docs/troubleshooting_and_verification.md)
 
 ## Known Issues
 
@@ -456,7 +457,7 @@ This module has some limitations in a FIPS environment.
 ## Breaking Changes
 
   * `>= 0.5.0` The `splunk_hec::url` parameter now expects a full URI of **https://servername:8088/services/collector**.
-  * `0.5.0` -> `0.6.0` Switches to the fact terminus cache setting via `splunk_routes.yaml` to ensure compatibility with [CD4PE](https://puppet.com/docs/continuous-delivery/4.x/cd_user_guide.html). See [Fact Terminus Support](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/v0.8.1/docs/fact_terminus_support.md) for guides on how to change it. Prior to deploying this module, remove the setting `facts_terminus` from the `puppet_enterprise::profile::master` class in the `PE Master` node group in your environment if you set it in previous versions of this module (`0.6.0 <`). It will prevent PE from operating normally if left on.
+  * `0.5.0` -> `0.6.0` Switches to the fact terminus cache setting via `splunk_hec_routes.yaml` to ensure compatibility with [CD4PE](https://puppet.com/docs/continuous-delivery/4.x/cd_user_guide.html). See [Fact Terminus Support](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/main/docs/fact_terminus_support.md) for guides on how to change it. Prior to deploying this module, remove the setting `facts_terminus` from the `puppet_enterprise::profile::master` class in the `PE Master` node group in your environment if you set it in previous versions of this module (`0.6.0 <`). It will prevent PE from operating normally if left on.
 
 ## Release Process
 
