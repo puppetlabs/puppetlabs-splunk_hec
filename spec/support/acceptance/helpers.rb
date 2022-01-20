@@ -57,6 +57,7 @@ module TargetHelpers
   def splunk_node
     target('Splunk Node', 'acceptance:setup_splunk_instance', 'splunk_node')
   end
+  module_function :splunk_node
 
   def target(name, setup_task, role)
     @targets ||= {}

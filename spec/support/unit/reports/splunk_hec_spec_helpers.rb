@@ -106,6 +106,17 @@ def expect_sent_event(_expected_credentials = {})
   end
 end
 
+def expect_requested_client(client)
+  case client
+  when :non_fips
+    expect(processor).to receive(:send_with_nonfips).and_return(new_mock_response(200, ''))
+    expect(processor).not_to receive(:send_with_fips)
+  when :fips
+    expect(processor).to receive(:send_with_fips).and_return(new_mock_response(200, ''))
+    expect(processor).not_to receive(:send_with_nonfips)
+  end
+end
+
 def default_facts
   {
     'host'       => 'foo.splunk.c.internal',

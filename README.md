@@ -440,6 +440,10 @@ This module has some limitations in a FIPS environment.
 
 2. None of the timeout parameters will have any effect. The module must use a different FIPS compliant HTTP client. This client does not support setting custom request timeouts and so those parameters are ignored when running in FIPS mode.
 
+**NOTE**
+
+To set up a testing environment with fips enabled, run the following command: `PROVISION_LIST=fips_acceptance bundle exec rake acceptance:setup`
+
 ## Advanced Topics
 
 * [Advanced Puppet Configuration](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/main/docs/advanced_puppet_configuration.md)
@@ -484,10 +488,6 @@ P. uppet\
 I. ntegrations\
 E. ngineering
 
-Chris Barker <cbarker@puppet.com>\
-Helen Campbell <helen@puppet.com>\
-Greg Hardy <greg.hardy@puppet.com>\
-Bryan Jen <bryan.jen@puppet.com>\
-Greg Sparks <greg.sparks@puppet.com>
+<team-pie@puppet.com>
 
 ---
