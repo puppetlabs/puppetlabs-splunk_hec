@@ -14,6 +14,10 @@ All notable changes to this project will be documented in this file. The format 
 
 - Prevent the `event_types` parameter from being configured unless `events_reporting_enabled` is set to **true**. [#174](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/174)
 
+- The `splunk_hec_agent_only_node` fact now properly resolves to **false** on infrastructure nodes running Puppet Server. [#175](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/175)
+
+- Prevent the deprecated `reports` parameter from removing configured settings in `puppet.conf`. [#176](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/176)
+
 ## [v1.1.0](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v1.1.0) (2021-11-09)
 
 [Full Changelog](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v1.0.1..v1.1.0)

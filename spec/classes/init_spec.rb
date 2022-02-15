@@ -106,7 +106,7 @@ describe 'splunk_hec' do
         it { is_expected.to have_pe_ini_subsetting_resource_count(1) }
       end
 
-      context "set 'reports' setting to $reports if $reports != ''" do
+      context "does not set 'reports' setting to $reports when $reports != undef" do
         let(:params) do
           p = super()
           p['reports'] = 'foo,bar,baz'
@@ -114,8 +114,9 @@ describe 'splunk_hec' do
         end
 
         it { is_expected.to contain_notify('reports param deprecation warning') }
-        it { is_expected.to contain_pe_ini_setting('enable splunk_hec').with_value('foo,bar,baz') }
-        it { is_expected.to have_pe_ini_subsetting_resource_count(0) }
+        it { is_expected.to contain_pe_ini_subsetting('enable splunk_hec').with_subsetting('splunk_hec') }
+        it { is_expected.to have_pe_ini_setting_resource_count(0) }
+        it { is_expected.to have_pe_ini_subsetting_resource_count(1) }
       end
     end
 

@@ -151,34 +151,24 @@ class splunk_hec (
   }
 
   if $enable_reports {
+  # lint:ignore:140chars
     if $reports != undef  {
       notify { 'reports param deprecation warning' :
-        message  => "The 'reports' parameter is being deprecated in favor of having the module automatically add the 'splunk_hec' setting \
-        to puppet.conf. You can enable this behavior by setting 'reports' to '', the empty string, but please keep in mind that the \
-        'reports' parameter will be removed in a future release.",
+        message  => 'The reports parameter has been deprecated in favor of having the module automatically add the splunk_hec setting to puppet.conf. Update the reports param to undef or remove it entirely. Please note that the reports parameter is currently ignored and will be removed in a future release of this module.',
         loglevel =>  'warning',
       }
-
-      Resource[$ini_setting] {'enable splunk_hec':
-        ensure  => present,
-        path    => '/etc/puppetlabs/puppet/puppet.conf',
-        section => 'master',
-        setting => 'reports',
-        value   => $reports,
-        notify  => Service[$service],
-      }
-    } else {
-      # The subsetting resource automatically adds the 'splunk_hec' report
-      # processor to the reports setting if it hasn't yet been added there.
-      Resource[$ini_subsetting] { 'enable splunk_hec':
-        ensure               => present,
-        path                 => '/etc/puppetlabs/puppet/puppet.conf',
-        section              => 'master',
-        setting              => 'reports',
-        subsetting           => 'splunk_hec',
-        subsetting_separator => ',',
-        notify               => Service[$service],
-      }
+    }
+  # lint:endignore
+    # The subsetting resource automatically adds the 'splunk_hec' report
+    # processor to the reports setting if it hasn't yet been added there.  
+    Resource[$ini_subsetting] { 'enable splunk_hec':
+      ensure               => present,
+      path                 => '/etc/puppetlabs/puppet/puppet.conf',
+      section              => 'master',
+      setting              => 'reports',
+      subsetting           => 'splunk_hec',
+      subsetting_separator => ',',
+      notify               => Service[$service],
     }
   }
 
