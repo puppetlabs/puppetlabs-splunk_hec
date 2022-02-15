@@ -457,6 +457,7 @@ To set up a testing environment with fips enabled, run the following command: `P
   * Integration with the `puppet_metrics_collection` requires version `>= 6.0.0`.
   * SSL Validation is under active development and behavior may change.
   * Automated testing could use work.
+  * `>= 0.9.0` With the deprecated `reports` parameter set to an empty string, any values in the reports settings in `puppet.conf` are removed.
 
 ## Breaking Changes
 
