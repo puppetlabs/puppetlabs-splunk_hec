@@ -1,6 +1,6 @@
 {
   "name": "puppetlabs-splunk_hec",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "author": "puppetlabs",
   "summary": "Puppet report processor using Splunk HEC",
   "license": "Apache-2.0",
@@ -9,27 +9,33 @@
   "issues_url": "https://tickets.puppetlabs.com/projects/PIE/issues",
   "dependencies": [
     {
-      "name": "puppetlabs/puppet_metrics_collector",
+      "name": "puppetlabs-puppet_metrics_collector",
       "version_requirement": ">= 6.0.0 < 8.0"
+    },
+    {
+      "name": "puppetlabs-pe_event_forwarding",
+      "version_requirement": ">= 1.0.0 < 2.0.0"
     }
   ],
   "operatingsystem_support": [
     {
       "operatingsystem": "CentOS",
       "operatingsystemrelease": [
-        "7",
-        "6"
+        "8",
+        "7"
       ]
     },
     {
       "operatingsystem": "OracleLinux",
       "operatingsystemrelease": [
+        "8",
         "7"
       ]
     },
     {
       "operatingsystem": "RedHat",
       "operatingsystemrelease": [
+        "8",
         "7",
         "6"
       ]
@@ -37,19 +43,23 @@
     {
       "operatingsystem": "Scientific",
       "operatingsystemrelease": [
-        "7",
-        "6"
+        "8",
+        "7"
       ]
     },
     {
       "operatingsystem": "Debian",
       "operatingsystemrelease": [
-        "8"
+        "11",
+        "10",
+        "9"
       ]
     },
     {
       "operatingsystem": "Ubuntu",
       "operatingsystemrelease": [
+        "20.04",
+        "18.04",
         "16.04"
       ]
     }
@@ -57,7 +67,7 @@
   "requirements": [
     {
       "name": "puppet",
-      "version_requirement": ">= 4.7.0 < 8.0.0"
+      "version_requirement": ">= 6.16.0 < 8.0.0"
     }
   ],
   "pdk-version": "2.2.0",
