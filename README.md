@@ -109,7 +109,9 @@ The following source types all refer to different types of events gathered from 
 
 4. `puppet:activities_rbac`
 
-    RBAC events such user login or creating or modifying users and groups.
+    RBAC events such as creating and/or modifying users or groups, and user logins.
+
+    **Note**: RBAC events can be disabled from the pe_event_forwarding module for performance reasons. Ensure the `disable_rbac` parameter is set to false in the pe_event_forwarding module if you wish to send RBAC events to Splunk.
 
 5. `puppet:activities_classifier`
 

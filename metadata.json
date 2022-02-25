@@ -14,7 +14,7 @@
     },
     {
       "name": "puppetlabs-pe_event_forwarding",
-      "version_requirement": ">= 1.0.0 < 2.0.0"
+      "version_requirement": ">= 1.1.0 < 2.0.0"
     }
   ],
   "operatingsystem_support": [
