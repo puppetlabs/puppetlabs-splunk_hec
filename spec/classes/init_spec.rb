@@ -51,7 +51,9 @@ describe 'splunk_hec' do
       }
     }
 
-    class pe_event_forwarding () {}
+    class pe_event_forwarding (
+      Optional[String] $confdir = "/tmp",
+    ) {}
 
     class {pe_event_forwarding:}
     MANIFEST
@@ -64,7 +66,7 @@ describe 'splunk_hec' do
     }
   end
 
-  let(:confdir) { Dir.pwd }
+  let(:confdir) { '/tmp' }
   let(:event_forwarding_base) { "#{confdir}/pe_event_forwarding/processors.d" }
   let(:facts) do
     {

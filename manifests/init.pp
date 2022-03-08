@@ -215,7 +215,12 @@ class splunk_hec (
   }
 
   if $events_reporting_enabled {
-    $confdir_base_path = pe_event_forwarding::base_path($settings::confdir, undef)
+    if $pe_event_forwarding::confdir != undef {
+      $confdir_base_path = $pe_event_forwarding::confdir
+    }
+    else {
+      $confdir_base_path = pe_event_forwarding::base_path($settings::confdir, undef)
+    }
 
     file { "${confdir_base_path}/pe_event_forwarding/processors.d/splunk_hec":
       ensure  => directory,
