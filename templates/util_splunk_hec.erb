@@ -48,7 +48,7 @@ def create_http(source_type)
   http.use_ssl = @uri.scheme == 'https'
   if http.use_ssl?
     if settings['ssl_ca'] && !settings['ssl_ca'].empty?
-      ssl_ca = File.join(confdir, 'splunk_hec', settings['ssl_ca'])
+      ssl_ca = File.join(@confdir, 'splunk_hec', settings['ssl_ca'])
 
       raise "CA file #{ssl_ca} does not exist" unless File.exist? ssl_ca
 
