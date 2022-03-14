@@ -4,7 +4,21 @@ All notable changes to this project will be documented in this file. The format 
 
 ## [Unreleased](https://github.com/puppetlabs/puppetlabs-splunk_hec)
 
-[Current Diff](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v1.1.0..main)
+[Current Diff](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v1.2.1..main)
+
+## [v1.2.1](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v1.2.1) (2022-3-14)
+
+### Added
+
+- Allow rbac events to be disabled. [#179](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/179)
+
+### Fixed
+
+- Allow customer confdirs when using with pe_event_forwarding [#180](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/180)
+
+- Fix syntax error when ssl is enabled. [#181](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/181)
+
+## [v1.2.0](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v1.2.0) (2022-2-16)
 
 ### Added
 
