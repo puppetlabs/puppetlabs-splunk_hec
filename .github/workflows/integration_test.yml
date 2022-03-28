@@ -19,6 +19,7 @@ jobs:
           - puppet7-nightly
           - 2019.8.7
           - 2019.8.8
+          - 2019.8.9
 
     env:
       BUILDEVENT_FILE: "../buildevents.txt"
@@ -55,17 +56,20 @@ jobs:
           echo ::group::bundler environment
           buildevents cmd $TRACE_ID $STEP_ID 'bundle env' -- bundle env
           echo ::endgroup::
+
       - name: Create the fixtures directory
         run: |
           echo ::group::Create the fixtures directory
           buildevents cmd $TRACE_ID $STEP_ID 'bundle exec rake spec_prep' -- bundle exec rake spec_prep
           echo ::endgroup::
+
       - name: "Honeycomb: Record Setup Environment time"
         if: ${{ always() }}
         run: |
           buildevents step $TRACE_ID $STEP_ID $STEP_START 'Setup Environment'
           echo STEP_ID=${{ matrix.platform }}-${{ matrix.puppet_version }}-2 >> $GITHUB_ENV
           echo STEP_START=$(date +%s) >> $GITHUB_ENV
+
       - name: Provision test environment
         run: |
           buildevents cmd $TRACE_ID $STEP_ID 'bolt plan run splunk_hec::provision_machines' -- bundle exec bolt --modulepath spec/fixtures/modules plan run splunk_hec::acceptance::provision_machines using='provision_service' image='${{ matrix.platform }}'
@@ -82,6 +86,7 @@ jobs:
           sed -e 's/password: .*/password: "[redacted]"/' < $FILE || true
           echo ::endgroup::
           echo INVENTORY_PATH=$FILE >> $GITHUB_ENV
+
       - name: Install server
         run: |
           buildevents cmd $TRACE_ID $STEP_ID 'bolt plan run splunk_hec::acceptance::server_setup' -- bundle exec bolt --modulepath spec/fixtures/modules plan run splunk_hec::acceptance::server_setup puppet_version='${{ matrix.puppet_version }}' -i ./$INVENTORY_PATH
@@ -118,6 +123,7 @@ jobs:
             echo
             echo ::endgroup::
           fi
+
       - name: "Honeycomb: Record removal times"
         if: ${{ always() }}
         run: |
