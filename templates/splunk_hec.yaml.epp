@@ -108,4 +108,6 @@
 <% } -%>
 <% if $facts['fips_enabled'] { -%>
 "fips_enabled" : "true"
+"certificate_revocation" : <%= $splunk_hec::fips_crl_check %>
+"verify_peer" : <%= $splunk_hec::fips_verify_peer %>
 <% } -%>
