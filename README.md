@@ -341,6 +341,13 @@ By default this type of reporting is not enabled.
   * `true`
   * `false`
 
+##### only_changes
+
+`Boolean`: Only process reports when the report status indicates there were [changes](https://puppet.com/docs/puppet/latest/format_report.html#format_report-puppet-transaction-report).
+
+  * `true`
+  * `false` :: **Default Value**
+
 ##### summary_resources_format
 
 `String`: If `include_resources_corrective_change` or `include_resources_status` is set and therefore `resource_events` are being sent as part of `puppet:summary` events, we can choose what format they should be sent in. Depending on your usage within Splunk, different formats may be preferable. The possible values are:

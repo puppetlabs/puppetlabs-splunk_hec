@@ -20,6 +20,8 @@
 #   If set to true, will call store_event and save report as json
 # @param [Boolean] disabled
 #   Disables the splunk_hec report processor
+# @param [Boolean] only_changes
+#   When true, only reports with a changed status with be send to Splunk
 # @param [Boolean] manage_routes
 #   When false, will not automatically send facts to splunk_hec
 # @param [Boolean] events_reporting_enabled
@@ -105,6 +107,7 @@ class splunk_hec (
   Boolean $enable_reports                                = false,
   Boolean $record_event                                  = false,
   Boolean $disabled                                      = false,
+  Boolean $only_changes                                  = false,
   Boolean $manage_routes                                 = false,
   Boolean $events_reporting_enabled                      = false,
   String $facts_terminus                                 = 'puppetdb',

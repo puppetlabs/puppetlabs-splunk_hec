@@ -8,8 +8,14 @@ Puppet::Reports.register_report(:splunk_hec) do
   def process
     # This prevents the processor from running if disabled
     return 0 if settings['disabled']
-    # now we can create the event with the timestamp from the report
 
+    # This prevents the processor from running when there are no changes to the report
+    if settings['only_changes'] && (status != 'changed')
+      Puppet.warning "Not submitting report to Splunk, report contains no changes! Status: #{status}"
+      return 0
+    end
+
+    # now we can create the event with the timestamp from the report
     epoch = sourcetypetime(time, metrics['time']['total'])
 
     # pass simple metrics for report processing later
