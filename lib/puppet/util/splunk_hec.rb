@@ -61,9 +61,15 @@ module Puppet::Util::Splunk_hec
       'Authorization' => "Splunk #{token}",
       'Content-Type'  => 'application/json'
     }
+    ssl_options = {
+      ssl_context: {
+        certificate_revocation: settings['certificate_revocation'],
+        verify_peer: settings['verify_peer']
+      }
+    }
 
     client = Puppet.runtime[:http]
-    client.post(splunk_url, body.to_json, headers: headers)
+    client.post(splunk_url, body.to_json, headers: headers, options: ssl_options)
   end
 
   def send_with_nonfips(body, source_type, token)
