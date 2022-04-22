@@ -50,11 +50,17 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Yaml
 
         # lets ensure user provided fact names are downcased
         # settings['facts.allowlist'] is populated by the splunk_hec::collect_facts param
-        allow_list = (settings['facts.allowlist'].map(&:downcase) + hardcoded).uniq
-        block_list = settings['facts.blocklist'].nil? ? [] : settings['facts.blocklist'].map(&:downcase)
+        allow_list  = (settings['facts.allowlist'].map(&:downcase) + hardcoded).uniq
+        block_list  = settings['facts.blocklist'].nil? ? [] : settings['facts.blocklist'].map(&:downcase)
+        # lets rescue any hardcoded facts that have been added to the blocklist
+        rescued_facts = block_list.select { |k| hardcoded.include?(k) }
 
         facts = if allow_list.include?('all.facts')
-                  incoming_facts.reject { |k, _v| block_list.include?(k) }
+                  unless rescued_facts.nil?
+                    Puppet.warning "Rescued required facts - Please remove the following facts from splunk_hec::facts_blocklist: #{rescued_facts}"
+                  end
+                  final_block = block_list.reject { |k| hardcoded.include?(k) }
+                  incoming_facts.reject { |k, _v| final_block.include?(k) }
                 else
                   incoming_facts.select { |k, _v| allow_list.include?(k) }
                 end
