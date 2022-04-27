@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. The format 
 
 ## [Unreleased](https://github.com/puppetlabs/puppetlabs-splunk_hec)
 
+## [v1.3.0](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v1.3.0) (2022-4-27)
+
+[Full Changelog](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v1.2.1..v1.3.0)
+
 ### Added
 
 - Added PE LTS version to testing matrix. [#185](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/185)
@@ -15,8 +19,6 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 - Rescue required facts that have been added to the block list. [#188](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/188)
-
-[Current Diff](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v1.2.1..main)
 
 ## [v1.2.1](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v1.2.1) (2022-3-14)
 
