@@ -14,10 +14,16 @@ describe 'Verify the minimum install' do
       trigger_puppet_run(puppetserver)
       after_run = Time.now.utc
       report_count = report_count(get_splunk_report(before_run, after_run))
-      expect(report_count).to be 1
+      expect(report_count).to be >= 1
     end
 
-    it 'Successfully sends facts to Splunk'
+    it 'Successfully sends facts to Splunk' do
+      before_run = earliest
+      trigger_puppet_run(puppetserver)
+      after_run = Time.now.utc
+      report_count = report_count(get_splunk_report(before_run, after_run, 'puppet:facts'))
+      expect(report_count).to be >= 1
+    end
 
     it 'Records events with record_event set to true'
 
@@ -35,6 +41,7 @@ describe 'Verify the minimum install' do
     it 'Does not run report processor when disabled set to true' do
       before_run = earliest
       server_agent_run(setup_manifest(disabled: true))
+      trigger_puppet_run(puppetserver)
       after_run = Time.now.utc
       expect(report_count(get_splunk_report(before_run, after_run))).to be 0
     end

@@ -6,8 +6,7 @@ include PuppetLitmus
 PuppetLitmus.configure!
 
 EVENT_FORWARDING_CONFDIR     = '/etc/puppetlabs/pe_event_forwarding'.freeze
-DIR_TEST_COMMAND             = '[[ -d /etc/puppetlabs/code/environments/production/modules/pe_event_forwarding ]] '\
-                               '&& rm -r /etc/puppetlabs/code/environments/production/modules/pe_event_forwarding'.freeze
+DIR_REMOVE_COMMAND           = 'rm /etc/puppetlabs/code/environments/production/modules/pe_event_forwarding -rf'.freeze
 EVENT_FORWARDING_LOCAL_PATH  = './spec/fixtures/modules/pe_event_forwarding'.freeze
 EVENT_FORWARDING_REMOTE_PATH = '/etc/puppetlabs/code/environments/production/modules'.freeze
 
@@ -20,7 +19,7 @@ RSpec.configure do |config|
     shell_command = 'puppet resource service puppet ensure=stopped; '\
       'puppet module install puppetlabs-inifile --version 5.1.0'
     puppetserver.run_shell(shell_command)
-    puppetserver.run_shell(DIR_TEST_COMMAND, expect_failures: true)
+    puppetserver.run_shell(DIR_REMOVE_COMMAND, expect_failures: true)
     puppetserver.bolt_upload_file(EVENT_FORWARDING_LOCAL_PATH, EVENT_FORWARDING_REMOTE_PATH)
   end
 end
@@ -93,20 +92,20 @@ def setup_manifest(disabled: false, url: nil, with_event_forwarding: false)
     url:            url,
     token:          'abcd1234',
     enable_reports: true,
+    manage_routes: true,
+    facts_terminus: 'yaml',
     record_event:   true,
     pe_console:     'localhost',
     disabled:       disabled,
   }
 
-  unless puppet_user == 'pe-puppet'
-    params[:manage_routes] = true
-    params[:facts_terminus] = 'yaml'
-  end
-
   if with_event_forwarding
     manifest << add_event_forwarding
     params[:events_reporting_enabled] = true
     params[:orchestrator_data_filter] = ['options.scope.nodes', 'options.scope.blah', 'environment.name']
+    params[:rbac_data_filter]         = ['subject.name', 'subject.blah', 'events']
+    params[:classifier_data_filter]   = ['subject.name', 'subject.blah', 'objects']
+    params[:pe_console_data_filter]   = ['subject.name', 'subject.blah', 'events']
   end
 
   manifest << declare(:class, :splunk_hec, params)

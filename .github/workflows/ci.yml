@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         check: ['syntax lint metadata_lint check:symlinks check:git_ignore check:dot_underscore check:test_file rubocop parallel_spec']
-        ruby_version: [2.7.x]
+        ruby_version: ['2.7']
         puppet_gem_version: [~> 6.0]
     steps:
     - uses: actions/checkout@v3

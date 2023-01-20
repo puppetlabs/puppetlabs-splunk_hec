@@ -10,7 +10,7 @@ plan splunk_hec::acceptance::oss_server_setup(
   Optional[String] $collection = 'puppet7'
 ) {
   # get server
-  $server = get_targets('*').filter |$node| { $node.vars['role'] == 'server' }
+  $server = get_targets('*').filter |$n| { $n.vars['role'] == 'server' }
   $localhost = get_targets('localhost')
 
   # get facts
