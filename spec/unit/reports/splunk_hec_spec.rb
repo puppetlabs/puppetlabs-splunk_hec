@@ -47,6 +47,28 @@ describe 'Splunk_hec report processor: miscellaneous tests' do
         processor.process
       end
     end
+
+    context 'when only_changes is set to true' do
+      let(:settings_hash) { super().merge('only_changes' => true) }
+
+      it 'does run report processor' do
+        expect_sent_event(expected_credentials) do |actual_event|
+          expect(actual_event['event']['status']).to eql('changed')
+        end
+        processor.process
+      end
+    end
+
+    context 'when only_changes is set to false' do
+      let(:settings_hash) { super().merge('only_changes' => false) }
+
+      it 'does run report processor' do
+        expect_sent_event(expected_credentials) do |actual_event|
+          expect(actual_event['event']['status']).to eql('changed')
+        end
+        processor.process
+      end
+    end
   end
 
   context 'when fips is enabled' do
