@@ -47,14 +47,19 @@ describe 'Splunk_hec report processor: miscellaneous tests' do
         processor.process
       end
     end
+  end
+
+  context 'testing splunk_hec only_changes features' do
+    before(:each) do
+      allow(processor).to receive(:status).and_return('unchanged')
+      mock_event_as_resource_status(processor, 'success', false)
+    end
 
     context 'when only_changes is set to true' do
       let(:settings_hash) { super().merge('only_changes' => true) }
 
-      it 'does run report processor' do
-        expect_sent_event(expected_credentials) do |actual_event|
-          expect(actual_event['event']['status']).to eql('changed')
-        end
+      it 'does not run report processor' do
+        expect(processor).not_to receive(:submit_request)
         processor.process
       end
     end
@@ -64,7 +69,7 @@ describe 'Splunk_hec report processor: miscellaneous tests' do
 
       it 'does run report processor' do
         expect_sent_event(expected_credentials) do |actual_event|
-          expect(actual_event['event']['status']).to eql('changed')
+          expect(actual_event['event']['status']).to eql('unchanged')
         end
         processor.process
       end
