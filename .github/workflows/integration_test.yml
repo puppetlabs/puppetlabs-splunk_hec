@@ -44,7 +44,7 @@ jobs:
           echo STEP_ID=${{ matrix.platform }}-${{ matrix.puppet_version }}-1 >> $GITHUB_ENV
           echo STEP_START=$(date +%s) >> $GITHUB_ENV
       - name: Checkout Source
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Activate Ruby 2.7
         uses: ruby/setup-ruby@v1

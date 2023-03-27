@@ -148,7 +148,7 @@ def get_splunk_report(earliest, latest, sourcetype = 'puppet:summary')
   start_time =  earliest.strftime('%m/%d/%Y:%H:%M:%S')
   end_time   = (latest + 2).strftime('%m/%d/%Y:%H:%M:%S')
   query_command = 'curl -u admin:piepiepie -k '\
-    'https://localhost:8089/services/search/jobs/export -d output_mode=json '\
+    'https://localhost:8089/services/search/v2/jobs/export -d output_mode=json '\
     "-d search='search sourcetype=\"#{sourcetype}\" AND earliest=\"#{start_time}\" AND latest=\"#{end_time}\"'"
   sleep 1
   begin
