@@ -4,14 +4,14 @@ on: [push, pull_request]
 
 jobs:
   Spec:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         check: ['syntax lint metadata_lint check:symlinks check:git_ignore check:dot_underscore check:test_file rubocop parallel_spec']
         ruby_version: [2.7.x]
         puppet_gem_version: [~> 6.0]
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
 
     - uses: actions/setup-ruby@v1
       with:
