@@ -98,13 +98,13 @@
 <% } -%>
 <% } -%>
 <% if $splunk_hec::pe_console_data_filter { -%>
-"pe_console_data_filter" :
+"pe-console_data_filter" :
 <% $splunk_hec::pe_console_data_filter.each |$subset| {-%>
         - <%= $subset %>
 <% } -%>
 <% } -%>
 <% if $splunk_hec::code_manager_data_filter { -%>
-"code_manager_data_filter" :
+"code-manager_data_filter" :
 <% $splunk_hec::code_manager_data_filter.each |$subset| {-%>
         - <%= $subset %>
 <% } -%>
