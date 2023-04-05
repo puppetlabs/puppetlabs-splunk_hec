@@ -8,7 +8,7 @@ function cleanup() {
 trap cleanup EXIT
 
 function start_splunk() {
-  id=`docker ps -q -f name=splunk_enterprise_1 -f status=running`
+  id=`docker ps -q -f name=splunk-enterprise-1 -f status=running`
 
   if [ ! -z "$id" ]
   then
@@ -16,16 +16,16 @@ function start_splunk() {
     docker rm --force ${id}
   fi
 
-  docker-compose -f /tmp/splunk/docker-compose.yml up -d --remove-orphans
+  docker compose -f /tmp/splunk/docker-compose.yml up -d --remove-orphans
 
-  id=`docker ps -q -f name=splunk_enterprise_1 -f status=running`
+  id=`docker ps -q -f name=splunk-enterprise-1 -f status=running`
 
   if [ -z "$id" ]
   then
     echo 'Splunk container start failed.'
     exit 1
   fi
-  echo 'Splunk container start succeeded.'
+  echo 'Splunk container starting...'
 }
 
 function yum_install_docker() {
@@ -33,26 +33,29 @@ function yum_install_docker() {
   yum-config-manager \
     --add-repo \
     https://download.docker.com/linux/centos/docker-ce.repo
-  yum install docker-ce docker-ce-cli containerd.io -y
+  yum install docker-ce docker-ce-cli containerd.io docker-compose-plugin -y 
   systemctl start docker
-
-  curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-  mv /usr/local/bin/docker-compose /usr/bin/docker-compose
-  chmod +x /usr/bin/docker-compose
 }
 
 function compose_starting() {
-  docker ps --all | grep starting
+  docker ps -f name=splunk-enterprise-1 | grep starting
 }
 
 function wait_for_compose() {
-  while [ 1 ]
+  r=0
+  while [ ! -z "$(compose_starting)" ] && [ $r -lt 10 ]
   do
-    if [ -z "$(compose_starting)" ]
-    then
-      exit
-    fi
+    sleep 30
+    ((r++))
   done
+}
+
+function splunk_set_minfreemb() {
+  echo "Setting Splunk custom configs..."
+  # This is a workaround for issues on Ubuntu where searches fail due to hitting default minfreemb of 5GB.
+  docker exec -u root splunk-enterprise-1 /opt/splunk/bin/splunk set minfreemb 500 -auth admin:piepiepie &>2
+  # We have to restart Splunk for the changes to get picked up.
+  docker exec -u root splunk-enterprise-1 /opt/splunk/bin/splunk restart
 }
 
 YUM=$(cat /etc/*-release | grep 'CentOS\|rhel')
@@ -66,13 +69,20 @@ then
     yum_install_docker
   fi
 else
+  # Add Docker repo for Ubuntu
+  mkdir -m 0755 -p /etc/apt/keyrings
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+  echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+  # Install Docker and Docker Compose
   apt-get -qq update -y 1>&- 2>&-
-  apt-get install -qq docker.io -y 1>&- 2>&-
-  apt-get install -qq docker-compose -y 1>&- 2>&-
+  apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y 1>&- 2>&-
 fi
 
 printenv
 docker system info
 start_splunk
 wait_for_compose
+splunk_set_minfreemb
 exit 0
