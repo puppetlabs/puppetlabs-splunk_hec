@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file. The format 
 
 ## [Unreleased](https://github.com/puppetlabs/puppetlabs-splunk_hec)
 
+## [v1.4.0](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v1.4.0) (2023-4-17)
+
+[Full Changelog](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v1.3.0..v1.4.0)
+
+### Fixed
+
+- Event filtering for `pe-console` and `code-manager` events are no longer ignored. [#196](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/196)
+
 ## [v1.3.0](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v1.3.0) (2022-4-27)
 
 [Full Changelog](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v1.2.1..v1.3.0)
