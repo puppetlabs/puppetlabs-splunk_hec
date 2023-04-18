@@ -93,15 +93,12 @@ def setup_manifest(disabled: false, url: nil, with_event_forwarding: false)
     url:            url,
     token:          'abcd1234',
     enable_reports: true,
+    manage_routes: true,
+    facts_terminus: 'yaml',
     record_event:   true,
     pe_console:     'localhost',
     disabled:       disabled,
   }
-
-  unless puppet_user == 'pe-puppet'
-    params[:manage_routes] = true
-    params[:facts_terminus] = 'yaml'
-  end
 
   if with_event_forwarding
     manifest << add_event_forwarding

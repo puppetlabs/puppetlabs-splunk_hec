@@ -17,7 +17,13 @@ describe 'Verify the minimum install' do
       expect(report_count).to be 1
     end
 
-    it 'Successfully sends facts to Splunk'
+    it 'Successfully sends facts to Splunk' do
+      before_run = earliest
+      trigger_puppet_run(puppetserver)
+      after_run = Time.now.utc
+      report_count = report_count(get_splunk_report(before_run, after_run, 'puppet:facts'))
+      expect(report_count).to be >= 1
+    end
 
     it 'Records events with record_event set to true'
 
