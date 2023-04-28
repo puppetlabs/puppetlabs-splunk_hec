@@ -70,7 +70,7 @@ end
 def new_mock_event(event_fields = {})
   event_fields[:property] = 'message'
   event_fields[:message]  = 'defined \'message\' as \'hello\''
-  Puppet::Transaction::Event.new(event_fields)
+  Puppet::Transaction::Event.new(property: event_fields[:property], message: event_fields[:message], status: event_fields[:event_status], corrective_change: event_fields[:event_corrective_change])
 end
 
 def new_mock_resource_status(events, status_changed, status_failed)

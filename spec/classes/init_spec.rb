@@ -139,10 +139,6 @@ describe 'splunk_hec' do
         p
       end
 
-      before(:each) do
-        MockFunction.new('pe_event_forwarding::base_path').expected.returns(Dir.pwd)
-      end
-
       it {
         is_expected.to contain_file("#{event_forwarding_base}/splunk_hec")
           .with(ensure: 'directory')

@@ -33,55 +33,53 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Yaml
     super(request)
 
     profile('splunk_facts#save', [:splunk, :facts, :save, request.key]) do
-      begin
-        host = request.instance.name.dup
-        incoming_facts = request.instance.values.dup
-        transaction_uuid = request.options[:transaction_uuid]
+      host = request.instance.name.dup
+      incoming_facts = request.instance.values.dup
+      transaction_uuid = request.options[:transaction_uuid]
 
-        hardcoded = [
-          'os',
-          'memory',
-          'puppetversion',
-          'system_uptime',
-          'load_averages',
-          'ipaddress',
-          'fqdn',
-        ]
+      hardcoded = [
+        'os',
+        'memory',
+        'puppetversion',
+        'system_uptime',
+        'load_averages',
+        'ipaddress',
+        'fqdn',
+      ]
 
-        # lets ensure user provided fact names are downcased
-        # settings['facts.allowlist'] is populated by the splunk_hec::collect_facts param
-        allow_list  = (settings['facts.allowlist'].map(&:downcase) + hardcoded).uniq
-        block_list  = settings['facts.blocklist'].nil? ? [] : settings['facts.blocklist'].map(&:downcase)
-        # lets rescue any hardcoded facts that have been added to the blocklist
-        rescued_facts = block_list.select { |k| hardcoded.include?(k) }
+      # lets ensure user provided fact names are downcased
+      # settings['facts.allowlist'] is populated by the splunk_hec::collect_facts param
+      allow_list  = (settings['facts.allowlist'].map(&:downcase) + hardcoded).uniq
+      block_list  = settings['facts.blocklist'].nil? ? [] : settings['facts.blocklist'].map(&:downcase)
+      # lets rescue any hardcoded facts that have been added to the blocklist
+      rescued_facts = block_list.select { |k| hardcoded.include?(k) }
 
-        facts = if allow_list.include?('all.facts')
-                  unless rescued_facts.nil?
-                    Puppet.warning "Rescued required facts - Please remove the following facts from splunk_hec::facts_blocklist: #{rescued_facts}"
-                  end
-                  final_block = block_list.reject { |k| hardcoded.include?(k) }
-                  incoming_facts.reject { |k, _v| final_block.include?(k) }
-                else
-                  incoming_facts.select { |k, _v| allow_list.include?(k) }
+      facts = if allow_list.include?('all.facts')
+                unless rescued_facts.nil?
+                  Puppet.warning "Rescued required facts - Please remove the following facts from splunk_hec::facts_blocklist: #{rescued_facts}"
                 end
+                final_block = block_list.reject { |k| hardcoded.include?(k) }
+                incoming_facts.reject { |k, _v| final_block.include?(k) }
+              else
+                incoming_facts.select { |k, _v| allow_list.include?(k) }
+              end
 
-        facts['trusted'] = get_trusted_info(request.node)
-        facts['environment'] = request.options[:environment] || request.environment.to_s
-        facts['producer'] = Puppet[:certname]
-        facts['pe_console'] = pe_console
-        facts['transaction_uuid'] = transaction_uuid
+      facts['trusted'] = get_trusted_info(request.node)
+      facts['environment'] = request.options[:environment] || request.environment.to_s
+      facts['producer'] = Puppet[:certname]
+      facts['pe_console'] = pe_console
+      facts['transaction_uuid'] = transaction_uuid
 
-        event = {
-          'host' => host,
-          'sourcetype' => 'puppet:facts',
-          'event' => facts
-        }
+      event = {
+        'host' => host,
+        'sourcetype' => 'puppet:facts',
+        'event' => facts
+      }
 
-        Puppet.info "Submitting facts to Splunk at #{get_splunk_url('facts')}"
-        submit_request event
-      rescue StandardError => e
-        Puppet.err "Could not send facts to Splunk: #{e}\n#{e.backtrace}"
-      end
+      Puppet.info "Submitting facts to Splunk at #{get_splunk_url('facts')}"
+      submit_request event
+    rescue StandardError => e
+      Puppet.err "Could not send facts to Splunk: #{e}\n#{e.backtrace}"
     end
   end
 end

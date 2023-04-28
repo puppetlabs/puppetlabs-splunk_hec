@@ -12,7 +12,7 @@
 #   Sets PE settings including password
 plan splunk_hec::acceptance::pe_server_setup(
   Optional[String] $version = '2021.7.2',
-  Optional[Hash] $pe_settings = {password => 'puppetlabspie'}
+  Optional[Hash] $pe_settings = { password => 'puppetlabspie' }
 ) {
   # machines are not yet ready at time of installing the puppetserver, so we wait 15s
   $localhost = get_targets('localhost')
@@ -30,10 +30,10 @@ plan splunk_hec::acceptance::pe_server_setup(
   )
 
   $cmd = @("CMD")
-          echo 'puppetlabspie' | puppet access login -l 1y --username admin
-          puppet infrastructure tune | sed "s,\\x1B\\[[0-9;]*[a-zA-Z],,g" > /etc/puppetlabs/code/environments/production/data/common.yaml
-          puppet agent -t
-          | CMD
+    echo 'puppetlabspie' | puppet access login -l 1y --username admin
+    puppet infrastructure tune | sed "s,\\x1B\\[[0-9;]*[a-zA-Z],,g" > /etc/puppetlabs/code/environments/production/data/common.yaml
+    puppet agent -t
+    | CMD
 
   run_command($cmd, $puppet_server, '_catch_errors' => true)
 }

@@ -12,8 +12,8 @@
 
 #### Public Plans
 
-* [`splunk_hec::examples::apply_example`](#splunk_hecexamplesapply_example): Example of submitting a report from apply Function to Splunk.
-* [`splunk_hec::examples::result_example`](#splunk_hecexamplesresult_example): An example of submitting a Task or Functions results to Splunk as a Task.
+* [`splunk_hec::examples::apply_example`](#splunk_hec--examples--apply_example): Example of submitting a report from apply Function to Splunk.
+* [`splunk_hec::examples::result_example`](#splunk_hec--examples--result_example): An example of submitting a Task or Functions results to Splunk as a Task.
 
 #### Private Plans
 
@@ -45,57 +45,74 @@ include splunk_hec
 
 The following parameters are available in the `splunk_hec` class:
 
-* [`url`](#url)
-* [`token`](#token)
-* [`collect_facts`](#collect_facts)
-* [`enable_reports`](#enable_reports)
-* [`record_event`](#record_event)
-* [`disabled`](#disabled)
-* [`only_changes`](#only_changes)
-* [`manage_routes`](#manage_routes)
-* [`events_reporting_enabled`](#events_reporting_enabled)
-* [`facts_terminus`](#facts_terminus)
-* [`facts_cache_terminus`](#facts_cache_terminus)
-* [`facts_blocklist`](#facts_blocklist)
-* [`reports`](#reports)
-* [`pe_console`](#pe_console)
-* [`timeout`](#timeout)
-* [`ssl_ca`](#ssl_ca)
-* [`ignore_system_cert_store`](#ignore_system_cert_store)
-* [`fips_crl_check`](#fips_crl_check)
-* [`fips_verify_peer`](#fips_verify_peer)
-* [`token_summary`](#token_summary)
-* [`token_facts`](#token_facts)
-* [`token_metrics`](#token_metrics)
-* [`url_summary`](#url_summary)
-* [`url_facts`](#url_facts)
-* [`url_metrics`](#url_metrics)
-* [`include_logs_status`](#include_logs_status)
-* [`include_logs_catalog_failure`](#include_logs_catalog_failure)
-* [`include_logs_corrective_change`](#include_logs_corrective_change)
-* [`include_resources_status`](#include_resources_status)
-* [`include_resources_corrective_change`](#include_resources_corrective_change)
-* [`summary_resources_format`](#summary_resources_format)
-* [`event_types`](#event_types)
-* [`orchestrator_data_filter`](#orchestrator_data_filter)
-* [`rbac_data_filter`](#rbac_data_filter)
-* [`classifier_data_filter`](#classifier_data_filter)
-* [`pe_console_data_filter`](#pe_console_data_filter)
-* [`code_manager_data_filter`](#code_manager_data_filter)
+- [Reference](#reference)
+  - [Table of Contents](#table-of-contents)
+    - [Classes](#classes)
+    - [Plans](#plans)
+      - [Public Plans](#public-plans)
+      - [Private Plans](#private-plans)
+  - [Classes](#classes-1)
+    - [`splunk_hec`](#splunk_hec)
+      - [Examples](#examples)
+        - [](#)
+      - [Parameters](#parameters)
+        - [`url`](#url)
+        - [`token`](#token)
+        - [`collect_facts`](#collect_facts)
+        - [`enable_reports`](#enable_reports)
+        - [`record_event`](#record_event)
+        - [`disabled`](#disabled)
+        - [`only_changes`](#only_changes)
+        - [`manage_routes`](#manage_routes)
+        - [`events_reporting_enabled`](#events_reporting_enabled)
+        - [`facts_terminus`](#facts_terminus)
+        - [`facts_cache_terminus`](#facts_cache_terminus)
+        - [`facts_blocklist`](#facts_blocklist)
+        - [`reports`](#reports)
+        - [`pe_console`](#pe_console)
+        - [`timeout`](#timeout)
+        - [`ssl_ca`](#ssl_ca)
+        - [`ignore_system_cert_store`](#ignore_system_cert_store)
+        - [`fips_crl_check`](#fips_crl_check)
+        - [`fips_verify_peer`](#fips_verify_peer)
+        - [`token_summary`](#token_summary)
+        - [`token_facts`](#token_facts)
+        - [`token_metrics`](#token_metrics)
+        - [`url_summary`](#url_summary)
+        - [`url_facts`](#url_facts)
+        - [`url_metrics`](#url_metrics)
+        - [`include_logs_status`](#include_logs_status)
+        - [`include_logs_catalog_failure`](#include_logs_catalog_failure)
+        - [`include_logs_corrective_change`](#include_logs_corrective_change)
+        - [`include_resources_status`](#include_resources_status)
+        - [`include_resources_corrective_change`](#include_resources_corrective_change)
+        - [`summary_resources_format`](#summary_resources_format)
+        - [`event_types`](#event_types)
+        - [`orchestrator_data_filter`](#orchestrator_data_filter)
+        - [`rbac_data_filter`](#rbac_data_filter)
+        - [`classifier_data_filter`](#classifier_data_filter)
+        - [`pe_console_data_filter`](#pe_console_data_filter)
+        - [`code_manager_data_filter`](#code_manager_data_filter)
+  - [Plans](#plans-1)
+    - [`splunk_hec::examples::apply_example`](#splunk_hecexamplesapply_example)
+      - [Parameters](#parameters-1)
+        - [`plan_guid`](#plan_guid)
+        - [`plan_name`](#plan_name)
+    - [`splunk_hec::examples::result_example`](#splunk_hecexamplesresult_example)
 
-##### <a name="url"></a>`url`
+##### <a name="-splunk_hec--url"></a>`url`
 
 Data type: `String`
 
 The url of the server that PE is running on
 
-##### <a name="token"></a>`token`
+##### <a name="-splunk_hec--token"></a>`token`
 
 Data type: `String`
 
 The user token
 
-##### <a name="collect_facts"></a>`collect_facts`
+##### <a name="-splunk_hec--collect_facts"></a>`collect_facts`
 
 Data type: `Array`
 
@@ -103,55 +120,55 @@ The list of facts that will be collected in the report. To collect all facts ava
 
 Default value: `['dmi','disks','partitions','processors','networking']`
 
-##### <a name="enable_reports"></a>`enable_reports`
+##### <a name="-splunk_hec--enable_reports"></a>`enable_reports`
 
 Data type: `Boolean`
 
 Adds splunk_hec to the list of report processors
 
-Default value: ``false``
+Default value: `false`
 
-##### <a name="record_event"></a>`record_event`
+##### <a name="-splunk_hec--record_event"></a>`record_event`
 
 Data type: `Boolean`
 
 If set to true, will call store_event and save report as json
 
-Default value: ``false``
+Default value: `false`
 
-##### <a name="disabled"></a>`disabled`
+##### <a name="-splunk_hec--disabled"></a>`disabled`
 
 Data type: `Boolean`
 
 Disables the splunk_hec report processor
 
-Default value: ``false``
+Default value: `false`
 
-##### <a name="only_changes"></a>`only_changes`
+##### <a name="-splunk_hec--only_changes"></a>`only_changes`
 
 Data type: `Boolean`
 
 When true, only reports with a changed status with be send to Splunk
 
-Default value: ``false``
+Default value: `false`
 
-##### <a name="manage_routes"></a>`manage_routes`
+##### <a name="-splunk_hec--manage_routes"></a>`manage_routes`
 
 Data type: `Boolean`
 
 When false, will not automatically send facts to splunk_hec
 
-Default value: ``false``
+Default value: `false`
 
-##### <a name="events_reporting_enabled"></a>`events_reporting_enabled`
+##### <a name="-splunk_hec--events_reporting_enabled"></a>`events_reporting_enabled`
 
 Data type: `Boolean`
 
 When true, will send data from PE Event Forwarding module to Splunk
 
-Default value: ``false``
+Default value: `false`
 
-##### <a name="facts_terminus"></a>`facts_terminus`
+##### <a name="-splunk_hec--facts_terminus"></a>`facts_terminus`
 
 Data type: `String`
 
@@ -159,7 +176,7 @@ Ensure that facts get saved to puppetdb
 
 Default value: `'puppetdb'`
 
-##### <a name="facts_cache_terminus"></a>`facts_cache_terminus`
+##### <a name="-splunk_hec--facts_cache_terminus"></a>`facts_cache_terminus`
 
 Data type: `String`
 
@@ -167,155 +184,155 @@ Makes sure that the facts get sent to splunk_hec
 
 Default value: `'splunk_hec'`
 
-##### <a name="facts_blocklist"></a>`facts_blocklist`
+##### <a name="-splunk_hec--facts_blocklist"></a>`facts_blocklist`
 
 Data type: `Optional[Array]`
 
 The list of facts that will not be collected in the report
 
-Default value: ``undef``
+Default value: `undef`
 
-##### <a name="reports"></a>`reports`
+##### <a name="-splunk_hec--reports"></a>`reports`
 
 Data type: `Optional[String]`
 
 Can specify report processors (other than puppetdb which is default)
 Deprecated; should not use (will give warning).
 
-Default value: ``undef``
+Default value: `undef`
 
-##### <a name="pe_console"></a>`pe_console`
+##### <a name="-splunk_hec--pe_console"></a>`pe_console`
 
-Data type: `Optional[String]`
+Data type: `String`
 
 The FQDN for the PE console
 
 Default value: `$settings::report_server`
 
-##### <a name="timeout"></a>`timeout`
+##### <a name="-splunk_hec--timeout"></a>`timeout`
 
 Data type: `Optional[Integer]`
 
 Timeout limit for for both open and read sessions
 
-Default value: ``undef``
+Default value: `undef`
 
-##### <a name="ssl_ca"></a>`ssl_ca`
+##### <a name="-splunk_hec--ssl_ca"></a>`ssl_ca`
 
 Data type: `Optional[String]`
 
 The name of the ca certification/bundle for ssl validation of the splunk_hec endpoint
 
-Default value: ``undef``
+Default value: `undef`
 
-##### <a name="ignore_system_cert_store"></a>`ignore_system_cert_store`
+##### <a name="-splunk_hec--ignore_system_cert_store"></a>`ignore_system_cert_store`
 
-Data type: `Optional[Boolean]`
+Data type: `Boolean`
 
 By default, the certificate provided to the ssl_ca parameter is a supplement
 to the system ca certificate store. If that cert store contains invalid
 certificates, ssl validation could fail. Set this parameter to true to
 ignore those certificates and use only the provided file.
 
-Default value: ``false``
+Default value: `false`
 
-##### <a name="fips_crl_check"></a>`fips_crl_check`
+##### <a name="-splunk_hec--fips_crl_check"></a>`fips_crl_check`
 
-Data type: `Optional[Boolean]`
+Data type: `Boolean`
 
 By default, the Puppet HTTP Client will attempt to check the Splunk CA against the Splunk CRL.
 Unless the Splunk HEC endpoint is configured with a certificate generated by the Puppet CA, set
 this parameter to false to allow metrics to successfully send.
 
-Default value: ``true``
+Default value: `true`
 
-##### <a name="fips_verify_peer"></a>`fips_verify_peer`
+##### <a name="-splunk_hec--fips_verify_peer"></a>`fips_verify_peer`
 
-Data type: `Optional[Boolean]`
+Data type: `Boolean`
 
 By default, the Puppet HTTP Client will attempt peer verfication. When utilizing a self-signed
 certificate set this parameter to false to allow metrics to successfully send.
 
-Default value: ``true``
+Default value: `true`
 
-##### <a name="token_summary"></a>`token_summary`
+##### <a name="-splunk_hec--token_summary"></a>`token_summary`
 
 Data type: `Optional[String]`
 
 Corresponds to puppet:summary in the Puppet Report Viewer
 When storing summary in a different index than the default token
 
-Default value: ``undef``
+Default value: `undef`
 
-##### <a name="token_facts"></a>`token_facts`
+##### <a name="-splunk_hec--token_facts"></a>`token_facts`
 
 Data type: `Optional[String]`
 
 Corresponds to puppet:facts in the Puppet Report Viewer
 When storing facts in a different index than the default token
 
-Default value: ``undef``
+Default value: `undef`
 
-##### <a name="token_metrics"></a>`token_metrics`
+##### <a name="-splunk_hec--token_metrics"></a>`token_metrics`
 
 Data type: `Optional[String]`
 
 Corresponds to puppet:metrics in the Puppet Report Viewer
 When storing metrics in a different index than the default token
 
-Default value: ``undef``
+Default value: `undef`
 
-##### <a name="url_summary"></a>`url_summary`
+##### <a name="-splunk_hec--url_summary"></a>`url_summary`
 
 Data type: `Optional[String]`
 
 Similar to token_summary; used to store summary in a different index than the default url
 
-Default value: ``undef``
+Default value: `undef`
 
-##### <a name="url_facts"></a>`url_facts`
+##### <a name="-splunk_hec--url_facts"></a>`url_facts`
 
 Data type: `Optional[String]`
 
 Similar to token_facts; used to store facts in a different index than the default url
 
-Default value: ``undef``
+Default value: `undef`
 
-##### <a name="url_metrics"></a>`url_metrics`
+##### <a name="-splunk_hec--url_metrics"></a>`url_metrics`
 
 Data type: `Optional[String]`
 
 Similar to token_metrics; used to store metrics in a different index than the default url
 
-Default value: ``undef``
+Default value: `undef`
 
-##### <a name="include_logs_status"></a>`include_logs_status`
+##### <a name="-splunk_hec--include_logs_status"></a>`include_logs_status`
 
 Data type: `Optional[Array]`
 
 Determines if puppet logs should be included based on the return status of the puppet agent run
 Can be none, one, or any of the following: failed, changed, unchanged
 
-Default value: ``undef``
+Default value: `undef`
 
-##### <a name="include_logs_catalog_failure"></a>`include_logs_catalog_failure`
+##### <a name="-splunk_hec--include_logs_catalog_failure"></a>`include_logs_catalog_failure`
 
-Data type: `Optional[Boolean]`
+Data type: `Boolean`
 
 Include logs if catalog fails to compile
 
-Default value: ``false``
+Default value: `false`
 
-##### <a name="include_logs_corrective_change"></a>`include_logs_corrective_change`
+##### <a name="-splunk_hec--include_logs_corrective_change"></a>`include_logs_corrective_change`
 
-Data type: `Optional[Boolean]`
+Data type: `Boolean`
 
 Include logs if there is a corrective change
 Only a PE feature
 
-Default value: ``false``
+Default value: `false`
 
-##### <a name="include_resources_status"></a>`include_resources_status`
+##### <a name="-splunk_hec--include_resources_status"></a>`include_resources_status`
 
 Data type: `Optional[Array]`
 
@@ -323,18 +340,18 @@ Determines if resource events should be included based on return status of puppe
 Does not include 'unchanged' status reports
 Allowed values are: failed, changed, unchanged
 
-Default value: ``undef``
+Default value: `undef`
 
-##### <a name="include_resources_corrective_change"></a>`include_resources_corrective_change`
+##### <a name="-splunk_hec--include_resources_corrective_change"></a>`include_resources_corrective_change`
 
-Data type: `Optional[Boolean]`
+Data type: `Boolean`
 
 Include resource events if there is a corrective change
 Only a PE feature
 
-Default value: ``false``
+Default value: `false`
 
-##### <a name="summary_resources_format"></a>`summary_resources_format`
+##### <a name="-splunk_hec--summary_resources_format"></a>`summary_resources_format`
 
 Data type: `String`
 
@@ -344,58 +361,58 @@ Allowed values are: 'hash', 'array'
 
 Default value: `'hash'`
 
-##### <a name="event_types"></a>`event_types`
+##### <a name="-splunk_hec--event_types"></a>`event_types`
 
-Data type: `Optional[Array]`
+Data type: `Array`
 
 Determines which events should be forwarded to Splunk
 Allowed values are: 'orchestrator','rbac','classifier','pe-console','code-manager'
 
 Default value: `['orchestrator','rbac','classifier','pe-console','code-manager']`
 
-##### <a name="orchestrator_data_filter"></a>`orchestrator_data_filter`
+##### <a name="-splunk_hec--orchestrator_data_filter"></a>`orchestrator_data_filter`
 
 Data type: `Optional[Array]`
 
 Filters the jobs event data
 
-Default value: ``undef``
+Default value: `undef`
 
-##### <a name="rbac_data_filter"></a>`rbac_data_filter`
+##### <a name="-splunk_hec--rbac_data_filter"></a>`rbac_data_filter`
 
 Data type: `Optional[Array]`
 
 Filters the rbac event data
 
-Default value: ``undef``
+Default value: `undef`
 
-##### <a name="classifier_data_filter"></a>`classifier_data_filter`
+##### <a name="-splunk_hec--classifier_data_filter"></a>`classifier_data_filter`
 
 Data type: `Optional[Array]`
 
 Filters the classifier event data
 
-Default value: ``undef``
+Default value: `undef`
 
-##### <a name="pe_console_data_filter"></a>`pe_console_data_filter`
+##### <a name="-splunk_hec--pe_console_data_filter"></a>`pe_console_data_filter`
 
 Data type: `Optional[Array]`
 
 Filters the pe_console event data
 
-Default value: ``undef``
+Default value: `undef`
 
-##### <a name="code_manager_data_filter"></a>`code_manager_data_filter`
+##### <a name="-splunk_hec--code_manager_data_filter"></a>`code_manager_data_filter`
 
 Data type: `Optional[Array]`
 
 Filters the code_manager event data
 
-Default value: ``undef``
+Default value: `undef`
 
 ## Plans
 
-### <a name="splunk_hecexamplesapply_example"></a>`splunk_hec::examples::apply_example`
+### <a name="splunk_hec--examples--apply_example"></a>`splunk_hec::examples::apply_example`
 
 Example of submitting a report from apply Function to Splunk.
 
@@ -403,22 +420,21 @@ Example of submitting a report from apply Function to Splunk.
 
 The following parameters are available in the `splunk_hec::examples::apply_example` plan:
 
-* [`plan_guid`](#plan_guid)
-* [`plan_name`](#plan_name)
+* [`plan_guid`](#-splunk_hec--examples--apply_example--plan_guid)
+* [`plan_name`](#-splunk_hec--examples--apply_example--plan_name)
 
-##### <a name="plan_guid"></a>`plan_guid`
+##### <a name="-splunk_hec--examples--apply_example--plan_guid"></a>`plan_guid`
 
 Data type: `Optional[String[1]]`
 
 A guid used to identify invocation of the plan (should change each run)
 
-##### <a name="plan_name"></a>`plan_name`
+##### <a name="-splunk_hec--examples--apply_example--plan_name"></a>`plan_name`
 
 Data type: `Optional[String[1]]`
 
 The name of the plan being run (shouldn't change each run)
 
-### <a name="splunk_hecexamplesresult_example"></a>`splunk_hec::examples::result_example`
+### <a name="splunk_hec--examples--result_example"></a>`splunk_hec::examples::result_example`
 
 An example of submitting a Task or Functions results to Splunk as a Task.
-

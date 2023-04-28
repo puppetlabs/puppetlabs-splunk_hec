@@ -33,8 +33,8 @@
     {
       "operatingsystem": "RedHat",
       "operatingsystemrelease": [
-        "8",
-        "7"
+        "7",
+        "8"
       ]
     },
     {
@@ -49,15 +49,22 @@
         "20.04",
         "18.04"
       ]
+    },
+    {
+      "operatingsystem": "SLES",
+      "operatingsystemrelease": [
+        "12",
+        "15"
+      ]
     }
   ],
   "requirements": [
     {
       "name": "puppet",
-      "version_requirement": ">= 6.16.0 < 8.0.0"
+      "version_requirement": ">= 6.16.0 < 9.0.0"
     }
   ],
-  "pdk-version": "2.2.0",
-  "template-url": "https://github.com/puppetlabs/pdk-templates#2.2.0",
-  "template-ref": "tags/2.2.0-0-g2381db6"
+  "pdk-version": "2.7.1",
+  "template-url": "https://github.com/puppetlabs/pdk-templates#2.7.4",
+  "template-ref": "tags/2.7.4-0-g58edf57"
 }

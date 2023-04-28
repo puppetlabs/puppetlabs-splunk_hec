@@ -7,7 +7,6 @@ plan splunk_hec::examples::apply_example (
   Optional[String[1]] $plan_guid,
   Optional[String[1]] $plan_name,
 ) {
-
   $result_ca = puppetdb_query('nodes [ certname ]{}')
   $ca = $result_ca.map |$r| { $r["certname"] }
   $pcpca = $ca.map |$n| { "pcp://${n}" }
@@ -16,8 +15,7 @@ plan splunk_hec::examples::apply_example (
 
   $results = apply ($pcpca) {
     include ntp
-    notify {'hello config test':}
-
+    notify { 'hello config test': }
   }
 
   $results.each |$result| {
@@ -38,6 +36,4 @@ plan splunk_hec::examples::apply_example (
       notice("${node} errored with a message: ${result.error}")
     }
   }
-
-
 }
