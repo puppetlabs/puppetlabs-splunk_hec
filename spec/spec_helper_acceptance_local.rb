@@ -137,7 +137,7 @@ end
 def query_puppet_user
   service_name = ''
   puppetserver.run_shell('[ -f /opt/puppetlabs/server/pe_version ]', expect_failures: true) do |result|
-    service_name = result.exit_code == 0 ? 'pe-puppet' : 'puppet'
+    service_name = (result.exit_code == 0) ? 'pe-puppet' : 'puppet'
   end
   service_name
 end

@@ -1,6 +1,5 @@
 # An example of submitting a Task or Functions results to Splunk as a Task.
 plan splunk_hec::examples::result_example {
-
   $result_ca = puppetdb_query('nodes [ certname ]{}')
   $ca = $result_ca.map |$r| { $r["certname"] }
   $pcpca = $ca.map |$n| { "pcp://${n}" }
