@@ -26,7 +26,7 @@ plan splunk_hec::acceptance::pe_server_setup(
     'deploy_pe::provision_master',
     $puppet_server,
     'version' => $version,
-    'pe_settings' => $pe_settings
+    'pe_settings' => Deferred('splunk_hec::pe_setting', [$pe_settings])
   )
 
   $cmd = @("CMD")

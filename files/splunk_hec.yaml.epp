@@ -1,0 +1,116 @@
+# managed by puppet
+---
+"url" : "<%= $url %>"
+"token" : "<%= $token %>"
+"facts.allowlist" :
+<% $collect_facts.each |$fact| {-%>
+        - <%= $fact %>
+<% } -%>
+<% unless $facts_blocklist == undef { -%>
+"facts.blocklist" :
+<% [$facts_blocklist].flatten.each |$fact| { -%>
+        - <%= $fact %>
+<% } -%>
+<% } -%>
+<% if $pe_console { -%>
+"pe_console" : "<%= $pe_console %>"
+<% } -%>
+<% if $timeout { -%>
+"timeout" : "<%= $timeout %>"
+<% } -%>
+<% if $ssl_ca { -%>
+"ssl_ca" : "<%= $ssl_ca %>"
+<% } -%>
+<% if $ignore_system_cert_store { -%>
+"ignore_system_cert_store" : "<%= $ignore_system_cert_store %>"
+<% } -%>
+<% if $record_event { -%>
+"record_event" : "<%= $record_event %>"
+<% } -%>
+<% if $token_summary { -%>
+"token_summary" : "<%= $token_summary %>"
+<% } -%>
+<% if $token_facts { -%>
+"token_facts" : "<%= $token_facts %>"
+<% } -%>
+<% if $token_metrics { -%>
+"token_metrics" : "<%= $token_metrics %>"
+<% } -%>
+<% if $url_summary { -%>
+"url_summary" : "<%= $url_summary %>"
+<% } -%>
+<% if $url_facts { -%>
+"url_facts" : "<%= $url_facts %>"
+<% } -%>
+<% if $url_metrics { -%>
+"url_metrics" : "<%= $url_metrics %>"
+<% } -%>
+<% if $include_logs_status { -%>
+"include_logs_status" :
+<% $include_logs_status.each |$status| {-%>
+        - <%= $status %>
+<% } -%>
+<% } -%>
+<% if $include_logs_catalog_failure { -%>
+"include_logs_catalog_failure" : "<%= $include_logs_catalog_failure %>"
+<% } -%>
+<% if $include_logs_corrective_change { -%>
+"include_logs_corrective_change" : "<%= $include_logs_corrective_change %>"
+<% } -%>
+<% if $include_resources_status { -%>
+"include_resources_status" :
+<% $include_resources_status.each |$status| {-%>
+        - <%= $status %>
+<% } -%>
+<% } -%>
+<% if $include_resources_corrective_change { -%>
+"include_resources_corrective_change" : "<%= $include_resources_corrective_change %>"
+<% } -%>
+<% if $summary_resources_format { -%>
+"summary_resources_format" : "<%= $summary_resources_format %>"
+<% } -%>
+<% if $disabled { -%>
+"disabled" : "<%= $disabled %>"
+<% } -%>
+<% if $only_changes { -%>
+"only_changes" : "<%= $only_changes %>"
+<% } -%>
+<% if $events_reporting_enabled { -%>
+"events_reporting_enabled" : "<%= $events_reporting_enabled %>"
+"event_types" : "<%= $event_types %>"
+<% } -%>
+<% if $orchestrator_data_filter { -%>
+"orchestrator_data_filter" :
+<% $orchestrator_data_filter.each |$subset| {-%>
+        - <%= $subset %>
+<% } -%>
+<% } -%>
+<% if $rbac_data_filter { -%>
+"rbac_data_filter" :
+<% $rbac_data_filter.each |$subset| {-%>
+        - <%= $subset %>
+<% } -%>
+<% } -%>
+<% if $classifier_data_filter { -%>
+"classifier_data_filter" :
+<% $classifier_data_filter.each |$subset| {-%>
+        - <%= $subset %>
+<% } -%>
+<% } -%>
+<% if $pe_console_data_filter { -%>
+"pe-console_data_filter" :
+<% $pe_console_data_filter.each |$subset| {-%>
+        - <%= $subset %>
+<% } -%>
+<% } -%>
+<% if $code_manager_data_filter { -%>
+"code-manager_data_filter" :
+<% $code_manager_data_filter.each |$subset| {-%>
+        - <%= $subset %>
+<% } -%>
+<% } -%>
+<% if $fips_enabled { -%>
+"fips_enabled" : "true"
+"certificate_revocation" : <%= $fips_crl_check %>
+"verify_peer" : <%= $fips_verify_peer %>
+<% } -%>

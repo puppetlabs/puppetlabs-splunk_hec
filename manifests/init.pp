@@ -206,13 +206,49 @@ class splunk_hec (
   # Decide whether to write a settings file, and if so, how to write it. A
   # settings file written to an agent node does not need to notify a service
   # to restart.
+  $parameters = {
+    'token' => Deferred('splunk_hec::token', [$token]),
+    'url' => $url,
+    'collect_facts' => $collect_facts,
+    'facts_blocklist' => $facts_blocklist,
+    'pe_console' => $pe_console,
+    'timeout' => $timeout,
+    'ssl_ca' => $ssl_ca,
+    'ignore_system_cert_store' => $ignore_system_cert_store,
+    'record_event' => $record_event,
+    'token_summary' => $token_summary,
+    'token_facts' => $token_facts,
+    'token_metrics' => $token_metrics,
+    'url_summary' => $url_summary,
+    'url_facts' => $url_facts,
+    'url_metrics' => $url_metrics,
+    'include_logs_status' => $include_logs_status,
+    'include_logs_catalog_failure' => $include_logs_catalog_failure,
+    'include_logs_corrective_change' => $include_logs_corrective_change,
+    'include_resources_status' => $include_resources_status,
+    'include_resources_corrective_change' => $include_resources_corrective_change,
+    'summary_resources_format' => $summary_resources_format,
+    'disabled' => $disabled,
+    'only_changes' => $only_changes,
+    'events_reporting_enabled' => $events_reporting_enabled,
+    'orchestrator_data_filter' => $orchestrator_data_filter,
+    'rbac_data_filter' => $rbac_data_filter,
+    'classifier_data_filter' => $classifier_data_filter,
+    'pe_console_data_filter' => $pe_console_data_filter,
+    'code_manager_data_filter' => $code_manager_data_filter,
+    'fips_crl_check' => $fips_crl_check,
+    'fips_verify_peer' => $fips_verify_peer,
+    'fips_enabled' => $facts['fips_enabled'],
+    'event_types' => $event_types,
+  }
+
   if !$agent_node {
     file { "${settings::confdir}/splunk_hec.yaml":
       ensure  => file,
       owner   => $owner,
       group   => $group,
       mode    => '0640',
-      content => epp('splunk_hec/splunk_hec.yaml.epp'),
+      content => Deferred('inline_epp', [file('splunk_hec/splunk_hec.yaml.epp'), $parameters]),
       notify  => Service[$service],
     }
   } elsif $agent_node and $events_reporting_enabled {
@@ -221,7 +257,7 @@ class splunk_hec (
       owner   => $owner,
       group   => $group,
       mode    => '0640',
-      content => epp('splunk_hec/splunk_hec.yaml.epp'),
+      content => Deferred('inline_epp', [file('splunk_hec/splunk_hec.yaml.epp'), $parameters]),
     }
   }
 
