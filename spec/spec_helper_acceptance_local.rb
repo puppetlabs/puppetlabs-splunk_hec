@@ -143,7 +143,7 @@ def query_puppet_user
 end
 
 def get_splunk_report(earliest, latest, sourcetype = 'puppet:summary')
-  start_time =  earliest.strftime('%m/%d/%Y:%H:%M:%S')
+  start_time = earliest.strftime('%m/%d/%Y:%H:%M:%S')
   end_time   = (latest + 2).strftime('%m/%d/%Y:%H:%M:%S')
   query_command = 'curl -u admin:piepiepie -k '\
     'https://localhost:8089/services/search/v2/jobs/export -d output_mode=json '\
