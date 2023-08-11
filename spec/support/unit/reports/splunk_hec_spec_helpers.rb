@@ -57,7 +57,7 @@ def default_settings_hash
 end
 
 def mock_settings_file(settings_hash)
-  allow(YAML).to receive(:load_file).with(%r{splunk_hec\.yaml}).and_return(settings_hash)
+  allow(YAML).to receive(:load_file).with(%r{(.*)(settings|hec_secrets).yaml}).and_return(settings_hash)
 end
 
 def new_mock_response(status, body)

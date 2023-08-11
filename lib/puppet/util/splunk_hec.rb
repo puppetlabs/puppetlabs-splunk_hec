@@ -12,9 +12,16 @@ require 'time'
 module Puppet::Util::Splunk_hec
   def settings
     return @settings if @settings
-    @settings_file = Puppet[:confdir] + '/splunk_hec.yaml'
+    @settings_file = Puppet[:confdir] + '/splunk_hec/settings.yaml'
 
     @settings = YAML.load_file(@settings_file)
+  end
+
+  def secrets
+    return @secrets if @secrets
+    @secrets_file = Puppet[:confdir] + '/splunk_hec/hec_secrets.yaml'
+
+    @secrets = YAML.load_file(@secrets_file)
   end
 
   def build_ca_store(cert_store_file_path)
@@ -86,7 +93,7 @@ module Puppet::Util::Splunk_hec
     # we want users to be able to provide different tokens per sourcetype if they want
     source_type = body['sourcetype'].split(':')[1]
     token_name = "token_#{source_type}"
-    token = settings[token_name] || settings['token'] || raise(Puppet::Error, 'Must provide token parameter to splunk class')
+    token = settings[token_name] || secrets['token'] || raise(Puppet::Error, 'Must provide token parameter to splunk class')
     if settings['fips_enabled']
       send_with_fips(body, source_type, token)
     else

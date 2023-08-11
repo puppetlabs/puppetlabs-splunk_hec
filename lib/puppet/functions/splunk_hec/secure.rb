@@ -3,10 +3,15 @@
 # Sensitive data is redacted from Puppet logs and reports.
 Puppet::Functions.create_function(:'splunk_hec::secure') do
   dispatch :secure do
-    param 'String', :secret
+    param 'Hash', :secrets
   end
 
-  def secure(secret)
-    Puppet::Pops::Types::PSensitiveType::Sensitive.new(secret)
+  def secure(secrets)
+    secrets.each do |key, value|
+      unless value.nil?
+        secrets[key] = Puppet::Pops::Types::PSensitiveType::Sensitive.new(value)
+      end
+    end
+    secrets
   end
 end

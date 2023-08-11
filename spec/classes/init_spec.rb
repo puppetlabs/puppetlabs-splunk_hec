@@ -198,7 +198,14 @@ describe 'splunk_hec' do
       it { is_expected.to have_pe_ini_setting_resource_count(0)    }
       it { is_expected.to have_pe_ini_subsetting_resource_count(0) }
       it {
-        is_expected.to contain_file("#{confdir}/splunk_hec.yaml")
+        is_expected.to contain_file("#{confdir}/splunk_hec/settings.yaml")
+          .with(
+            owner: 'root',
+            group: 'root',
+          )
+      }
+      it {
+        is_expected.to contain_file("#{confdir}/splunk_hec/hec_secrets.yaml")
           .with(
             owner: 'root',
             group: 'root',
