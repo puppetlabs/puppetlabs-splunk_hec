@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. The format 
 
 ## [Unreleased](https://github.com/puppetlabs/puppetlabs-splunk_hec)
 
+### Fixed
+
+Settings are now removed from `puppet.conf` when `splunk_hec::disabled` is set to **true**.[#205](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/205)
+
 ## [v1.4.0](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v1.4.0) (2023-4-17)
 
 [Full Changelog](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v1.3.0..v1.4.0)

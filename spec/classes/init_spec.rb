@@ -126,10 +126,15 @@ describe 'splunk_hec' do
       let(:params) do
         p = super()
         p['disabled'] = true
+        p['enable_reports'] = true
+        p['manage_routes'] = true
         p
       end
 
-      it { is_expected.to compile }
+      it { is_expected.to contain_pe_ini_subsetting('enable splunk_hec').with_setting('reports').with_ensure('absent') }
+      it { is_expected.to contain_pe_ini_setting('enable splunk_hec_routes.yaml').with_setting('route_file').with_ensure('absent') }
+      it { is_expected.to have_pe_ini_subsetting_resource_count(1) }
+      it { is_expected.to have_pe_ini_setting_resource_count(1) }
     end
 
     context 'events_reporting_enabled' do

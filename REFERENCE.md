@@ -140,7 +140,7 @@ Default value: `false`
 
 Data type: `Boolean`
 
-Disables the splunk_hec report processor
+Removes settings to send reports and facts to Splunk
 
 Default value: `false`
 
