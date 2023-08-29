@@ -19,7 +19,7 @@
 # @param [Boolean] record_event
 #   If set to true, will call store_event and save report as json
 # @param [Boolean] disabled
-#   Disables the splunk_hec report processor
+#   Removes settings to send reports and facts to Splunk
 # @param [Boolean] only_changes
 #   When true, only reports with a changed status with be send to Splunk
 # @param [Boolean] manage_routes
@@ -161,6 +161,13 @@ class splunk_hec (
     $group          = 'puppet'
   }
 
+  unless $disabled {
+    $ensure_conf = present
+  }
+  else {
+    $ensure_conf = absent
+  }
+
   if $enable_reports {
     # lint:ignore:140chars
     if $reports != undef {
@@ -173,7 +180,7 @@ class splunk_hec (
     # The subsetting resource automatically adds the 'splunk_hec' report
     # processor to the reports setting if it hasn't yet been added there.  
     Resource[$ini_subsetting] { 'enable splunk_hec':
-      ensure               => present,
+      ensure               => $ensure_conf,
       path                 => '/etc/puppetlabs/puppet/puppet.conf',
       section              => 'master',
       setting              => 'reports',
@@ -193,7 +200,7 @@ class splunk_hec (
       notify  => Service[$service],
     }
     Resource[$ini_setting] { 'enable splunk_hec_routes.yaml':
-      ensure  => present,
+      ensure  => $ensure_conf,
       path    => '/etc/puppetlabs/puppet/puppet.conf',
       section => 'master',
       setting => 'route_file',
