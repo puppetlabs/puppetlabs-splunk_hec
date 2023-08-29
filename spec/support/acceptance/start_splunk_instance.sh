@@ -50,6 +50,19 @@ function wait_for_compose() {
   done
 }
 
+function setup_hec_ssl() {
+  echo "Setting up HEC SSL..."
+  certs=$(puppet config print certdir)
+  keys="$(puppet config print privatekeydir)"
+  s_cert='/tmp/splunk/puppet_hec.pem'
+  s_apps='/opt/splunk/etc/apps'
+  s_auth='/opt/splunk/etc/auth'
+  /opt/puppetlabs/bin/puppetserver ca generate --certname localhost &>2
+  cat "$certs/localhost.pem" "$keys/localhost.pem" "$certs/ca.pem" > $s_cert
+  docker cp $s_cert splunk-enterprise-1:$s_auth
+  docker exec -u root splunk-enterprise-1 sed -i "/Cert/c\serverCert = $s_auth/puppet_hec.pem" $s_apps/splunk_httpinput/local/inputs.conf
+}
+
 function splunk_set_minfreemb() {
   echo "Setting Splunk custom configs..."
   # This is a workaround for issues on Ubuntu where searches fail due to hitting default minfreemb of 5GB.
@@ -84,5 +97,6 @@ printenv
 docker system info
 start_splunk
 wait_for_compose
+setup_hec_ssl
 splunk_set_minfreemb
 exit 0
