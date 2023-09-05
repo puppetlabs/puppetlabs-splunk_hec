@@ -10,8 +10,9 @@
 #
 # @param [String] url
 #   The url of the server that PE is running on
-# @param [String] token
-#   The user token
+# @param [Optional[String]] token
+#   The default Splunk HEC token
+#   Note: The value of the token is converted to Puppet's Sensitive data type during catalog application.
 # @param [Array] collect_facts
 #   The list of facts that will be collected in the report. To collect all facts available add the special value 'all.facts'.
 # @param [Boolean] enable_reports
@@ -56,12 +57,15 @@
 # @param [Optional[String]] token_summary
 #   Corresponds to puppet:summary in the Puppet Report Viewer
 #   When storing summary in a different index than the default token
+#   Note: The value of the token is converted to Puppet's Sensitive data type during catalog application.
 # @param [Optional[String]] token_facts
 #   Corresponds to puppet:facts in the Puppet Report Viewer
 #   When storing facts in a different index than the default token
+#   Note: The value of the token is converted to Puppet's Sensitive data type during catalog application.
 # @param [Optional[String]] token_metrics
 #   Corresponds to puppet:metrics in the Puppet Report Viewer
 #   When storing metrics in a different index than the default token
+#   Note: The value of the token is converted to Puppet's Sensitive data type during catalog application.
 # @param [Optional[String]] url_summary
 #   Similar to token_summary; used to store summary in a different index than the default url
 # @param [Optional[String]] url_facts
@@ -102,7 +106,7 @@
 #   Filters the code_manager event data
 class splunk_hec (
   String $url,
-  String $token,
+  Optional[String] $token                                = undef,
   Array $collect_facts                                   = ['dmi','disks','partitions','processors','networking'],
   Boolean $enable_reports                                = false,
   Boolean $record_event                                  = false,
@@ -139,6 +143,20 @@ class splunk_hec (
   Optional[Array] $pe_console_data_filter                = undef,
   Optional[Array] $code_manager_data_filter              = undef,
 ) {
+  # Ensure required credential params are configured
+  if (
+    ($token == undef)
+    and
+    ($token_summary or $token_facts or $token_metrics == undef)
+  ) {
+    $authorization_failure_message = @(MESSAGE/L)
+      Splunk HEC: Unless you are utilizing individual HEC tokens \
+      ('token_summary', 'token_facts', 'token_metrics') \
+      you must configure the 'token' parameter.
+      |-MESSAGE
+    fail($authorization_failure_message)
+  }
+
   # Account for the differences in Puppet Enterprise and Open Source and Agent
   $agent_node = $facts['splunk_hec_agent_only_node']
 
@@ -168,6 +186,18 @@ class splunk_hec (
     $ensure_conf = absent
   }
 
+  # Remove old settings files from v1.
+  include splunk_hec::v2_cleanup
+
+  # Secure credential data
+  $hec_secrets = {
+    'token' => $token,
+    'token_summary' => $token_summary,
+    'token_facts' => $token_facts,
+    'token_metrics' => $token_metrics,
+  }
+  $secrets = Deferred('splunk_hec::secure', [$hec_secrets])
+
   if $enable_reports {
     # lint:ignore:140chars
     if $reports != undef {
@@ -190,8 +220,14 @@ class splunk_hec (
     }
   }
 
+  file { "${settings::confdir}/splunk_hec":
+    ensure => directory,
+    owner  => $owner,
+    group  => $group,
+  }
+
   if $manage_routes {
-    file { '/etc/puppetlabs/puppet/splunk_hec_routes.yaml':
+    file { "${settings::confdir}/splunk_hec/splunk_hec_routes.yaml":
       ensure  => file,
       owner   => $owner,
       group   => $group,
@@ -204,8 +240,8 @@ class splunk_hec (
       path    => '/etc/puppetlabs/puppet/puppet.conf',
       section => 'master',
       setting => 'route_file',
-      value   => '/etc/puppetlabs/puppet/splunk_hec_routes.yaml',
-      require => File['/etc/puppetlabs/puppet/splunk_hec_routes.yaml'],
+      value   => "${settings::confdir}/splunk_hec/splunk_hec_routes.yaml",
+      require => File["${settings::confdir}/splunk_hec/splunk_hec_routes.yaml"],
       notify  => Service[$service],
     }
   }
@@ -214,21 +250,40 @@ class splunk_hec (
   # settings file written to an agent node does not need to notify a service
   # to restart.
   if !$agent_node {
-    file { "${settings::confdir}/splunk_hec.yaml":
+    file { "${settings::confdir}/splunk_hec/settings.yaml":
       ensure  => file,
       owner   => $owner,
       group   => $group,
       mode    => '0640',
-      content => epp('splunk_hec/splunk_hec.yaml.epp'),
+      require => File["${settings::confdir}/splunk_hec"],
+      content => epp('splunk_hec/settings.yaml.epp'),
+      notify  => Service[$service],
+    }
+    file { "${settings::confdir}/splunk_hec/hec_secrets.yaml":
+      ensure  => file,
+      owner   => $owner,
+      group   => $group,
+      mode    => '0600',
+      require => File["${settings::confdir}/splunk_hec"],
+      content => Deferred('inline_epp', [file('splunk_hec/hec_secrets.yaml.epp'), $secrets]),
       notify  => Service[$service],
     }
   } elsif $agent_node and $events_reporting_enabled {
-    file { "${settings::confdir}/splunk_hec.yaml":
+    file { "${settings::confdir}/splunk_hec/settings.yaml":
       ensure  => file,
       owner   => $owner,
       group   => $group,
       mode    => '0640',
-      content => epp('splunk_hec/splunk_hec.yaml.epp'),
+      require => File["${settings::confdir}/splunk_hec"],
+      content => epp('splunk_hec/settings.yaml.epp'),
+    }
+    file { "${settings::confdir}/splunk_hec/hec_secrets.yaml":
+      ensure  => file,
+      owner   => $owner,
+      group   => $group,
+      mode    => '0600',
+      require => File["${settings::confdir}/splunk_hec"],
+      content => Deferred('inline_epp', [file('splunk_hec/hec_secrets.yaml.epp'), $secrets]),
     }
   }
 
@@ -246,7 +301,8 @@ class splunk_hec (
       group   => $group,
       require => [
         Class['pe_event_forwarding'],
-        File["${settings::confdir}/splunk_hec.yaml"],
+        File["${settings::confdir}/splunk_hec/settings.yaml"],
+        File["${settings::confdir}/splunk_hec/hec_secrets.yaml"],
       ],
     }
 

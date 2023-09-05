@@ -16,7 +16,7 @@ class ::Hash
   end
 end
 
-@confdir  = '/etc/puppetlabs/puppet'
+@confdir  = '/etc/puppetlabs/puppet/splunk_hec'
 
 INDICES = {
   'orchestrator' => 'puppet:jobs',
@@ -26,10 +26,15 @@ INDICES = {
   'code-manager' => 'puppet:activities_code_manager'
 }
 
-@settings_file = "#{@confdir}/splunk_hec.yaml"
+@settings_file = "#{@confdir}/settings.yaml"
+@secrets_file = "#{@confdir}/hec_secrets.yaml"
 
 def settings
   @settings ||= YAML.load_file(@settings_file)
+end
+
+def secrets
+  @secrets ||= YAML.load_file(@secrets_file)
 end
 
 def build_ca_store(cert_store_file_path)
@@ -77,7 +82,7 @@ def submit_request(body)
   source_type = 'pe_event_forwarding'
   token_name = "token_#{source_type}"
   http = create_http(source_type)
-  token = settings[token_name] || settings['token'] || raise('Must provide token parameter to splunk class')
+  token = secrets[token_name] || secrets['token'] || raise('Must provide token parameter to splunk class')
   req = Net::HTTP::Post.new(@uri.path.to_str)
   req.add_field('Authorization', "Splunk #{token}")
   req.add_field('Content-Type', 'application/json')

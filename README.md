@@ -201,12 +201,6 @@ Alternatively, you can create a [profile class](https://puppet.com/docs/pe/lates
 
 ```
 class profile::splunk_hec {
-  file { '/etc/puppetlabs/puppet/splunk_hec':
-    ensure => directory,
-    owner  => 'pe-puppet',
-    group  => 'pe-puppet',
-    mode   => 0644,
-  }
   file { '/etc/puppetlabs/puppet/splunk_hec/splunk_ca.cert':
     ensure => file,
     owner  => 'pe-puppet',

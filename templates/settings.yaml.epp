@@ -1,7 +1,6 @@
-# managed by puppet
+# managed by splunk_hec module
 ---
 "url" : "<%= $splunk_hec::url %>"
-"token" : "<%= $splunk_hec::token %>"
 "facts.allowlist" :
 <% $splunk_hec::collect_facts.each |$fact| {-%>
         - <%= $fact %>
@@ -26,15 +25,6 @@
 <% } -%>
 <% if $splunk_hec::record_event { -%>
 "record_event" : "<%= $splunk_hec::record_event %>"
-<% } -%>
-<% if $splunk_hec::token_summary { -%>
-"token_summary" : "<%= $splunk_hec::token_summary %>"
-<% } -%>
-<% if $splunk_hec::token_facts { -%>
-"token_facts" : "<%= $splunk_hec::token_facts %>"
-<% } -%>
-<% if $splunk_hec::token_metrics { -%>
-"token_metrics" : "<%= $splunk_hec::token_metrics %>"
 <% } -%>
 <% if $splunk_hec::url_summary { -%>
 "url_summary" : "<%= $splunk_hec::url_summary %>"

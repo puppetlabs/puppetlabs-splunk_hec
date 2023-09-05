@@ -6,7 +6,17 @@
 
 ### Classes
 
+#### Public Classes
+
 * [`splunk_hec`](#splunk_hec): Simple class to manage your splunk_hec connectivity
+
+#### Private Classes
+
+* `splunk_hec::v2_cleanup`: Class to remove old configuration files
+
+### Functions
+
+* [`splunk_hec::secure`](#splunk_hecsecure): Custom function to mark sensitive data utilized by this module as Sensitive types in the Puppet language. Sensitive data is redacted from Pup
 
 ### Plans
 
@@ -48,6 +58,9 @@ The following parameters are available in the `splunk_hec` class:
 - [Reference](#reference)
   - [Table of Contents](#table-of-contents)
     - [Classes](#classes)
+      - [Public Classes](#public-classes)
+      - [Private Classes](#private-classes)
+    - [Functions](#functions)
     - [Plans](#plans)
       - [Public Plans](#public-plans)
       - [Private Plans](#private-plans)
@@ -108,9 +121,10 @@ The url of the server that PE is running on
 
 ##### <a name="-splunk_hec--token"></a>`token`
 
-Data type: `String`
+Data type: `Optional[String]`
 
-The user token
+The default Splunk HEC token
+Note: The value of the token is converted to Puppet's Sensitive data type during catalog application.
 
 ##### <a name="-splunk_hec--collect_facts"></a>`collect_facts`
 
@@ -261,6 +275,7 @@ Data type: `Optional[String]`
 
 Corresponds to puppet:summary in the Puppet Report Viewer
 When storing summary in a different index than the default token
+Note: The value of the token is converted to Puppet's Sensitive data type during catalog application.
 
 Default value: `undef`
 
@@ -270,6 +285,7 @@ Data type: `Optional[String]`
 
 Corresponds to puppet:facts in the Puppet Report Viewer
 When storing facts in a different index than the default token
+Note: The value of the token is converted to Puppet's Sensitive data type during catalog application.
 
 Default value: `undef`
 
@@ -279,6 +295,7 @@ Data type: `Optional[String]`
 
 Corresponds to puppet:metrics in the Puppet Report Viewer
 When storing metrics in a different index than the default token
+Note: The value of the token is converted to Puppet's Sensitive data type during catalog application.
 
 Default value: `undef`
 
