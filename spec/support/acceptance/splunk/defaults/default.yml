@@ -15,8 +15,15 @@ splunk:
   s2s_port: 9997
   http_port: 8000
   hec:
-    enable: True
-    ssl: false
+    enable: true
+    ssl: true
     port: 8088
     token: abcd1234
+  conf:
+    - key: inputs
+      value:
+        directory: /opt/splunk/etc/apps/splunk_httpinput/local
+        content:
+          http:
+            serverCert:
   smartstore: null

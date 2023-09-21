@@ -75,7 +75,7 @@ def report_dir
   @report_dir ||= puppetserver.run_shell(cmd).stdout.chomp
 end
 
-def setup_manifest(disabled: false, url: nil, with_event_forwarding: false)
+def setup_manifest(disabled: false, ignore_store: true, ssl_ca: nil, url: nil, with_event_forwarding: false)
   if url.nil?
     # This block is for checking whether we are testing locally or on the CloudCI
     # splunk_node.uri will work locally, but bc of the discrepancy of uri and hostname
@@ -85,20 +85,23 @@ def setup_manifest(disabled: false, url: nil, with_event_forwarding: false)
     rescue
       splunk_runner = 'localhost'
     end
-    url = "http://#{splunk_runner}:8088/services/collector/event"
+    url = "https://#{splunk_runner}:8088/services/collector/event"
   end
 
   manifest = ''
   params = {
-    url:            url,
-    token:          'abcd1234',
-    enable_reports: true,
-    manage_routes: true,
-    facts_terminus: 'yaml',
-    record_event:   true,
-    pe_console:     'localhost',
-    disabled:       disabled,
+    url:                      url,
+    token:                    'abcd1234',
+    enable_reports:           true,
+    manage_routes:            true,
+    facts_terminus:           'yaml',
+    record_event:             true,
+    pe_console:               'localhost',
+    disabled:                 disabled,
+    ignore_system_cert_store: ignore_store,
   }
+
+  params[:ssl_ca] = ssl_ca unless ssl_ca.nil?
 
   if with_event_forwarding
     manifest << add_event_forwarding
@@ -128,6 +131,21 @@ def add_event_forwarding
     disabled: true
   }
   declare(:class, :pe_event_forwarding, params)
+end
+
+def configure_ssl(cert_store: false)
+  inventory_hash = LitmusHelpers.inventory_hash_from_inventory_file
+  image = puppetserver.facts_from_node(inventory_hash, puppetserver.uri)
+  cmd = if cert_store
+          if image['platform'].include?('ubuntu')
+            'cp $(puppet config print localcacert) /usr/local/share/ca-certificates/ && update-ca-certificates'
+          else
+            'cp $(puppet config print localcacert) /etc/pki/ca-trust/source/anchors/ && update-ca-trust'
+          end
+        else
+          'cp $(puppet config print localcacert) /etc/puppetlabs/puppet/splunk_hec/'
+        end
+  puppetserver.run_shell(cmd)
 end
 
 def puppet_user
@@ -160,6 +178,11 @@ end
 
 def report_count(report)
   report[0]['result'].nil? ? 0 : report.count
+end
+
+def log_count(message, log)
+  cmd = "grep '#{message}' #{log} -c"
+  puppetserver.run_shell(cmd, expect_failures: true).stdout.chomp.to_i
 end
 
 def server_agent_run(manifest)
