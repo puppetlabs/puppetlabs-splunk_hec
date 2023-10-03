@@ -10,7 +10,7 @@ plan splunk_hec::acceptance::oss_server_setup(
   Optional[String] $collection = 'puppet7'
 ) {
   # get server
-  $server = get_targets('*').filter |$node| { $node.vars['role'] == 'server' }
+  $server = get_targets('*').filter |$n| { $n.vars['role'] == 'server' }
   $localhost = get_targets('localhost')
 
   # get facts
@@ -18,7 +18,7 @@ plan splunk_hec::acceptance::oss_server_setup(
   $platform = $puppetserver_facts['platform']
 
   # machines are not yet ready at time of installing the puppetserver, so we wait 15s
-  run_command('sleep 15s', $localhost)
+  run_command('sleep 15', $localhost)
 
   # install puppetserver and start on master
   run_task(

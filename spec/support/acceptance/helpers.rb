@@ -34,9 +34,9 @@ class Target
   # most recently set the TARGET_HOST variable.
   PuppetLitmus.instance_methods.each do |name|
     m = PuppetLitmus.instance_method(name)
-    define_method(name) do |*args, &block|
+    define_method(name) do |*args, **kwargs, &block|
       ENV['TARGET_HOST'] = uri
-      m.bind(self).call(*args, &block)
+      m.bind(self).call(*args, **kwargs, &block)
     end
   end
 end
@@ -50,7 +50,7 @@ module TargetHelpers
   module_function :puppetserver
 
   def splunk_instance
-    target('Splunk instance', 'acceptance:setup_splunk_instance', 'splunk_instance')
+    target('Splunk instance', 'acceptance:setup_splunk_targets', 'splunk_instance')
   end
   module_function :splunk_instance
 
@@ -63,17 +63,16 @@ module TargetHelpers
     @targets ||= {}
 
     unless @targets[name]
-      # Find the target
+      # Find the targets
       inventory_hash = LitmusHelpers.inventory_hash_from_inventory_file
-      targets = LitmusHelpers.find_targets(inventory_hash, nil)
-      target_uri = targets.find do |target|
-        vars = LitmusHelpers.vars_from_node(inventory_hash, target) || {}
-        (vars['role'] || []) == role
-      end
-      unless target_uri
+      targets = LitmusHelpers.nodes_with_role(role, inventory_hash)
+      unless targets
         raise TargetNotFoundError, "none of the targets in 'inventory.yaml' have the '#{role}' role set. Did you forget to run 'rake #{setup_task}'?"
       end
-      @targets[name] = Target.new(target_uri)
+      @targets[name] = []
+      targets.each_with_index do |target, i|
+        @targets[name][i] = Target.new(target)
+      end
     end
 
     @targets[name]

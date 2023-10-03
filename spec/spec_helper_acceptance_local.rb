@@ -7,9 +7,11 @@ PuppetLitmus.configure!
 
 EVENT_FORWARDING_CONFDIR     = '/etc/puppetlabs/pe_event_forwarding'.freeze
 DIR_TEST_COMMAND             = '[[ -d /etc/puppetlabs/code/environments/production/modules/pe_event_forwarding ]] '\
-                               '&& rm -r /etc/puppetlabs/code/environments/production/modules/pe_event_forwarding'.freeze
+                               '&& rm /etc/puppetlabs/code/environments/production/modules/pe_event_forwarding -rf'.freeze
 EVENT_FORWARDING_LOCAL_PATH  = './spec/fixtures/modules/pe_event_forwarding'.freeze
 EVENT_FORWARDING_REMOTE_PATH = '/etc/puppetlabs/code/environments/production/modules'.freeze
+
+TARGET_SERVER = ENV['TARGET_HOST']
 
 RSpec.configure do |config|
   include TargetHelpers
@@ -19,9 +21,9 @@ RSpec.configure do |config|
     # Puppet runs (one triggered by service vs one we trigger)
     shell_command = 'puppet resource service puppet ensure=stopped; '\
       'puppet module install puppetlabs-inifile --version 5.1.0'
-    puppetserver.run_shell(shell_command)
-    puppetserver.run_shell(DIR_TEST_COMMAND, expect_failures: true)
-    puppetserver.bolt_upload_file(EVENT_FORWARDING_LOCAL_PATH, EVENT_FORWARDING_REMOTE_PATH)
+    TARGET_SERVER.run_shell(shell_command)
+    TARGET_SERVER.run_shell(DIR_TEST_COMMAND, expect_failures: true)
+    TARGET_SERVER.bolt_upload_file(EVENT_FORWARDING_LOCAL_PATH, EVENT_FORWARDING_REMOTE_PATH)
   end
 end
 
@@ -35,8 +37,8 @@ def set_sitepp_content(manifest)
   }
   HERE
 
-  puppetserver.write_file(content, '/etc/puppetlabs/code/environments/production/manifests/site.pp')
-  puppetserver.run_shell("chown #{puppet_user}:#{puppet_user} /etc/puppetlabs/code/environments/production/manifests/site.pp")
+  TARGET_SERVER.write_file(content, '/etc/puppetlabs/code/environments/production/manifests/site.pp')
+  TARGET_SERVER.run_shell("chown #{puppet_user}:#{puppet_user} /etc/puppetlabs/code/environments/production/manifests/site.pp")
 end
 
 def trigger_puppet_run(target, acceptable_exit_codes: [0, 2])
@@ -65,14 +67,14 @@ def to_manifest(*declarations)
 end
 
 def host_name
-  @puppetserver_hostname ||= puppetserver.run_shell('facter fqdn').stdout.chomp
+  @puppetserver_hostname ||= TARGET_SERVER.run_shell('facter fqdn').stdout.chomp
 end
 
 def report_dir
   cmd = "reportdir=`puppet config print reportdir --section server` \n"\
         "hostname=`facter fqdn` \n"\
         'echo \"$reportdir/$hostname\"'
-  @report_dir ||= puppetserver.run_shell(cmd).stdout.chomp
+  @report_dir ||= TARGET_SERVER.run_shell(cmd).stdout.chomp
 end
 
 def setup_manifest(disabled: false, ignore_store: true, ssl_ca: nil, url: nil, with_event_forwarding: false)
@@ -125,7 +127,7 @@ def add_service_resource
 end
 
 def add_event_forwarding
-  token = puppetserver.run_shell('puppet access show').stdout.chomp
+  token = TARGET_SERVER.run_shell('puppet access show').stdout.chomp
   params = {
     pe_token: token,
     disabled: true
@@ -135,7 +137,7 @@ end
 
 def configure_ssl(cert_store: false)
   inventory_hash = LitmusHelpers.inventory_hash_from_inventory_file
-  image = puppetserver.facts_from_node(inventory_hash, puppetserver.uri)
+  image = LitmusHelpers.facts_from_node(inventory_hash, TARGET_SERVER)
   cmd = if cert_store
           if image['platform'].include?('ubuntu')
             'cp $(puppet config print localcacert) /usr/local/share/ca-certificates/ && update-ca-certificates'
@@ -145,7 +147,7 @@ def configure_ssl(cert_store: false)
         else
           'cp $(puppet config print localcacert) /etc/puppetlabs/puppet/splunk_hec/'
         end
-  puppetserver.run_shell(cmd)
+  TARGET_SERVER.run_shell(cmd)
 end
 
 def puppet_user
@@ -154,7 +156,7 @@ end
 
 def query_puppet_user
   service_name = ''
-  puppetserver.run_shell('[ -f /opt/puppetlabs/server/pe_version ]', expect_failures: true) do |result|
+  TARGET_SERVER.run_shell('[ -f /opt/puppetlabs/server/pe_version ]', expect_failures: true) do |result|
     service_name = (result.exit_code == 0) ? 'pe-puppet' : 'puppet'
   end
   service_name
@@ -170,7 +172,7 @@ def get_splunk_report(earliest, latest, sourcetype = 'puppet:summary')
   begin
     splunk_runner = splunk_node
   rescue
-    splunk_runner = puppetserver
+    splunk_runner = TARGET_SERVER
   end
   response = splunk_runner.run_shell(query_command).stdout
   JSON.parse("[#{response.split.join(',')}]")
@@ -182,14 +184,14 @@ end
 
 def log_count(message, log)
   cmd = "grep '#{message}' #{log} -c"
-  puppetserver.run_shell(cmd, expect_failures: true).stdout.chomp.to_i
+  TARGET_SERVER.run_shell(cmd, expect_failures: true).stdout.chomp.to_i
 end
 
 def server_agent_run(manifest)
   set_sitepp_content(manifest)
-  trigger_puppet_run(puppetserver)
+  trigger_puppet_run(TARGET_SERVER)
 end
 
 def console_host_fqdn
-  @console_host_fqdn ||= puppetserver.run_shell('hostname -A').stdout.strip
+  @console_host_fqdn ||= TARGET_SERVER.run_shell('hostname -A').stdout.strip
 end

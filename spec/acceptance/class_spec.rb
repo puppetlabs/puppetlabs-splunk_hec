@@ -3,6 +3,7 @@ require 'spec_helper_acceptance'
 
 describe 'Verify the minimum install' do
   let(:earliest) { Time.now.utc }
+  let(:server) { ENV['TARGET_HOST'] }
 
   before(:all) do
     server_agent_run(setup_manifest)
@@ -11,7 +12,7 @@ describe 'Verify the minimum install' do
   context 'with a basic test' do
     it 'Successfully sends a report to splunk' do
       before_run = earliest
-      trigger_puppet_run(puppetserver)
+      trigger_puppet_run(server)
       after_run = Time.now.utc
       report_count = report_count(get_splunk_report(before_run, after_run))
       expect(report_count).to be 1
@@ -19,7 +20,7 @@ describe 'Verify the minimum install' do
 
     it 'Successfully sends facts to Splunk' do
       before_run = earliest
-      trigger_puppet_run(puppetserver)
+      trigger_puppet_run(server)
       after_run = Time.now.utc
       report_count = report_count(get_splunk_report(before_run, after_run, 'puppet:facts'))
       expect(report_count).to be >= 1
@@ -28,13 +29,13 @@ describe 'Verify the minimum install' do
     it 'Records events with record_event set to true'
 
     it 'Successfully sends data to an http endpoint' do
-      run_shell('cat /etc/puppetlabs/code/environments/production/modules/splunk_hec/examples/orchestrator_metrics.json | puppet splunk_hec --sourcetype puppet:summary --saved_report')
+      server.run_shell('cat /etc/puppetlabs/code/environments/production/modules/splunk_hec/examples/orchestrator_metrics.json | puppet splunk_hec --sourcetype puppet:summary --saved_report')
     end
 
     it 'Fails when given a bad endpoint' do
       server_agent_run(setup_manifest(url: 'notanendpoint/nicetry'))
       cmd = 'cat /etc/puppetlabs/code/environments/production/modules/splunk_hec/examples/foo.json | puppet splunk_hec --sourcetype puppet:summary --saved_report'
-      results = puppetserver.run_shell(cmd, expect_failures: true).to_s
+      results = server.run_shell(cmd, expect_failures: true).to_s
       expect(results).to match %r{exit_code=1}
     end
 
