@@ -7,7 +7,6 @@ fixtures:
     inifile:
       repo: "puppetlabs/inifile"
       ref: "4.2.0"
-    deploy_pe: 'jarretlavallee/deploy_pe'
   repositories:
     stdlib: 'https://github.com/puppetlabs/puppetlabs-stdlib'
     translate: 'https://github.com/puppetlabs/puppetlabs-translate'
@@ -16,3 +15,4 @@ fixtures:
     provision: 'https://github.com/puppetlabs/provision'
     puppet_conf: 'https://github.com/puppetlabs/puppet_conf'
     pe_event_forwarding: 'https://github.com/puppetlabs/puppetlabs-pe_event_forwarding'
+    deploy_pe: 'https://github.com/jarretlavallee/puppet-deploy_pe'

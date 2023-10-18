@@ -1,0 +1,119 @@
+name: "Puppet Server Nightly Testing"
+
+on: [pull_request]
+
+jobs:
+  setup_matrix:
+    name: "Setup Test Matrix"
+    runs-on: ubuntu-20.04
+    outputs:
+      matrix: ${{ steps.build-matrix.outputs.matrix }}
+
+    steps:
+    - name: Checkout Source
+      uses: actions/checkout@v3
+      if: ${{ github.repository_owner == 'puppetlabs' }}
+
+    - name: Activate Ruby 2.7
+      uses: ruby/setup-ruby@v1
+      if: ${{ github.repository_owner == 'puppetlabs' }}
+      with:
+        ruby-version: "2.7"
+        bundler-cache: true
+
+    - name: Print bundle environment
+      if: ${{ github.repository_owner == 'puppetlabs' }}
+      run: |
+        echo ::group::bundler environment
+         bundle env
+        echo ::endgroup::
+    - name: Get Test Matrix
+      id: get-matrix
+      run: |
+        bundle exec matrix_from_metadata_v2
+    - name: Set nightly releases
+      id: nightly_release
+      run: |
+        out=$(echo '${{ steps.get-matrix.outputs.matrix }}' | jq -c '.collection')
+        echo "latest=$out" >> $GITHUB_OUTPUT
+    - name: Setup Spec Test Matrix
+      id: set-matrix
+      run: |
+        echo "matrix={\"platforms\":[\"centos-7\",\"rhel-8\",\"rhel-9\",\"ubuntu-2004-lts\"]}" >> $GITHUB_OUTPUT
+    - name: Setup Acceptance Test Matrix
+      id: build-matrix
+      run: |
+        out=$(echo '${{ steps.set-matrix.outputs.matrix }}' | jq -c --argjson nightly '${{ steps.nightly_release.outputs.latest }}' '.collection += $nightly') 
+        echo "matrix=$out" >> $GITHUB_OUTPUT
+  Integration:
+    name: "${{matrix.platforms}}, ${{matrix.collection}}"
+    needs:
+      - setup_matrix
+    if: ${{ needs.setup_matrix.outputs.matrix != '{}' }}
+
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix: ${{fromJson(needs.setup_matrix.outputs.matrix)}}
+
+    steps:
+    - name: Checkout Source
+      uses: actions/checkout@v3
+
+    - name: Activate Ruby 2.7
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: "2.7"
+        bundler-cache: true
+
+    - name: Print bundle environment
+      run: |
+        echo ::group::bundler environment
+        bundle env
+        echo ::endgroup::
+    - name: Create the fixtures directory
+      run: |
+        echo ::group::Create the fixtures directory
+        bundle exec rake spec_prep
+        echo ::endgroup::
+    - name: Provision test environment
+      run: |
+        bundle exec bolt --modulepath spec/fixtures/modules plan run splunk_hec::acceptance::provision_machines using='provision_service' image='${{ matrix.platforms }}'
+        echo ::group::=== REQUEST ===
+        cat request.json || true
+        echo
+        echo ::endgroup::
+        echo ::group::=== INVENTORY ===
+        if [ -f 'spec/fixtures/litmus_inventory.yaml' ];
+        then
+          FILE='spec/fixtures/litmus_inventory.yaml'
+        elif [ -f 'inventory.yaml' ];
+        then
+          FILE='inventory.yaml'
+        fi
+        sed -e 's/password: .*/password: "[redacted]"/' < $FILE || true
+        echo ::endgroup::
+        echo INVENTORY_PATH=$FILE >> $GITHUB_ENV
+    - name: Install server
+      run: |
+        bundle exec bolt --modulepath spec/fixtures/modules plan run splunk_hec::acceptance::server_setup puppet_version='${{ matrix.collection }}' -i ./$INVENTORY_PATH --stream
+    - name: Install module
+      run: |
+        bundle exec rake 'litmus:install_module'
+    - name: Set up Splunk instance
+      run: |
+        bundle exec rake acceptance:setup_splunk_targets
+    - name: Run acceptance tests
+      run: |
+        bundle exec rake acceptance:ci_run_tests
+    - name: Remove test environment
+      if: ${{ always() }}
+      continue-on-error: true
+      run: |
+        if [[ -f inventory.yaml || -f spec/fixtures/litmus_inventory.yaml ]]; then
+          bundle exec rake 'litmus:tear_down'
+          echo ::group::=== REQUEST ===
+          cat request.json || true
+          echo
+          echo ::endgroup::
+        fi

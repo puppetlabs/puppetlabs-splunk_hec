@@ -9,11 +9,11 @@
 # @param [Optional[String]] puppet_version
 #   Sets the version of Puppet Server to install
 plan splunk_hec::acceptance::server_setup(
-  Optional[String] $puppet_version = '2021.7.2',
+  Optional[String] $puppet_version = '2021.7.5',
 ) {
   # machines are not yet ready at time of installing the puppetserver, so we wait 15s
   $localhost = get_targets('localhost')
-  run_command('sleep 15s', $localhost)
+  run_command('sleep 15', $localhost)
 
   if $puppet_version =~ /puppet/ {
     run_plan(
