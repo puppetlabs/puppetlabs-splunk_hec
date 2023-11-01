@@ -211,7 +211,7 @@ class profile::splunk_hec {
 }
 ```
 
-The certificate provided to the `ssl_ca` parameter is a supplement to the system ca certificates store. By default, the Ruby classes that perform certificate validation will attempt to use the system certificates first, and then if the certificate cannot be validated there, it will load the ca file in `ssl_ca`. Occasionally, the system cert store will cause validation errors prior to checking the file at `ssl_ca`. To avoid this you can set `ignore_system_cert_store` to `true`. This will allow the code to use ONLY the file at `ssl_ca` to perform certificate validation.
+**Note**: When `splunk_hec::ssl_ca` is configured it takes precendence over the system certificate store. The report processor will build its own cert store with the provided CA certificate to validate requests against the Splunk HEC endpoint. Alternatively, you can add the Splunk HEC CA to the system certificate store and set `splunk_hec::include_system_cert_store` to `true`. This will allow the code to ONLY use the system default store to perform certificate validation.
 
 ## Fact Configuration
 

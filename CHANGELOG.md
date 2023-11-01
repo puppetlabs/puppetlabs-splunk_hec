@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file. The format 
 
 ### Added
 
+The parameter `ignore_system_cert_store` is now named `include_system_cert_store` and defaults to **false**. [#208](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/208)
+
 Credential data provided to this module is now written to a separate configuration file utilizing the Sensitive data type to ensure redaction from Puppet logs and reports. [#204](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/204)
 
 Configuration files created by this module are now placed in a `splunk_hec` subdirectory. [#204](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/204)
