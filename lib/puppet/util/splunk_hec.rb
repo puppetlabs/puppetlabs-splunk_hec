@@ -39,22 +39,33 @@ module Puppet::Util::Splunk_hec
     http.read_timeout = timeout.to_i
     http.use_ssl = @uri.scheme == 'https'
     if http.use_ssl?
-      if settings['ssl_ca'] && !settings['ssl_ca'].empty?
-        ssl_ca = File.join(Puppet[:confdir], 'splunk_hec', settings['ssl_ca'])
-        raise Puppet::Error, "CA file #{ssl_ca} does not exist" unless File.exist? ssl_ca
-        ssl_info_message = "Will verify #{splunk_url} SSL identity"
+      if (settings['ssl_ca'] && !settings['ssl_ca'].empty?) || settings['include_system_cert_store']
+        ssl_ca_file = if settings['ssl_ca']
+                        File.join(Puppet[:confdir], 'splunk_hec', settings['ssl_ca'])
+                      elsif !settings['ssl_ca'] && Facter.value(:os)['family'].eql?('RedHat')
+                        '/etc/ssl/certs/ca-bundle.crt'
+                      elsif !settings['ssl_ca'] && Facter.value(:os)['family'].eql?('Suse')
+                        '/etc/ssl/ca-bundle.pem'
+                      else
+                        '/etc/ssl/certs/ca-certificates.crt'
+                      end
+        message     = if settings['ssl_ca']
+                        "will verify #{splunk_url} SSL identity against Splunk HEC SSL #{settings['ssl_ca']}"
+                      else
+                        "will verify #{splunk_url} SSL identity against system store"
+                      end
 
-        if settings['ignore_system_cert_store']
-          http.cert_store = build_ca_store(ssl_ca)
-          ssl_info_message = "#{ssl_info_message} ignoring system cert store"
-        else
-          http.ca_file = ssl_ca
+        unless File.exist?(ssl_ca_file) && !File.zero?(ssl_ca_file)
+          raise Puppet::Error,
+          "CA file #{ssl_ca_file} is an empty file or does not exist"
         end
-
-        Puppet.info ssl_info_message
+        ssl_ca = build_ca_store(ssl_ca_file)
+        http.cert_store = ssl_ca
         http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+        Puppet.warn_once('hec_ssl', 'ssl_ca', message, nil, nil, :info)
       else
-        Puppet.info "Will NOT verify #{splunk_url} SSL identity"
+        message = "will NOT verify #{splunk_url} SSL identity"
+        Puppet.warn_once('hec_ssl', 'no_ssl', message, nil, nil, :info)
         http.verify_mode = OpenSSL::SSL::VERIFY_NONE
       end
     end

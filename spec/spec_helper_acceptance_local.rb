@@ -77,7 +77,7 @@ def report_dir
   @report_dir ||= TARGET_SERVER.run_shell(cmd).stdout.chomp
 end
 
-def setup_manifest(disabled: false, ignore_store: true, ssl_ca: nil, url: nil, with_event_forwarding: false)
+def setup_manifest(disabled: false, cert_store: false, ssl_ca: nil, url: nil, with_event_forwarding: false)
   if url.nil?
     # This block is for checking whether we are testing locally or on the CloudCI
     # splunk_node.uri will work locally, but bc of the discrepancy of uri and hostname
@@ -92,15 +92,15 @@ def setup_manifest(disabled: false, ignore_store: true, ssl_ca: nil, url: nil, w
 
   manifest = ''
   params = {
-    url:                      url,
-    token:                    'abcd1234',
-    enable_reports:           true,
-    manage_routes:            true,
-    facts_terminus:           'yaml',
-    record_event:             true,
-    pe_console:               'localhost',
-    disabled:                 disabled,
-    ignore_system_cert_store: ignore_store,
+    url:                       url,
+    token:                     'abcd1234',
+    enable_reports:            true,
+    manage_routes:             true,
+    facts_terminus:            'yaml',
+    record_event:              true,
+    pe_console:                'localhost',
+    disabled:                  disabled,
+    include_system_cert_store: cert_store,
   }
 
   params[:ssl_ca] = ssl_ca unless ssl_ca.nil?
@@ -140,9 +140,9 @@ def configure_ssl(cert_store: false)
   image = LitmusHelpers.facts_from_node(inventory_hash, TARGET_SERVER)
   cmd = if cert_store
           if image['platform'].include?('ubuntu')
-            'cp $(puppet config print localcacert) /usr/local/share/ca-certificates/ && update-ca-certificates'
+            'cp $(puppet config print localcacert) /usr/local/share/ca-certificates/splunk_hec.crt && update-ca-certificates'
           else
-            'cp $(puppet config print localcacert) /etc/pki/ca-trust/source/anchors/ && update-ca-trust'
+            'cp $(puppet config print localcacert) /etc/pki/ca-trust/source/anchors/splunk_hec.pem && update-ca-trust'
           end
         else
           'cp $(puppet config print localcacert) /etc/puppetlabs/puppet/splunk_hec/'
