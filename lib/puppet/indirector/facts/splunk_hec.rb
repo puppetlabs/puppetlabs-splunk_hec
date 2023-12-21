@@ -55,7 +55,7 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Yaml
       rescued_facts = block_list.select { |k| hardcoded.include?(k) }
 
       facts = if allow_list.include?('all.facts')
-                unless rescued_facts.nil?
+                unless rescued_facts.empty?
                   Puppet.warning "Rescued required facts - Please remove the following facts from splunk_hec::facts_blocklist: #{rescued_facts}"
                 end
                 final_block = block_list.reject { |k| hardcoded.include?(k) }

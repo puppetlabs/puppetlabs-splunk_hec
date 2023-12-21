@@ -6,21 +6,23 @@ All notable changes to this project will be documented in this file. The format 
 
 ### Added
 
-The parameter `ignore_system_cert_store` is now named `include_system_cert_store` and defaults to **false**. [#208](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/208)
+- The parameter `ignore_system_cert_store` is now named `include_system_cert_store` and defaults to **false**. [#208](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/208)
 
-Credential data provided to this module is now written to a separate configuration file utilizing the Sensitive data type to ensure redaction from Puppet logs and reports. [#204](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/204)
+- Credential data provided to this module is now written to a separate configuration file utilizing the Sensitive data type to ensure redaction from Puppet logs and reports. [#204](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/204)
 
-Configuration files created by this module are now placed in a `splunk_hec` subdirectory. [#204](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/204)
+- Configuration files created by this module are now placed in a `splunk_hec` subdirectory. [#204](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/204)
 
-New private subclass `splunk_hec::v2_cleanup` ensures old configuration files are removed. [#204](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/204)
+- New private subclass `splunk_hec::v2_cleanup` ensures old configuration files are removed. [#204](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/204)
 
-New custom function to convert sensitive user provided data from a String to Puppet's [Sensitive](https://www.puppet.com/docs/puppet/latest/lang_data_sensitive.html) data type. [#203](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/203)
+- New custom function to convert sensitive user provided data from a String to Puppet's [Sensitive](https://www.puppet.com/docs/puppet/latest/lang_data_sensitive.html) data type. [#203](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/203)
 
-Add support for Puppet 8. [#200](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/200)
+- Add support for Puppet 8. [#200](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/200)
 
 ### Fixed
 
-Settings are now removed from `puppet.conf` when `splunk_hec::disabled` is set to **true**.[#205](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/205)
+- False positive when attempting to rescue required facts from an unconfigured  `splunk_hec::facts_blocklist`. [#210](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/210)
+
+- Settings are now removed from `puppet.conf` when `splunk_hec::disabled` is set to **true**. [#205](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/205)
 
 ## [v1.4.0](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v1.4.0) (2023-4-17)
 
