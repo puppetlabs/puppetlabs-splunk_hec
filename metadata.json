@@ -10,7 +10,7 @@
   "dependencies": [
     {
       "name": "puppetlabs-puppet_metrics_collector",
-      "version_requirement": ">= 6.0.0 < 9.0"
+      "version_requirement": ">= 6.0.0 < 9.0.0"
     },
     {
       "name": "puppetlabs-pe_event_forwarding",

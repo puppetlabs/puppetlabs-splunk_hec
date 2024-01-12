@@ -20,6 +20,8 @@ All notable changes to this project will be documented in this file. The format 
 
 ### Fixed
 
+- No longer utilizing `parse_legacy_metrics` function for metrics collected with older versions of `puppet_metrics_collector`. [#211](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/211)
+
 - False positive when attempting to rescue required facts from an unconfigured  `splunk_hec::facts_blocklist`. [#210](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/210)
 
 - Settings are now removed from `puppet.conf` when `splunk_hec::disabled` is set to **true**. [#205](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/205)

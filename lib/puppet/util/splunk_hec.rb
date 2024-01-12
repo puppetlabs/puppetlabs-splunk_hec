@@ -62,10 +62,10 @@ module Puppet::Util::Splunk_hec
         ssl_ca = build_ca_store(ssl_ca_file)
         http.cert_store = ssl_ca
         http.verify_mode = OpenSSL::SSL::VERIFY_PEER
-        Puppet.warn_once('hec_ssl', 'ssl_ca', message, nil, nil, :info)
+        Puppet.warn_once('hec_ssl', 'ssl_ca', message, :default, :default, :info)
       else
         message = "will NOT verify #{splunk_url} SSL identity"
-        Puppet.warn_once('hec_ssl', 'no_ssl', message, nil, nil, :info)
+        Puppet.warn_once('hec_ssl', 'no_ssl', message, :default, :default, :info)
         http.verify_mode = OpenSSL::SSL::VERIFY_NONE
       end
     end
@@ -163,5 +163,24 @@ module Puppet::Util::Splunk_hec
     parsed_time = time.is_a?(String) ? Time.parse(time) : time
     total = Time.parse((parsed_time + duration).iso8601(3))
     '%10.3f' % total.to_f
+  end
+
+  # Legacy function to parse pretty-printed output produced by puppet_metrics_collector prior to v5.3.0
+  def parse_legacy_metrics(input)
+    cleaned = input.gsub("\n}{\n", "\n},{\n")
+    cleaned = cleaned.insert(0, '[')
+    cleaned = cleaned.insert(-1, ']')
+
+    result = begin
+               JSON.parse(cleaned)
+             rescue StandardError => e
+               Puppet.info 'Unable to parse json from stdin'
+               Puppet.info e.message
+               Puppet.info e.backtrace.inspect
+
+               []
+             end
+
+    result
   end
 end
