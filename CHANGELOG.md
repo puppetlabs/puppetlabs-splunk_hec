@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file. The format 
 
 ### Added
 
+- New parameters `token_events` and `url_events` can now be used to store events from `pe_event_forwarding` in a different index. [#212](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/212)
+
 - The parameter `ignore_system_cert_store` is now named `include_system_cert_store` and defaults to **false**. [#208](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/208)
 
 - Credential data provided to this module is now written to a separate configuration file utilizing the Sensitive data type to ensure redaction from Puppet logs and reports. [#204](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/204)
@@ -18,7 +20,13 @@ All notable changes to this project will be documented in this file. The format 
 
 - Add support for Puppet 8. [#200](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/200)
 
+### Removed
+
+- The deprecated `reports` parameter has been removed in favor of having the module automatically add the **splunk_hec** setting to `puppet.conf`. [#212](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/212)
+
 ### Fixed
+
+- The `collect_facts` parameter has been renamed to `facts_allowlist` to align with the `facts_blocklist` parameter. [#212](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/212)
 
 - No longer utilizing `parse_legacy_metrics` function for metrics collected with older versions of `puppet_metrics_collector`. [#211](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/211)
 

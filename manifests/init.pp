@@ -1,19 +1,14 @@
 # @summary Simple class to manage your splunk_hec connectivity
 #
-# @note If you manage enable_reports, it will default to puppetdb,splunk_hec
-#       If you wish to add other reports, you can do so with the reports param
-#       That you can have the module automatically add the splunk_hec reports
-#       processor by setting reports to '', the empty string.
-#
 # @example
 #   include splunk_hec
 #
-# @param [String] url
+# @param [Optional][String] url
 #   The url of the server that PE is running on
 # @param [Optional[String]] token
 #   The default Splunk HEC token
 #   Note: The value of the token is converted to Puppet's Sensitive data type during catalog application.
-# @param [Array] collect_facts
+# @param [Array] facts_allowlist
 #   The list of facts that will be collected in the report. To collect all facts available add the special value 'all.facts'.
 # @param [Boolean] enable_reports
 #   Adds splunk_hec to the list of report processors
@@ -33,9 +28,6 @@
 #   Makes sure that the facts get sent to splunk_hec
 # @param [Optional[Array]] facts_blocklist
 #   The list of facts that will not be collected in the report
-# @param [Optional[String]] reports
-#   Can specify report processors (other than puppetdb which is default)
-#   Deprecated; should not use (will give warning).
 # @param [String] pe_console
 #   The FQDN for the PE console
 # @param [Optional[Integer]] timeout
@@ -64,12 +56,17 @@
 #   Corresponds to puppet:metrics in the Puppet Report Viewer
 #   When storing metrics in a different index than the default token
 #   Note: The value of the token is converted to Puppet's Sensitive data type during catalog application.
+# @param [Optional[String]] token_events
+#   When storing events from pe_event_forwarding in a different index than the default token
+#   Note: The value of the token is converted to Puppet's Sensitive data type during catalog application.
 # @param [Optional[String]] url_summary
 #   Similar to token_summary; used to store summary in a different index than the default url
 # @param [Optional[String]] url_facts
 #   Similar to token_facts; used to store facts in a different index than the default url
 # @param [Optional[String]] url_metrics
 #   Similar to token_metrics; used to store metrics in a different index than the default url
+# @param [Optional[String]] url_events
+#   Similar to token_events; used to store events from pe_event_forwarding in a different index than the default url
 # @param [Optional[Array]] include_logs_status
 #   Determines if puppet logs should be included based on the return status of the puppet agent run
 #   Can be none, one, or any of the following: failed, changed, unchanged
@@ -103,9 +100,9 @@
 # @param [Optional[Array]] code_manager_data_filter
 #   Filters the code_manager event data
 class splunk_hec (
-  String $url,
+  Optional[String] $url                                  = undef,
   Optional[String] $token                                = undef,
-  Array $collect_facts                                   = ['dmi','disks','partitions','processors','networking'],
+  Array $facts_allowlist                                 = ['dmi','disks','partitions','processors','networking'],
   Boolean $enable_reports                                = false,
   Boolean $record_event                                  = false,
   Boolean $disabled                                      = false,
@@ -115,7 +112,6 @@ class splunk_hec (
   String $facts_terminus                                 = 'puppetdb',
   String $facts_cache_terminus                           = 'splunk_hec',
   Optional[Array] $facts_blocklist                       = undef,
-  Optional[String] $reports                              = undef,
   String $pe_console                                     = $settings::report_server,
   Optional[Integer] $timeout                             = undef,
   Optional[String] $ssl_ca                               = undef,
@@ -125,9 +121,11 @@ class splunk_hec (
   Optional[String] $token_summary                        = undef,
   Optional[String] $token_facts                          = undef,
   Optional[String] $token_metrics                        = undef,
+  Optional[String] $token_events                         = undef,
   Optional[String] $url_summary                          = undef,
   Optional[String] $url_facts                            = undef,
   Optional[String] $url_metrics                          = undef,
+  Optional[String] $url_events                           = undef,
   Optional[Array] $include_logs_status                   = undef,
   Boolean $include_logs_catalog_failure                  = false,
   Boolean $include_logs_corrective_change                = false,
@@ -145,12 +143,25 @@ class splunk_hec (
   if (
     ($token == undef)
     and
-    ($token_summary or $token_facts or $token_metrics == undef)
+    (($token_summary == undef) or ($token_facts == undef) or ($token_metrics == undef))
   ) {
     $authorization_failure_message = @(MESSAGE/L)
       Splunk HEC: Unless you are utilizing individual HEC tokens \
       ('token_summary', 'token_facts', 'token_metrics') \
       you must configure the 'token' parameter.
+      |-MESSAGE
+    fail($authorization_failure_message)
+  }
+
+  if (
+    ($url == undef)
+    and
+    (($url_summary == undef) or ($url_facts == undef) or ($url_metrics == undef))
+  ) {
+    $authorization_failure_message = @(MESSAGE/L)
+      Splunk HEC: Unless you are utilizing individual URLs \
+      ('url_summary', 'url_facts', 'url_metrics') \
+      you must configure the 'url' parameter.
       |-MESSAGE
     fail($authorization_failure_message)
   }
@@ -189,22 +200,15 @@ class splunk_hec (
 
   # Secure credential data
   $hec_secrets = {
-    'token' => $token,
+    'token'         => $token,
     'token_summary' => $token_summary,
-    'token_facts' => $token_facts,
+    'token_facts'   => $token_facts,
     'token_metrics' => $token_metrics,
+    'token_events'  => $token_events,
   }
   $secrets = Deferred('splunk_hec::secure', [$hec_secrets])
 
   if $enable_reports {
-    # lint:ignore:140chars
-    if $reports != undef {
-      notify { 'reports param deprecation warning':
-        message  => 'The reports parameter has been deprecated in favor of having the module automatically add the splunk_hec setting to puppet.conf. Update the reports param to undef or remove it entirely. Please note that the reports parameter is currently ignored and will be removed in a future release of this module.',
-        loglevel => 'warning',
-      }
-    }
-    # lint:endignore
     # The subsetting resource automatically adds the 'splunk_hec' report
     # processor to the reports setting if it hasn't yet been added there.  
     Resource[$ini_subsetting] { 'enable splunk_hec':
@@ -263,7 +267,7 @@ class splunk_hec (
       group   => $group,
       mode    => '0600',
       require => File["${settings::confdir}/splunk_hec"],
-      content => Deferred('inline_epp', [file('splunk_hec/hec_secrets.yaml.epp'), $secrets]),
+      content => Sensitive(Deferred('inline_epp', [file('splunk_hec/hec_secrets.yaml.epp'), $secrets])),
       notify  => Service[$service],
     }
   } elsif $agent_node and $events_reporting_enabled {
@@ -281,11 +285,23 @@ class splunk_hec (
       group   => $group,
       mode    => '0600',
       require => File["${settings::confdir}/splunk_hec"],
-      content => Deferred('inline_epp', [file('splunk_hec/hec_secrets.yaml.epp'), $secrets]),
+      content => Sensitive(Deferred('inline_epp', [file('splunk_hec/hec_secrets.yaml.epp'), $secrets])),
     }
   }
 
   if $events_reporting_enabled {
+    if (
+      (($token == undef) and ($token_events == undef))
+      or
+      (($url == undef) and ($url_events == undef))
+    ) {
+      $authorization_failure_message = @(MESSAGE/L)
+        Splunk HEC: Unless you are utilizing a specific URL \
+        and token for events ('url_events', 'token_events') \
+        you must configure the 'url' and 'token' parameters.
+        |-MESSAGE
+      fail($authorization_failure_message)
+    }
     if $pe_event_forwarding::confdir != undef {
       $confdir_base_path = $pe_event_forwarding::confdir
     }
