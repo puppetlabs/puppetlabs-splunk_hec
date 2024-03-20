@@ -48,7 +48,6 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Yaml
       ]
 
       # lets ensure user provided fact names are downcased
-      # settings['facts.allowlist'] is populated by the splunk_hec::collect_facts param
       allow_list  = (settings['facts.allowlist'].map(&:downcase) + hardcoded).uniq
       block_list  = settings['facts.blocklist'].nil? ? [] : settings['facts.blocklist'].map(&:downcase)
       # lets rescue any hardcoded facts that have been added to the blocklist

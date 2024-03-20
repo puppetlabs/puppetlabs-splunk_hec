@@ -1,8 +1,10 @@
 # managed by splunk_hec module
 ---
+<% if $splunk_hec::url { -%>
 "url" : "<%= $splunk_hec::url %>"
+<% } -%>
 "facts.allowlist" :
-<% $splunk_hec::collect_facts.each |$fact| {-%>
+<% $splunk_hec::facts_allowlist.each |$fact| {-%>
         - <%= $fact %>
 <% } -%>
 <% unless $splunk_hec::facts_blocklist == undef { -%>
@@ -34,6 +36,9 @@
 <% } -%>
 <% if $splunk_hec::url_metrics { -%>
 "url_metrics" : "<%= $splunk_hec::url_metrics %>"
+<% } -%>
+<% if $splunk_hec::url_events { -%>
+"url_events" : "<%= $splunk_hec::url_events %>"
 <% } -%>
 <% if $splunk_hec::include_logs_status { -%>
 "include_logs_status" :

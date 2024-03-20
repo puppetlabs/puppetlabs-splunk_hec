@@ -89,7 +89,7 @@ Instructions assume you are using Puppet Enterprise. For Open Source Puppet inst
   * Commit the changes.
   * Run Puppet on the node group; this will cause a restart of the `pe-puppetserver` service.
 
-4. Log into the Splunk console and search `index=* sourcetype=puppet:summary`, if everything was done properly you should see the reports (and soon facts) from the systems in your Puppet environment.
+4. Log into the Splunk console and search `index=* sourcetype=puppet:summary`, if everything was done properly you should see the reports from the systems in your Puppet environment.
 
 ## Source Types
 
@@ -217,12 +217,12 @@ class profile::splunk_hec {
 
 The following parameters are utilized to configure which facts (including custom facts) you would like to send to Splunk:
 
-  * `collect_facts`
+  * `facts_allowlist`
   * `facts_blocklist` (**Optional**)
 
-To configure which facts to collect add the `collect_facts` parameter to the `splunk_hec` class and modify the array of facts presented.
+To configure which facts to collect add the `facts_allowlist` parameter to the `splunk_hec` class and modify the array of facts presented.
 
-  * To collect **all facts** available at the time of the Puppet run, add the special value `all.facts` to the `collect_facts` array.
+  * To collect **all facts** available at the time of the Puppet run, add the special value `all.facts` to the `facts_allowlist` array.
   * When collecting **all facts**, you can configure the optional parameter `facts_blocklist` with an array of facts that should not be collected.
 
 ## PE Event Forwarding

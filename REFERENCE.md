@@ -38,11 +38,6 @@
 
 Simple class to manage your splunk_hec connectivity
 
-* **Note** If you manage enable_reports, it will default to puppetdb,splunk_hec
-If you wish to add other reports, you can do so with the reports param
-That you can have the module automatically add the splunk_hec reports
-processor by setting reports to '', the empty string.
-
 #### Examples
 
 ##### 
@@ -71,7 +66,7 @@ The following parameters are available in the `splunk_hec` class:
       - [Parameters](#parameters)
         - [`url`](#url)
         - [`token`](#token)
-        - [`collect_facts`](#collect_facts)
+        - [`facts_allowlist`](#facts_allowlist)
         - [`enable_reports`](#enable_reports)
         - [`record_event`](#record_event)
         - [`disabled`](#disabled)
@@ -81,7 +76,6 @@ The following parameters are available in the `splunk_hec` class:
         - [`facts_terminus`](#facts_terminus)
         - [`facts_cache_terminus`](#facts_cache_terminus)
         - [`facts_blocklist`](#facts_blocklist)
-        - [`reports`](#reports)
         - [`pe_console`](#pe_console)
         - [`timeout`](#timeout)
         - [`ssl_ca`](#ssl_ca)
@@ -91,9 +85,11 @@ The following parameters are available in the `splunk_hec` class:
         - [`token_summary`](#token_summary)
         - [`token_facts`](#token_facts)
         - [`token_metrics`](#token_metrics)
+        - [`token_events`](#token_events)
         - [`url_summary`](#url_summary)
         - [`url_facts`](#url_facts)
         - [`url_metrics`](#url_metrics)
+        - [`url_events`](#url_events)
         - [`include_logs_status`](#include_logs_status)
         - [`include_logs_catalog_failure`](#include_logs_catalog_failure)
         - [`include_logs_corrective_change`](#include_logs_corrective_change)
@@ -115,7 +111,7 @@ The following parameters are available in the `splunk_hec` class:
 
 ##### <a name="-splunk_hec--url"></a>`url`
 
-Data type: `String`
+Data type: `Optional[String]`
 
 The url of the server that PE is running on
 
@@ -126,7 +122,7 @@ Data type: `Optional[String]`
 The default Splunk HEC token
 Note: The value of the token is converted to Puppet's Sensitive data type during catalog application.
 
-##### <a name="-splunk_hec--collect_facts"></a>`collect_facts`
+##### <a name="-splunk_hec--facts_allowlist"></a>`facts_allowlist`
 
 Data type: `Array`
 
@@ -203,15 +199,6 @@ Default value: `'splunk_hec'`
 Data type: `Optional[Array]`
 
 The list of facts that will not be collected in the report
-
-Default value: `undef`
-
-##### <a name="-splunk_hec--reports"></a>`reports`
-
-Data type: `Optional[String]`
-
-Can specify report processors (other than puppetdb which is default)
-Deprecated; should not use (will give warning).
 
 Default value: `undef`
 
@@ -297,6 +284,15 @@ Note: The value of the token is converted to Puppet's Sensitive data type during
 
 Default value: `undef`
 
+##### <a name="-splunk_hec--token_events"></a>`token_events`
+
+Data type: `Optional[String]`
+
+When storing events from pe_event_forwarding in a different index than the default token
+Note: The value of the token is converted to Puppet's Sensitive data type during catalog application.
+
+Default value: `undef`
+
 ##### <a name="-splunk_hec--url_summary"></a>`url_summary`
 
 Data type: `Optional[String]`
@@ -318,6 +314,14 @@ Default value: `undef`
 Data type: `Optional[String]`
 
 Similar to token_metrics; used to store metrics in a different index than the default url
+
+Default value: `undef`
+
+##### <a name="-splunk_hec--url_events"></a>`url_events`
+
+Data type: `Optional[String]`
+
+Similar to token_events; used to store events from pe_event_forwarding in a different index than the default url
 
 Default value: `undef`
 

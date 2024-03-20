@@ -90,7 +90,7 @@ end
 
 def submit_request(body)
   # we want users to be able to provide different tokens per sourcetype if they want
-  source_type = 'pe_event_forwarding'
+  source_type = 'events'
   token_name = "token_#{source_type}"
   http = create_http(source_type)
   token = secrets[token_name] || secrets['token'] || raise('Must provide token parameter to splunk class')
