@@ -26,6 +26,8 @@ All notable changes to this project will be documented in this file. The format 
 
 ### Fixed
 
+- Bug fix preventing `sar` metrics collected by `puppet_metrics_collector::system` from being shipped to Splunk. [#214](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/214)
+
 - The `collect_facts` parameter has been renamed to `facts_allowlist` to align with the `facts_blocklist` parameter. [#212](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/212)
 
 - No longer utilizing `parse_legacy_metrics` function for metrics collected with older versions of `puppet_metrics_collector`. [#211](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/211)
