@@ -35,12 +35,6 @@ Puppet::Reports.register_report(:splunk_hec) do
       },
     }
 
-    # puppet 4 compatibility, code_id and job_id were added in puppet 5
-    if report_format.to_i < 7
-      job_id = nil
-      code_id = nil
-    end
-
     event = {
       'host' => host,
       'time' => epoch,
@@ -61,6 +55,7 @@ Puppet::Reports.register_report(:splunk_hec) do
         'producer' => Puppet[:certname],
         'puppet_version' => puppet_version,
         'report_format' => report_format,
+        'server_used' => server_used,
         'status' => status,
         'time' => (time + metrics['time']['total']).iso8601(3),
         'transaction_uuid' => transaction_uuid,
