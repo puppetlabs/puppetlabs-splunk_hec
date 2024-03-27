@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file. The format 
 
 ## [Unreleased](https://github.com/puppetlabs/puppetlabs-splunk_hec)
 
+[Current Diff](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v2.0.0..main)
+
+## [2.0.0](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v2.0.0) (2024-3-27)
+
+[Full Changelog](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v1.4.0..v2.0.0)
+
 ### Added
 
 - New parameters `token_events` and `url_events` can now be used to store events from `pe_event_forwarding` in a different index. [#212](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/212)
