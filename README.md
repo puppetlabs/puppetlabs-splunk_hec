@@ -31,7 +31,7 @@ This module provides three services to Puppet and Splunk users.
 
 2. A fact terminus to submit node facts to Splunk. See [Fact Terminus Support](https://github.com/puppetlabs/puppetlabs-splunk_hec/blob/main/docs/fact_terminus_support.md) for details.
 
-3. A PE Event Forwarding processor for sending data received from the [PE Event Forwarding](https://forge.puppet.com/modules/puppetlabs/pe_event_forwarding) module to Splunk. This data can include the details of Task and Plan executions that were initiated by the Puppet Orchestrator (clicking execute task|plan from the console or puppet command line), or it can be events from rbac, the node classifier, the console, or code-manager. To enable this feature, after the PE Event Forwarding module has been installed, set the `events_reporting_enabled` parameter on the `splunk` class to `true`.
+3. A PE Event Forwarding processor for sending data received from the [PE Event Forwarding](https://forge.puppet.com/modules/puppetlabs/pe_event_forwarding) module to Splunk. This data can include the details of Task and Plan executions that were initiated by the Puppet Orchestrator (clicking execute task|plan from the console or puppet command line), or it can be events from rbac, the node classifier, the console, or code-manager. To enable this feature, after the PE Event Forwarding module has been configured, set the `events_reporting_enabled` parameter on the `splunk_hec` class to **true**.
 
     **Note**: This is a PE only feature and depends on the [PE Event Forwarding](https://forge.puppet.com/modules/puppetlabs/pe_event_forwarding) module being installed and classified on the Puppet Server nodes in your environment. Please see the documentation in that module for details on how to install and configure that module.
 
@@ -46,7 +46,7 @@ There are two Tasks included in this module, `splunk_hec:bolt_apply` and `splunk
 * Puppet Enterprise (PE) or Open Source Puppet
 * Splunk
 
-This was tested on the Puppet Enterprise LTS release, Puppet 6 and Puppet 7, using stock gems of `yaml`, `json`, and `net::https`.
+This was tested on the Puppet Enterprise LTS release, Puppet 7 and Puppet 8, using stock gems of `yaml`, `json`, and `net::https`.
 
 * While most of this module is PE and Open Source, using the PE Event Forwarding processor is PE only because it gathers data from API's that exist only in Puppet Enterprise.
 
@@ -81,7 +81,6 @@ Instructions assume you are using Puppet Enterprise. For Open Source Puppet inst
       ```
       enable_reports           = true
       manage_routes            = true
-      events_reporting_enabled = true
       token                    = <TOKEN GENERATED IN STEP 2>
       url                      = something like https://splunk-8.splunk.internal:8088/services/collector
       ```
@@ -273,10 +272,7 @@ This feature can be configured to send these events from non server nodes if nee
 
 ### Supported Puppet Versions For Event Forwarding
 
-The puppetlabs-pe_event_forwarding module that this feature depends on is compatible with PE versions in the 2019 range starting at **2019.8.7** and above, and then 2021 versions from **2021.2** and above.
-
-Versions in the PE 2019 series below 2019.8.7 and in the 2021 series in versions below 2021.2 did not recieve an update to some of the API methods in PE that are required for the puppetlabs-pe_event_forwarding module to function properly.
-
+The `puppetlabs-pe_event_forwarding` module that this feature depends on requires PE versions **2021.2** and above to access the API methods for the module to function properly.
 
 ## Customized Reporting
 
