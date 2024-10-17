@@ -19,15 +19,31 @@
   ],
   "operatingsystem_support": [
     {
-      "operatingsystem": "CentOS",
+      "operatingsystem": "AlmaLinux",
       "operatingsystemrelease": [
-        "7"
+        "8",
+        "9"
+      ]
+    },
+    {
+      "operatingsystem": "AmazonLinux",
+      "operatingsystemrelease": [
+        "2"
+      ]
+    },
+    {
+      "operatingsystem": "Debian",
+      "operatingsystemrelease": [
+        "9",
+        "10",
+        "11"
       ]
     },
     {
       "operatingsystem": "OracleLinux",
       "operatingsystemrelease": [
-        "7"
+        "7",
+        "8"
       ]
     },
     {
@@ -39,9 +55,17 @@
       ]
     },
     {
-      "operatingsystem": "Scientific",
+      "operatingsystem": "RockyLinux",
       "operatingsystemrelease": [
-        "7"
+        "8",
+        "9"
+      ]
+    },
+    {
+      "operatingsystem": "SLES",
+      "operatingsystemrelease": [
+        "12",
+        "15"
       ]
     },
     {
@@ -51,13 +75,6 @@
         "20.04",
         "22.04"
       ]
-    },
-    {
-      "operatingsystem": "SLES",
-      "operatingsystemrelease": [
-        "12",
-        "15"
-      ]
     }
   ],
   "requirements": [
@@ -66,7 +83,7 @@
       "version_requirement": ">= 6.16.0 < 9.0.0"
     }
   ],
-  "pdk-version": "2.7.1",
-  "template-url": "https://github.com/puppetlabs/pdk-templates#2.7.4",
-  "template-ref": "tags/2.7.4-0-g58edf57"
+  "pdk-version": "3.3.0",
+  "template-url": "https://github.com/puppetlabs/pdk-templates#3.3.0",
+  "template-ref": "tags/3.3.0-0-g5d17ec1"
 }

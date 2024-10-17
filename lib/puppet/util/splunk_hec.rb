@@ -104,7 +104,7 @@ module Puppet::Util::Splunk_hec
     # we want users to be able to provide different tokens per sourcetype if they want
     source_type = body['sourcetype'].split(':')[1]
     token_name = "token_#{source_type}"
-    token = settings[token_name] || secrets['token'] || raise(Puppet::Error, 'Must provide token parameter to splunk class')
+    token = secrets[token_name] || secrets['token'] || raise(Puppet::Error, 'Must provide token parameter to splunk class')
     if settings['fips_enabled']
       send_with_fips(body, source_type, token)
     else

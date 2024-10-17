@@ -7,7 +7,7 @@ jobs:
     name: "Setup Test Matrix"
     runs-on: ubuntu-20.04
     outputs:
-      matrix: ${{ steps.build-matrix.outputs.matrix }}
+      matrix: ${{ steps.set-matrix.outputs.acc_matrix }}
 
     steps:
     - name: Checkout Source
@@ -31,30 +31,34 @@ jobs:
       id: curl_forge
       run: |
         echo "forge_response=$(curl https://forge.puppet.com/private/versions/pe)" >> $GITHUB_OUTPUT
-    - name: Set latest release
+    - name: Set PE latest release
       id: latest_release
       run: |
-        out=$(jq -c '[.[] | select(.lts == false)][0].latest | {"collection": [.]}' <<<'${{ steps.curl_forge.outputs.forge_response }}')
+        out=$(jq -c '[.[] | select(.lts == false)][0].latest | {"pe_version": [.]}' <<<'${{ steps.curl_forge.outputs.forge_response }}')
         echo "latest=$out" >> $GITHUB_OUTPUT
-    - name: Setup Spec Test Matrix
-      id: set-matrix
-      run: |
-        echo "matrix={\"platforms\":[\"centos-7\",\"rhel-8\",\"rhel-9\",\"ubuntu-2004-lts\"]}" >> $GITHUB_OUTPUT
-    - name: Setup Acceptance Test Matrix
+    - name: Build Test Matrix
       id: build-matrix
       run: |
-        out=$(echo '${{ steps.set-matrix.outputs.matrix }}' | jq -c --argjson latest '${{ steps.latest_release.outputs.latest }}' '.collection += $latest.collection') 
-        echo "matrix=$out" >> $GITHUB_OUTPUT
+        bundle exec matrix_from_metadata_v3 \
+        --provision-exclude docker \
+        --arch-exclude arm \
+        --platform-exclude debian \
+        --platform-exclude sles \
+        --platform-exclude ubuntu
+    - name: Setup Acceptance Test Matrix
+      id: set-matrix
+      run: |
+        out=$(echo '${{ steps.build-matrix.outputs.matrix }}' | jq -c --argjson latest '${{ steps.latest_release.outputs.latest }}' '.collection = $latest.pe_version') 
+        echo "acc_matrix=$out" >> $GITHUB_OUTPUT
   Integration:
-    name: "${{matrix.platforms}}, ${{matrix.collection}}"
+    name: "${{matrix.platforms.label}}, ${{matrix.collection}}"
     needs:
       - setup_matrix
-    if: ${{ needs.setup_matrix.outputs.matrix != '{}' }}
 
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
-      matrix: ${{fromJson(needs.setup_matrix.outputs.matrix)}}
+      matrix: ${{ fromJson(needs.setup_matrix.outputs.matrix) }}
 
     steps:
     - name: Checkout Source
@@ -78,7 +82,7 @@ jobs:
         echo ::endgroup::
     - name: Provision test environment
       run: |
-        bundle exec bolt --modulepath spec/fixtures/modules plan run splunk_hec::acceptance::provision_machines using='provision_service' image='${{ matrix.platforms }}'
+        bundle exec bolt --modulepath spec/fixtures/modules plan run splunk_hec::acceptance::provision_machines using='provision_service' image='${{ matrix.platforms.image }}'
         echo ::group::=== REQUEST ===
         cat request.json || true
         echo
