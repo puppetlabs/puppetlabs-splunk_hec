@@ -31,7 +31,7 @@ jobs:
       id: get-matrix
       if: ${{ github.repository_owner == 'puppetlabs' }}
       run: |
-          bundle exec matrix_from_metadata_v2
+          bundle exec matrix_from_metadata_v3
 
   Spec:
     name: "Spec Tests (Puppet: ${{matrix.puppet_version}}, Ruby Ver: ${{matrix.ruby_version}})"

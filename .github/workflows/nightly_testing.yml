@@ -30,7 +30,7 @@ jobs:
     - name: Get Test Matrix
       id: get-matrix
       run: |
-        bundle exec matrix_from_metadata_v2
+        bundle exec matrix_from_metadata_v3
     - name: Set nightly releases
       id: nightly_release
       run: |
@@ -39,7 +39,7 @@ jobs:
     - name: Setup Spec Test Matrix
       id: set-matrix
       run: |
-        echo "matrix={\"platforms\":[\"centos-7\",\"rhel-8\",\"rhel-9\",\"ubuntu-2004-lts\"]}" >> $GITHUB_OUTPUT
+        echo "matrix={\"platforms\":[\"rhel-8\",\"rhel-9\",\"ubuntu-2204-lts\"]}" >> $GITHUB_OUTPUT
     - name: Setup Acceptance Test Matrix
       id: build-matrix
       run: |
