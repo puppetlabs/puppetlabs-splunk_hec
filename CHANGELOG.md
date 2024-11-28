@@ -4,7 +4,15 @@ All notable changes to this project will be documented in this file. The format 
 
 ## [Unreleased](https://github.com/puppetlabs/puppetlabs-splunk_hec)
 
-[Current Diff](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v2.0.0..main)
+[Current Diff](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v2.0.1..main)
+
+## [2.0.1](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v2.0.1) (2024-11-26)
+
+[Full Changelog](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v2.0.0..v2.0.1)
+
+### Fixed
+
+-  Ensure the report processor is using the correct file to retrieve the token value. [#217](https://github.com/puppetlabs/puppetlabs-splunk_hec/pull/217)
 
 ## [2.0.0](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v2.0.0) (2024-3-27)
 
