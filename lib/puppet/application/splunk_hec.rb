@@ -46,7 +46,10 @@ class Puppet::Application::Splunk_hec < Puppet::Application
         event['host'] = name
         if content[serv.to_s].is_a?(Array)
           event['event'] = {}
-          event['event']['metrics'] = content[serv.to_s]
+          event['event']['metrics'] = []
+          content[serv.to_s].each do |metric|
+            event['event']['metrics'] << { metric['name'].to_s => metric['value'].to_f }
+          end
         else
           event['event'] = content[serv.to_s]
         end
