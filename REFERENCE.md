@@ -98,6 +98,7 @@ The following parameters are available in the `splunk_hec` class:
         - [`summary_resources_format`](#summary_resources_format)
         - [`event_types`](#event_types)
         - [`orchestrator_data_filter`](#orchestrator_data_filter)
+        - [`orchestrator_plan_data_filter`](#orchestrator_plan_data_filter)
         - [`rbac_data_filter`](#rbac_data_filter)
         - [`classifier_data_filter`](#classifier_data_filter)
         - [`pe_console_data_filter`](#pe_console_data_filter)
@@ -385,15 +386,23 @@ Default value: `'hash'`
 Data type: `Array`
 
 Determines which events should be forwarded to Splunk
-Allowed values are: 'orchestrator','rbac','classifier','pe-console','code-manager'
+Allowed values are: 'orchestrator','orchestrator_plan','rbac','classifier','pe-console','code-manager'
 
-Default value: `['orchestrator','rbac','classifier','pe-console','code-manager']`
+Default value: `['orchestrator','orchestrator_plan','rbac','classifier','pe-console','code-manager']`
 
 ##### <a name="-splunk_hec--orchestrator_data_filter"></a>`orchestrator_data_filter`
 
 Data type: `Optional[Array]`
 
-Filters the jobs event data
+Filters the orchestrator jobs event data
+
+Default value: `undef`
+
+##### <a name="-splunk_hec--orchestrator_plan_data_filter"></a>`orchestrator_plan_data_filter`
+
+Data type: `Optional[Array]`
+
+Filters the orchestrator plans event data
 
 Default value: `undef`
 

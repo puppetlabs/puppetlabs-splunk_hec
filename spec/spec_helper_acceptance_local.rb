@@ -109,7 +109,8 @@ def setup_manifest(disabled: false, cert_store: false, ssl_ca: nil, url: nil, wi
     manifest << add_event_forwarding
     params[:events_reporting_enabled] = true
     params[:orchestrator_data_filter] = ['options.scope.nodes', 'options.scope.blah', 'environment.name']
-    params[:pe_console_data_filter]   = ['subject.name', 'subject.blah', 'events']
+    params[:orchestrator_plan_data_filter] = ['options.scope.nodes', 'options.scope.blah', 'environment.name']
+    params[:pe_console_data_filter] = ['subject.name', 'subject.blah', 'events']
   end
 
   manifest << declare(:class, :splunk_hec, params)

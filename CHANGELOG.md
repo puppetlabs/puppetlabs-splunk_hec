@@ -6,6 +6,18 @@ All notable changes to this project will be documented in this file. The format 
 
 [Current Diff](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v2.1.0..main)
 
+### Added
+
+- Added support for the `orchestrator_plan` event type from the **puppetlabs-pe_event_forwarding** module.
+  - Added `orchestrator_plan` to index mappings in util_splunk_hec template.
+  - New PE Event Forwarding filter `orchestrator_plan_data_filter` to allow filtering orchestrator plan event payloads.
+  - Module dependency updated to ensure `pe_event_forwarding` v2.3.0+ is installed.
+
+### Removed
+
+- Removed support for Debian platform and EOL operating system versions.
+- Removed support for Puppet 6.
+
 ## [2.1.0](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v2.1.0) (2025-06-03)
 
 [Full Changelog](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v2.0.1..v2.1.0)
