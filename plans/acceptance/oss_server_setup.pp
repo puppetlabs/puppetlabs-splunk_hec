@@ -7,7 +7,7 @@
 # @param [Optional[String]] collection
 #   puppet version collection name
 plan splunk_hec::acceptance::oss_server_setup(
-  Optional[String] $collection = 'puppet7'
+  Optional[String] $collection = 'puppetcore8'
 ) {
   # get server
   $server = get_targets('*').filter |$n| { $n.vars['role'] == 'server' }
@@ -17,6 +17,9 @@ plan splunk_hec::acceptance::oss_server_setup(
   $puppetserver_facts = facts($server[0])
   $platform = $puppetserver_facts['platform']
 
+  # transform collection name to accomodate puppet core naming convention
+  $version = regsubst($collection, '^puppet(?!core)', 'puppetcore')
+
   # machines are not yet ready at time of installing the puppetserver, so we wait 15s
   run_command('sleep 15', $localhost)
 
@@ -25,7 +28,7 @@ plan splunk_hec::acceptance::oss_server_setup(
     'provision::install_puppetserver',
     $server,
     'install and configure server',
-    { 'collection' => $collection, 'platform' => $platform }
+    { 'collection' => $version, 'platform' => $platform }
   )
 
   $os_name = $puppetserver_facts['provisioner'] ? {

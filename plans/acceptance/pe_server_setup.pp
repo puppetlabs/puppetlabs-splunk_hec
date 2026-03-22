@@ -11,7 +11,7 @@
 # @param [Optional[Hash]] pe_settings
 #   Sets PE settings including password
 plan splunk_hec::acceptance::pe_server_setup(
-  Optional[String] $version = '2021.7.5',
+  Optional[String] $version = '2023.8.5',
   Optional[Hash] $pe_settings = { password => 'puppetlabsPi3!', configure_tuning => false }
 ) {
   # machines are not yet ready at time of installing the puppetserver, so we wait 15s

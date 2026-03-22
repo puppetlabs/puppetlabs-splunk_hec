@@ -14,7 +14,7 @@
     },
     {
       "name": "puppetlabs-pe_event_forwarding",
-      "version_requirement": ">= 2.3.0 < 3.0.0"
+      "version_requirement": ">= 2.0.0 < 3.0.0"
     }
   ],
   "operatingsystem_support": [
@@ -47,7 +47,7 @@
       ]
     },
     {
-      "operatingsystem": "RockyLinux",
+      "operatingsystem": "Rocky",
       "operatingsystemrelease": [
         "8",
         "9"
@@ -56,7 +56,6 @@
     {
       "operatingsystem": "SLES",
       "operatingsystemrelease": [
-        "12",
         "15"
       ]
     },
@@ -72,7 +71,7 @@
   "requirements": [
     {
       "name": "puppet",
-      "version_requirement": ">= 7.8.0 < 9.0.0"
+      "version_requirement": ">= 8.2.0 < 9.0.0"
     }
   ],
   "pdk-version": "3.4.0",

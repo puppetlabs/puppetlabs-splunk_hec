@@ -36,9 +36,6 @@ jobs:
         --arch-exclude arm \
         --platform-exclude debian \
         --platform-exclude redhat-7 \
-        --platform-exclude redhat-8 \
-        --platform-exclude sles \
-        --platform-exclude ubuntu \
         --puppet-exclude 7 \
         --puppet-exclude 8 \
         --pe-include
