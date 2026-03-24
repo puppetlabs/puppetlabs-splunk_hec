@@ -79,21 +79,25 @@ end
 
 def setup_manifest(disabled: false, cert_store: false, ssl_ca: nil, url: nil, with_event_forwarding: false)
   if url.nil?
-    # This block is for checking whether we are testing locally or on the CloudCI
-    # splunk_node.uri will work locally, but bc of the discrepancy of uri and hostname
-    # on the CloudCI, and we use localhost
-    begin
-      splunk_runner = splunk_node.uri
-    rescue
-      splunk_runner = 'localhost'
+    if ENV['SPLUNK_CI_URL'] && !ENV['SPLUNK_CI_URL'].empty?
+      url = "#{ENV['SPLUNK_CI_URL']}:8088/services/collector"
+    else
+      # This block is for checking whether we are testing locally or on the CloudCI
+      # splunk_node.uri will work locally, but bc of the discrepancy of uri and hostname
+      # on the CloudCI, and we use localhost
+      begin
+        splunk_runner = splunk_node.uri
+      rescue
+        splunk_runner = 'localhost'
+      end
+      url = "https://#{splunk_runner}:8088/services/collector"
     end
-    url = "https://#{splunk_runner}:8088/services/collector/event"
   end
 
   manifest = ''
   params = {
     url:                       url,
-    token:                     'abcd1234',
+    token:                     ENV.fetch('SPLUNK_CI_HEC_TOKEN', 'abcd1234'),
     enable_reports:            true,
     manage_routes:             true,
     facts_terminus:            'yaml',
@@ -166,16 +170,26 @@ end
 def get_splunk_report(earliest, latest, sourcetype = 'puppet:summary')
   start_time = earliest.strftime('%m/%d/%Y:%H:%M:%S')
   end_time   = (latest + 2).strftime('%m/%d/%Y:%H:%M:%S')
-  query_command = 'curl -u admin:piepiepie -k '\
-    'https://localhost:8089/services/search/v2/jobs/export -d output_mode=json '\
-    "-d search='search sourcetype=\"#{sourcetype}\" AND earliest=\"#{start_time}\" AND latest=\"#{end_time}\"'"
+  splunk_user = ENV.fetch('SPLUNK_CI_USER', 'admin')
+  splunk_pass = ENV.fetch('SPLUNK_CI_PASS', 'piepiepie')
   sleep 1
-  begin
-    splunk_runner = splunk_node
-  rescue
-    splunk_runner = TARGET_SERVER
-  end
-  response = splunk_runner.run_shell(query_command).stdout
+  response = if ENV['SPLUNK_CI_URL'] && !ENV['SPLUNK_CI_URL'].empty?
+               search_url = "#{ENV['SPLUNK_CI_URL']}:8089/services/search/v2/jobs/export"
+               query_command = "curl -u #{splunk_user}:#{splunk_pass} -k " \
+                 "#{search_url} -d output_mode=json " \
+                 "-d search='search sourcetype=\"#{sourcetype}\" AND host=\"#{host_name}\" AND earliest=\"#{start_time}\" AND latest=\"#{end_time}\"'"
+               `#{query_command}`
+             else
+               query_command = "curl -u #{splunk_user}:#{splunk_pass} -k " \
+                 'https://localhost:8089/services/search/v2/jobs/export -d output_mode=json ' \
+                 "-d search='search sourcetype=\"#{sourcetype}\" AND earliest=\"#{start_time}\" AND latest=\"#{end_time}\"'"
+               begin
+                 splunk_runner = splunk_node
+               rescue
+                 splunk_runner = TARGET_SERVER
+               end
+               splunk_runner.run_shell(query_command).stdout
+             end
   JSON.parse("[#{response.split.join(',')}]")
 end
 

@@ -66,6 +66,10 @@ namespace :acceptance do
 
   desc 'Sets up the Splunk instance'
   task :setup_splunk_targets do
+    if ENV['SPLUNK_CI_URL']
+      puts 'Using persistent Splunk CI instance, skipping local setup'
+      next
+    end
     inventory_hash = LitmusHelpers.inventory_hash_from_inventory_file
     splunk_setup_target = begin
                             splunk_node

@@ -1,6 +1,6 @@
 name: "PE LTS Testing"
 
-on: [pull_request]
+on: [pull_request_target]
 
 jobs:
   setup_matrix:
@@ -11,7 +11,7 @@ jobs:
 
     steps:
     - name: Checkout Source
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       if: ${{ github.repository_owner == 'puppetlabs' }}
 
     - name: Activate Ruby 3.1
@@ -35,7 +35,9 @@ jobs:
         --provision-exclude docker \
         --arch-exclude arm \
         --platform-exclude debian \
-        --platform-exclude redhat-7 \
+        --platform-exclude redhat-8 \
+        --platform-exclude sles \
+        --platform-exclude 'ubuntu-(20|24).04' \
         --puppet-exclude 7 \
         --puppet-exclude 8 \
         --pe-include
@@ -50,10 +52,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{fromJson(needs.setup_matrix.outputs.matrix)}}
+    env:
+      SPLUNK_CI_URL: ${{ secrets.SPLUNK_CI_URL }}
+      SPLUNK_CI_USER: ${{ secrets.SPLUNK_CI_USER }}
+      SPLUNK_CI_PASS: ${{ secrets.SPLUNK_CI_PASS }}
+      SPLUNK_CI_HEC_TOKEN: ${{ secrets.SPLUNK_CI_HEC_TOKEN }}
 
     steps:
     - name: Checkout Source
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
 
     - name: Activate Ruby 3.1
       uses: ruby/setup-ruby@v1

@@ -1,6 +1,6 @@
 name: "Puppet Server Nightly Testing"
 
-on: [pull_request]
+on: [pull_request_target]
 
 jobs:
   setup_matrix:
@@ -11,7 +11,7 @@ jobs:
 
     steps:
     - name: Checkout Source
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       if: ${{ github.repository_owner == 'puppetlabs' }}
 
     - name: Activate Ruby 3.1
@@ -32,7 +32,11 @@ jobs:
       run: |
         bundle exec matrix_from_metadata_v3 \
         --provision-exclude docker \
-        --arch-exclude arm
+        --arch-exclude arm \
+        --platform-exclude almalinux \
+        --platform-exclude rocky \
+        --platform-exclude sles \
+        --platform-exclude 'ubuntu-(20|24).04'
   Integration:
     name: "${{matrix.platforms.label}}, ${{matrix.collection}}"
     needs:
@@ -43,10 +47,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{fromJson(needs.setup_matrix.outputs.matrix)}}
-
+    env:
+      SPLUNK_CI_URL: ${{ secrets.SPLUNK_CI_URL }}
+      SPLUNK_CI_USER: ${{ secrets.SPLUNK_CI_USER }}
+      SPLUNK_CI_PASS: ${{ secrets.SPLUNK_CI_PASS }}
+      SPLUNK_CI_HEC_TOKEN: ${{ secrets.SPLUNK_CI_HEC_TOKEN }}
     steps:
     - name: Checkout Source
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
 
     - name: Activate Ruby 3.1
       uses: ruby/setup-ruby@v1
