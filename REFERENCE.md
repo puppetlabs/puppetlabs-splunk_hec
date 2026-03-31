@@ -16,7 +16,11 @@
 
 ### Functions
 
-* [`splunk_hec::secure`](#splunk_hecsecure): Custom function to mark sensitive data utilized by this module as Sensitive types in the Puppet language. Sensitive data is redacted from Pup
+* [`splunk_hec::secure`](#splunk_hec--secure): Custom function to mark sensitive data utilized by this module as Sensitive types in the Puppet language. Sensitive data is redacted from Pup
+
+### Tasks
+
+* [`install_pe`](#install_pe): Download and install Puppet Enterprise on a target node
 
 ### Plans
 
@@ -50,70 +54,52 @@ include splunk_hec
 
 The following parameters are available in the `splunk_hec` class:
 
-- [Reference](#reference)
-  - [Table of Contents](#table-of-contents)
-    - [Classes](#classes)
-      - [Public Classes](#public-classes)
-      - [Private Classes](#private-classes)
-    - [Functions](#functions)
-    - [Plans](#plans)
-      - [Public Plans](#public-plans)
-      - [Private Plans](#private-plans)
-  - [Classes](#classes-1)
-    - [`splunk_hec`](#splunk_hec)
-      - [Examples](#examples)
-        - [](#)
-      - [Parameters](#parameters)
-        - [`url`](#url)
-        - [`token`](#token)
-        - [`facts_allowlist`](#facts_allowlist)
-        - [`enable_reports`](#enable_reports)
-        - [`record_event`](#record_event)
-        - [`disabled`](#disabled)
-        - [`only_changes`](#only_changes)
-        - [`manage_routes`](#manage_routes)
-        - [`events_reporting_enabled`](#events_reporting_enabled)
-        - [`facts_terminus`](#facts_terminus)
-        - [`facts_cache_terminus`](#facts_cache_terminus)
-        - [`facts_blocklist`](#facts_blocklist)
-        - [`pe_console`](#pe_console)
-        - [`timeout`](#timeout)
-        - [`ssl_ca`](#ssl_ca)
-        - [`include_system_cert_store`](#include_system_cert_store)
-        - [`fips_crl_check`](#fips_crl_check)
-        - [`fips_verify_peer`](#fips_verify_peer)
-        - [`token_summary`](#token_summary)
-        - [`token_facts`](#token_facts)
-        - [`token_metrics`](#token_metrics)
-        - [`token_events`](#token_events)
-        - [`url_summary`](#url_summary)
-        - [`url_facts`](#url_facts)
-        - [`url_metrics`](#url_metrics)
-        - [`url_events`](#url_events)
-        - [`include_logs_status`](#include_logs_status)
-        - [`include_logs_catalog_failure`](#include_logs_catalog_failure)
-        - [`include_logs_corrective_change`](#include_logs_corrective_change)
-        - [`include_resources_status`](#include_resources_status)
-        - [`include_resources_corrective_change`](#include_resources_corrective_change)
-        - [`summary_resources_format`](#summary_resources_format)
-        - [`event_types`](#event_types)
-        - [`orchestrator_data_filter`](#orchestrator_data_filter)
-        - [`orchestrator_plan_data_filter`](#orchestrator_plan_data_filter)
-        - [`rbac_data_filter`](#rbac_data_filter)
-        - [`classifier_data_filter`](#classifier_data_filter)
-        - [`pe_console_data_filter`](#pe_console_data_filter)
-        - [`code_manager_data_filter`](#code_manager_data_filter)
-  - [Plans](#plans-1)
-    - [`splunk_hec::examples::apply_example`](#splunk_hecexamplesapply_example)
-      - [Parameters](#parameters-1)
-        - [`plan_guid`](#plan_guid)
-        - [`plan_name`](#plan_name)
-    - [`splunk_hec::examples::result_example`](#splunk_hecexamplesresult_example)
+* [`[String]`](#-splunk_hec---String-)
+* [`token`](#-splunk_hec--token)
+* [`facts_allowlist`](#-splunk_hec--facts_allowlist)
+* [`enable_reports`](#-splunk_hec--enable_reports)
+* [`record_event`](#-splunk_hec--record_event)
+* [`disabled`](#-splunk_hec--disabled)
+* [`only_changes`](#-splunk_hec--only_changes)
+* [`manage_routes`](#-splunk_hec--manage_routes)
+* [`events_reporting_enabled`](#-splunk_hec--events_reporting_enabled)
+* [`facts_terminus`](#-splunk_hec--facts_terminus)
+* [`facts_cache_terminus`](#-splunk_hec--facts_cache_terminus)
+* [`facts_blocklist`](#-splunk_hec--facts_blocklist)
+* [`pe_console`](#-splunk_hec--pe_console)
+* [`timeout`](#-splunk_hec--timeout)
+* [`ssl_ca`](#-splunk_hec--ssl_ca)
+* [`include_system_cert_store`](#-splunk_hec--include_system_cert_store)
+* [`fips_crl_check`](#-splunk_hec--fips_crl_check)
+* [`fips_verify_peer`](#-splunk_hec--fips_verify_peer)
+* [`token_summary`](#-splunk_hec--token_summary)
+* [`token_facts`](#-splunk_hec--token_facts)
+* [`token_metrics`](#-splunk_hec--token_metrics)
+* [`token_events`](#-splunk_hec--token_events)
+* [`url_summary`](#-splunk_hec--url_summary)
+* [`url_facts`](#-splunk_hec--url_facts)
+* [`url_metrics`](#-splunk_hec--url_metrics)
+* [`url_events`](#-splunk_hec--url_events)
+* [`include_logs_status`](#-splunk_hec--include_logs_status)
+* [`include_logs_catalog_failure`](#-splunk_hec--include_logs_catalog_failure)
+* [`include_logs_corrective_change`](#-splunk_hec--include_logs_corrective_change)
+* [`include_resources_status`](#-splunk_hec--include_resources_status)
+* [`include_resources_corrective_change`](#-splunk_hec--include_resources_corrective_change)
+* [`summary_resources_format`](#-splunk_hec--summary_resources_format)
+* [`event_types`](#-splunk_hec--event_types)
+* [`orchestrator_data_filter`](#-splunk_hec--orchestrator_data_filter)
+* [`orchestrator_plan_data_filter`](#-splunk_hec--orchestrator_plan_data_filter)
+* [`rbac_data_filter`](#-splunk_hec--rbac_data_filter)
+* [`classifier_data_filter`](#-splunk_hec--classifier_data_filter)
+* [`pe_console_data_filter`](#-splunk_hec--pe_console_data_filter)
+* [`code_manager_data_filter`](#-splunk_hec--code_manager_data_filter)
+* [`url`](#-splunk_hec--url)
 
-##### <a name="-splunk_hec--url"></a>`url`
+##### <a name="-splunk_hec---String-"></a>`[String]`
 
-Data type: `Optional[String]`
+Data type: `Optional`
 
+url
 The url of the server that PE is running on
 
 ##### <a name="-splunk_hec--token"></a>`token`
@@ -122,6 +108,8 @@ Data type: `Optional[String]`
 
 The default Splunk HEC token
 Note: The value of the token is converted to Puppet's Sensitive data type during catalog application.
+
+Default value: `undef`
 
 ##### <a name="-splunk_hec--facts_allowlist"></a>`facts_allowlist`
 
@@ -437,6 +425,60 @@ Data type: `Optional[Array]`
 Filters the code_manager event data
 
 Default value: `undef`
+
+##### <a name="-splunk_hec--url"></a>`url`
+
+Data type: `Optional[String]`
+
+
+
+Default value: `undef`
+
+## Functions
+
+### <a name="splunk_hec--secure"></a>`splunk_hec::secure`
+
+Type: Ruby 4.x API
+
+Custom function to mark sensitive data utilized by
+this module as Sensitive types in the Puppet language.
+Sensitive data is redacted from Puppet logs and reports.
+
+#### `splunk_hec::secure(Hash $secrets)`
+
+Custom function to mark sensitive data utilized by
+this module as Sensitive types in the Puppet language.
+Sensitive data is redacted from Puppet logs and reports.
+
+Returns: `Any`
+
+##### `secrets`
+
+Data type: `Hash`
+
+
+
+## Tasks
+
+### <a name="install_pe"></a>`install_pe`
+
+Download and install Puppet Enterprise on a target node
+
+**Supports noop?** false
+
+#### Parameters
+
+##### `url`
+
+Data type: `String[1]`
+
+The full HTTPS URL to the PE installer tarball
+
+##### `console_password`
+
+Data type: `String[1]`
+
+The PE console admin password
 
 ## Plans
 

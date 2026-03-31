@@ -1,14 +1,24 @@
 acceptance:
   provisioner: abs
   images:
-  - centos-7-x86_64
   - redhat-8-x86_64
   - redhat-9-x86_64
-  - ubuntu-2004-x86_64
+  - ubuntu-2404-x86_64
   vars: |
     role: server
+
+# One dedicated Splunk node per PE server above. Keep the count in sync with
+# the acceptance list — provision_vms pairs them by index.
+acceptance_splunk:
+  provisioner: abs
+  images:
+  - redhat-9-x86_64
+  - redhat-9-x86_64
+  - redhat-9-x86_64
+  vars: |
+    role: splunk_node
+
 fips_acceptance:
   provisioner: abs
   images:
-  - redhat-fips-7-x86_64
-  - ubuntu-2004-x86_64
+  - redhat-fips-9-x86_64

@@ -7,7 +7,7 @@ require 'yaml'
 require 'json'
 require 'time'
 
-# rubocop:disable Style/ClassAndModuleCamelCase
+# rubocop:disable Naming/ClassAndModuleCamelCase
 # splunk_hec.rb
 module Puppet::Util::Splunk_hec
   def settings

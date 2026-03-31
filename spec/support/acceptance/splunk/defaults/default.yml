@@ -19,11 +19,4 @@ splunk:
     ssl: true
     port: 8088
     token: abcd1234
-  conf:
-    - key: inputs
-      value:
-        directory: /opt/splunk/etc/apps/splunk_httpinput/local
-        content:
-          http:
-            serverCert:
   smartstore: null

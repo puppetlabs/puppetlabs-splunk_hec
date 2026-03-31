@@ -16,7 +16,7 @@ describe 'Event Forwarding' do
         server.run_shell("LC_ALL=en_US.UTF-8 puppet task run facts --nodes #{host_name}")
         server.run_shell("#{EVENT_FORWARDING_CONFDIR}/collect_api_events.rb")
         after_run = Time.now.utc
-        get_splunk_report(before_run, after_run, 'puppet:jobs')
+        get_splunk_report(before_run, after_run, 'puppet:jobs', host: host_name)
       end
 
       it 'does not send report on first run' do
@@ -36,7 +36,7 @@ describe 'Event Forwarding' do
         data   = report[0]['result']
         event  = JSON.parse(data['_raw'])
 
-        expect(data['source']).to                     eql('http:splunk_hec_token')
+        expect(data['source']).to                     eql(splunk_hec_source)
         expect(data['sourcetype']).to                 eql('puppet:jobs')
         expect(event['options']['scope']['nodes']).to eql([host_name])
         expect(event['options']['blah']).to           be_nil
@@ -51,7 +51,7 @@ describe 'Event Forwarding' do
         server.run_shell("LC_ALL=en_US.UTF-8 puppet plan run facts targets=#{console_host_fqdn}")
         server.run_shell("#{EVENT_FORWARDING_CONFDIR}/collect_api_events.rb")
         after_run = Time.now.utc
-        get_splunk_report(before_run, after_run, 'puppet:plans')
+        get_splunk_report(before_run, after_run, 'puppet:plans', host: host_name)
       end
 
       it 'does not send report on first run' do
@@ -71,11 +71,11 @@ describe 'Event Forwarding' do
         data   = report[0]['result']
         event  = JSON.parse(data['_raw'])
 
-        expect(data['source']).to                     eql('http:splunk_hec_token')
+        expect(data['source']).to                     eql(splunk_hec_source)
         expect(data['sourcetype']).to                 eql('puppet:plans')
-        expect(event['options']['scope']['nodes']).to eql([host_name])
-        expect(event['options']['blah']).to           be_nil
-        expect(event['environment']['name']).to       eql('production')
+        expect(event['options']['parameters']['targets']).to eql(host_name)
+        expect(event['options']['parameters']['blah']).to be_nil
+        expect(event['options']['environment']).to    eql('production')
         expect(event['options']['transport']).to      be_nil
       end
     end
@@ -98,7 +98,7 @@ describe 'Event Forwarding' do
         server.run_shell("LC_ALL=en_US.UTF-8 puppet task run facts --nodes #{host_name}")
         server.run_shell("#{EVENT_FORWARDING_CONFDIR}/collect_api_events.rb")
         after_run = Time.now.utc
-        get_splunk_report(before_run, after_run, 'puppet:activities_console')
+        get_splunk_report(before_run, after_run, 'puppet:activities_console', host: host_name)
       end
 
       it 'does not send report on first run' do
@@ -118,7 +118,7 @@ describe 'Event Forwarding' do
         data   = report[0]['result']
         event  = JSON.parse(data['_raw'])
 
-        expect(data['source']).to             eql('http:splunk_hec_token')
+        expect(data['source']).to             eql(splunk_hec_source)
         expect(data['sourcetype']).to         eql('puppet:activities_console')
         expect(event['events'][0]['type']).to eql('run_task')
         expect(event['subject']['blah']).to   be_nil

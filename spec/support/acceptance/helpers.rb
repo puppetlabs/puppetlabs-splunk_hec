@@ -1,5 +1,6 @@
 require 'puppet_litmus'
-PuppetLitmus.configure!
+# PuppetLitmus.configure! is called by spec_helper_acceptance_local.rb after requiring this file;
+# do not call it here to avoid printing 'Running tests against this machine !' twice.
 
 # The Target class and TargetHelpers module are a useful ways
 # for tests to reuse Litmus' helpers when they want to do stuff

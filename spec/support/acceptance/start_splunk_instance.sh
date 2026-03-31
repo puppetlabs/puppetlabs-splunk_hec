@@ -8,11 +8,11 @@ function cleanup() {
 trap cleanup EXIT
 
 function start_splunk() {
-  id=`docker ps -q -f name=splunk-enterprise-1 -f status=running`
+  id=`docker ps -aq -f name=splunk-enterprise-1`
 
   if [ ! -z "$id" ]
   then
-    echo "Killing the current Splunk container (id = ${id}) ..."
+    echo "Removing the existing Splunk container (id = ${id}) ..."
     docker rm --force ${id}
   fi
 
@@ -29,12 +29,28 @@ function start_splunk() {
 }
 
 function yum_install_docker() {
-  yum install -y yum-utils
-  yum-config-manager \
-    --add-repo \
-    https://download.docker.com/linux/centos/docker-ce.repo
-  yum install docker-ce docker-ce-cli containerd.io docker-compose-plugin -y 
+  # Remove packages that conflict with Docker CE on RHEL 8/9
+  dnf remove -y docker docker-client docker-client-latest docker-common \
+    docker-latest docker-latest-logrotate docker-logrotate docker-engine \
+    podman runc 2>/dev/null || true
+  dnf install -y yum-utils
+  dnf config-manager --add-repo https://download.docker.com/linux/rhel/docker-ce.repo
+  dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
   systemctl start docker
+}
+
+function apt_install_docker() {
+  # Remove packages that conflict with Docker CE on Ubuntu
+  for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do
+    apt-get remove -y $pkg 2>/dev/null || true
+  done
+  mkdir -m 0755 -p /etc/apt/keyrings
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+  echo \
+    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+    $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+  apt-get -qq update -y 1>&- 2>&-
+  apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin 1>&- 2>&-
 }
 
 function compose_starting() {
@@ -50,53 +66,29 @@ function wait_for_compose() {
   done
 }
 
-function setup_hec_ssl() {
-  echo "Setting up HEC SSL..."
-  certs=$(puppet config print certdir)
-  keys="$(puppet config print privatekeydir)"
-  s_cert='/tmp/splunk/puppet_hec.pem'
-  s_apps='/opt/splunk/etc/apps'
-  s_auth='/opt/splunk/etc/auth'
-  /opt/puppetlabs/bin/puppetserver ca generate --certname localhost &>2
-  cat "$certs/localhost.pem" "$keys/localhost.pem" "$certs/ca.pem" > $s_cert
-  docker cp $s_cert splunk-enterprise-1:$s_auth
-  docker exec -u root splunk-enterprise-1 sed -i "/Cert/c\serverCert = $s_auth/puppet_hec.pem" $s_apps/splunk_httpinput/local/inputs.conf
-}
-
-function splunk_set_minfreemb() {
-  echo "Setting Splunk custom configs..."
-  # This is a workaround for issues on Ubuntu where searches fail due to hitting default minfreemb of 5GB.
-  docker exec -u root splunk-enterprise-1 /opt/splunk/bin/splunk set minfreemb 500 -auth admin:piepiepie &>2
-  # We have to restart Splunk for the changes to get picked up.
-  docker exec -u root splunk-enterprise-1 /opt/splunk/bin/splunk restart
+function check_ssl_cert() {
+  # The cert is uploaded to /tmp/splunk/puppet_hec.pem by setup_splunk_targets
+  # before this script runs. docker-compose.yml mounts it as Splunk's default
+  # server.pem so HEC uses it without any explicit serverCert configuration.
+  # It lives under /tmp/splunk/ so the cleanup trap removes it with everything else.
+  if [ ! -f '/tmp/splunk/puppet_hec.pem' ]; then
+    echo "ERROR: /tmp/splunk/puppet_hec.pem not found — expected to be uploaded by setup_splunk_targets" >&2
+    exit 1
+  fi
+  chmod 644 /tmp/splunk/puppet_hec.pem
 }
 
 YUM=$(cat /etc/*-release | grep 'CentOS\|rhel')
 
-nodocker=$(which docker 2>&1 | grep "no docker")
-status=$?
-
-if [ ! -z "$nodocker" ]
-then
-  if [ ! -z "$YUM" ]; then
+if ! which docker &>/dev/null; then
+  if [ -n "$YUM" ]; then
     yum_install_docker
+  else
+    apt_install_docker
   fi
-else
-  # Add Docker repo for Ubuntu
-  mkdir -m 0755 -p /etc/apt/keyrings
-  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-  echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-  $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
-  # Install Docker and Docker Compose
-  apt-get -qq update -y 1>&- 2>&-
-  apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y 1>&- 2>&-
 fi
 
-printenv
-docker system info
+check_ssl_cert
 start_splunk
 wait_for_compose
-setup_hec_ssl
-splunk_set_minfreemb
 exit 0

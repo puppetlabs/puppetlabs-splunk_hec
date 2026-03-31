@@ -2,7 +2,7 @@ require 'puppet/indirector/facts/yaml'
 require 'puppet/util/profiler'
 require File.dirname(__FILE__) + '/../../util/splunk_hec.rb'
 
-# rubocop:disable Style/ClassAndModuleCamelCase
+# rubocop:disable Naming/ClassAndModuleCamelCase
 # splunk_hec.rb
 class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Yaml
   desc "Save facts to Splunk over HEC and then to yamlcache.
