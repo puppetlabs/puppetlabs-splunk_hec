@@ -11,7 +11,7 @@ jobs:
 
     steps:
     - name: Checkout Source
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       if: ${{ github.repository_owner == 'puppetlabs' }}
 
     - name: Activate Ruby 3.1
@@ -45,7 +45,7 @@ jobs:
         --platform-exclude debian \
         --platform-exclude redhat-8 \
         --platform-exclude sles \
-        --platform-exclude ubuntu
+        --platform-exclude 'ubuntu-(20|24).04'
     - name: Setup Acceptance Test Matrix
       id: set-matrix
       run: |
@@ -60,10 +60,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.setup_matrix.outputs.matrix) }}
+    env:
+      SPLUNK_CI_URL: ${{ secrets.SPLUNK_CI_URL }}
+      SPLUNK_CI_USER: ${{ secrets.SPLUNK_CI_USER }}
+      SPLUNK_CI_PASS: ${{ secrets.SPLUNK_CI_PASS }}
+      SPLUNK_CI_HEC_TOKEN: ${{ secrets.SPLUNK_CI_HEC_TOKEN }}
+      SPLUNK_CI_HEC_CA: ${{ secrets.SPLUNK_CI_HEC_CA }}
+      SPLUNK_CI_IP: ${{ secrets.SPLUNK_CI_IP }}
 
     steps:
     - name: Checkout Source
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
 
     - name: Activate Ruby 3.1
       uses: ruby/setup-ruby@v1
@@ -99,9 +108,12 @@ jobs:
         sed -e 's/password: .*/password: "[redacted]"/' < $FILE || true
         echo ::endgroup::
         echo INVENTORY_PATH=$FILE >> $GITHUB_ENV
+    - name: Configure inventory
+      run: |
+        bundle exec rake acceptance:configure_inventory
     - name: Install server
       run: |
-        bundle exec bolt --modulepath spec/fixtures/modules plan run splunk_hec::acceptance::server_setup puppet_version='${{ matrix.collection }}' -i ./$INVENTORY_PATH --stream
+        bundle exec bolt --modulepath spec/fixtures/modules plan run splunk_hec::acceptance::server_setup puppet_version='${{ matrix.collection }}' splunk_url="$SPLUNK_CI_URL" splunk_ip="$SPLUNK_CI_IP" -i ./$INVENTORY_PATH --stream
     - name: Install module
       run: |
         bundle exec rake 'litmus:install_module'

@@ -1,7 +1,7 @@
 require 'puppet/application'
 require File.dirname(__FILE__) + '/../util/splunk_hec.rb'
 
-# rubocop:disable Style/ClassAndModuleCamelCase
+# rubocop:disable Naming/ClassAndModuleCamelCase
 # splunk_hec.rb
 class Puppet::Application::Splunk_hec < Puppet::Application
   include Puppet::Util::Splunk_hec

@@ -80,6 +80,12 @@
         - <%= $subset %>
 <% } -%>
 <% } -%>
+<% if $splunk_hec::orchestrator_plan_data_filter { -%>
+"orchestrator_plan_data_filter" :
+<% $splunk_hec::orchestrator_plan_data_filter.each |$subset| {-%>
+        - <%= $subset %>
+<% } -%>
+<% } -%>
 <% if $splunk_hec::rbac_data_filter { -%>
 "rbac_data_filter" :
 <% $splunk_hec::rbac_data_filter.each |$subset| {-%>

@@ -88,9 +88,11 @@
 #   Allowed values are: 'hash', 'array'
 # @param [Array] event_types
 #   Determines which events should be forwarded to Splunk
-#   Allowed values are: 'orchestrator','rbac','classifier','pe-console','code-manager'
+#   Allowed values are: 'orchestrator','orchestrator_plan','rbac','classifier','pe-console','code-manager'
 # @param [Optional[Array]] orchestrator_data_filter
-#   Filters the jobs event data
+#   Filters the orchestrator jobs event data
+# @param [Optional[Array]] orchestrator_plan_data_filter
+#   Filters the orchestrator plans event data
 # @param [Optional[Array]] rbac_data_filter
 #   Filters the rbac event data
 # @param [Optional[Array]] classifier_data_filter
@@ -132,8 +134,9 @@ class splunk_hec (
   Optional[Array] $include_resources_status              = undef,
   Boolean $include_resources_corrective_change           = false,
   String $summary_resources_format                       = 'hash',
-  Array $event_types                                     = ['orchestrator','rbac','classifier','pe-console','code-manager'],
+  Array $event_types                                     = ['orchestrator','orchestrator_plan','rbac','classifier','pe-console','code-manager'],
   Optional[Array] $orchestrator_data_filter              = undef,
+  Optional[Array] $orchestrator_plan_data_filter         = undef,
   Optional[Array] $rbac_data_filter                      = undef,
   Optional[Array] $classifier_data_filter                = undef,
   Optional[Array] $pe_console_data_filter                = undef,

@@ -20,11 +20,12 @@ end
 @confdir  = '/etc/puppetlabs/puppet/splunk_hec'
 
 INDICES = {
-  'orchestrator' => 'puppet:jobs',
-  'rbac'         => 'puppet:activities_rbac',
-  'classifier'   => 'puppet:activities_classifier',
-  'pe-console'   => 'puppet:activities_console',
-  'code-manager' => 'puppet:activities_code_manager'
+  'orchestrator'      => 'puppet:jobs',
+  'orchestrator_plan' => 'puppet:plans',
+  'rbac'              => 'puppet:activities_rbac',
+  'classifier'        => 'puppet:activities_classifier',
+  'pe-console'        => 'puppet:activities_console',
+  'code-manager'      => 'puppet:activities_code_manager'
 }
 
 @settings_file = "#{@confdir}/settings.yaml"

@@ -231,12 +231,13 @@ PE Customers can install the [`puppetlabs-pe_event_forwarding`](https://forge.pu
 1. See the documenation for [`puppetlabs-pe_event_forwarding`](https://forge.puppet.com/modules/puppetlabs/pe_event_forwarding) for details on installing and configuring that module. That module will need to be installed and configured before moving on to the next step.
 2. Set the `events_reporting_enabled` parameter to `true`.
 
-By default the `event_types` parameter is configured to send all event types. You can choose which event types to send by setting this parameter to one or more of `orchestrator`, `rbac`, `classifier`, `pe-console`, or `code-manager`.
+By default the `event_types` parameter is configured to send all event types. You can choose which event types to send by setting this parameter to one or more of `orchestrator`, `orchestrator_plan`, `rbac`, `classifier`, `pe-console`, or `code-manager`.
 
 ### Filtering Event Data
 
 To filter the event data, one can set the following parameters:
 * `orchestrator_data_filter`
+* `orchestrator_plan_data_filter`
 * `rbac_data_filter`
 * `classifier_data_filter`
 * `pe_console_data_filter`

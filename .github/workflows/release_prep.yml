@@ -23,7 +23,7 @@ jobs:
       run: gem update --system 3.1.0
 
     - name: Clone repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v6
       with:
         ref: ${{ env.GITHUB_BRANCH }}
         # Needed to fetch all the tags

@@ -1,0 +1,15 @@
+{
+  "description": "Download and install Puppet Enterprise on a target node",
+  "input_method": "environment",
+  "private": true,
+  "parameters": {
+    "url": {
+      "description": "The full HTTPS URL to the PE installer tarball",
+      "type": "String[1]"
+    },
+    "console_password": {
+      "description": "The PE console admin password",
+      "type": "String[1]"
+    }
+  }
+}

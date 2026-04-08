@@ -3,10 +3,10 @@ fixtures:
   forge_modules:
     ruby_task_helper:
       repo: "puppetlabs/ruby_task_helper"
-      ref: "0.5.1"
+      ref: "1.0.0"
     inifile:
       repo: "puppetlabs/inifile"
-      ref: "4.2.0"
+      ref: "6.1.0"
   repositories:
     stdlib: 'https://github.com/puppetlabs/puppetlabs-stdlib'
     translate: 'https://github.com/puppetlabs/puppetlabs-translate'
@@ -15,4 +15,3 @@ fixtures:
     provision: 'https://github.com/puppetlabs/provision'
     puppet_conf: 'https://github.com/puppetlabs/puppet_conf'
     pe_event_forwarding: 'https://github.com/puppetlabs/puppetlabs-pe_event_forwarding'
-    deploy_pe: 'https://github.com/jarretlavallee/puppet-deploy_pe'

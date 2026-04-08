@@ -7,11 +7,11 @@ jobs:
     name: "Setup Test Matrix"
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.build-matrix.outputs.matrix }}
+      matrix: ${{ steps.get-matrix.outputs.matrix }}
 
     steps:
     - name: Checkout Source
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       if: ${{ github.repository_owner == 'puppetlabs' }}
 
     - name: Activate Ruby 3.1
@@ -30,23 +30,16 @@ jobs:
     - name: Get Test Matrix
       id: get-matrix
       run: |
-        bundle exec matrix_from_metadata_v3
-    - name: Set nightly releases
-      id: nightly_release
-      run: |
-        out=$(echo '${{ steps.get-matrix.outputs.matrix }}' | jq -c '.collection')
-        echo "latest=$out" >> $GITHUB_OUTPUT
-    - name: Setup Spec Test Matrix
-      id: set-matrix
-      run: |
-        echo "matrix={\"platforms\":[\"rhel-7\",\"rhel-9\"]}" >> $GITHUB_OUTPUT
-    - name: Setup Acceptance Test Matrix
-      id: build-matrix
-      run: |
-        out=$(echo '${{ steps.set-matrix.outputs.matrix }}' | jq -c --argjson nightly '${{ steps.nightly_release.outputs.latest }}' '.collection += $nightly') 
-        echo "matrix=$out" >> $GITHUB_OUTPUT
+        bundle exec matrix_from_metadata_v3 \
+        --provision-exclude docker \
+        --arch-exclude arm \
+        --platform-exclude almalinux \
+        --platform-exclude rocky \
+        --platform-exclude sles \
+        --platform-exclude redhat-8 \
+        --platform-exclude 'ubuntu-(20|24).04'
   Integration:
-    name: "${{matrix.platforms}}, ${{matrix.collection}}"
+    name: "${{matrix.platforms.label}}, ${{matrix.collection}}"
     needs:
       - setup_matrix
     if: ${{ needs.setup_matrix.outputs.matrix != '{}' }}
@@ -55,10 +48,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{fromJson(needs.setup_matrix.outputs.matrix)}}
-
+    env:
+      SPLUNK_CI_URL: ${{ secrets.SPLUNK_CI_URL }}
+      SPLUNK_CI_USER: ${{ secrets.SPLUNK_CI_USER }}
+      SPLUNK_CI_PASS: ${{ secrets.SPLUNK_CI_PASS }}
+      SPLUNK_CI_HEC_TOKEN: ${{ secrets.SPLUNK_CI_HEC_TOKEN }}
+      SPLUNK_CI_HEC_CA: ${{ secrets.SPLUNK_CI_HEC_CA }}
+      SPLUNK_CI_IP: ${{ secrets.SPLUNK_CI_IP }}
     steps:
     - name: Checkout Source
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
 
     - name: Activate Ruby 3.1
       uses: ruby/setup-ruby@v1
@@ -78,7 +79,7 @@ jobs:
         echo ::endgroup::
     - name: Provision test environment
       run: |
-        bundle exec bolt --modulepath spec/fixtures/modules plan run splunk_hec::acceptance::provision_machines using='provision_service' image='${{ matrix.platforms }}'
+        bundle exec bolt --modulepath spec/fixtures/modules plan run splunk_hec::acceptance::provision_machines using='provision_service' image='${{ matrix.platforms.image }}'
         echo ::group::=== REQUEST ===
         cat request.json || true
         echo
@@ -96,7 +97,7 @@ jobs:
         echo INVENTORY_PATH=$FILE >> $GITHUB_ENV
     - name: Install server
       run: |
-        bundle exec bolt --modulepath spec/fixtures/modules plan run splunk_hec::acceptance::server_setup puppet_version='${{ matrix.collection }}' -i ./$INVENTORY_PATH --stream
+        bundle exec bolt --modulepath spec/fixtures/modules plan run splunk_hec::acceptance::server_setup puppet_version='${{ matrix.collection }}' splunk_url="$SPLUNK_CI_URL" splunk_ip="$SPLUNK_CI_IP" -i ./$INVENTORY_PATH --stream
     - name: Install module
       run: |
         bundle exec rake 'litmus:install_module'
