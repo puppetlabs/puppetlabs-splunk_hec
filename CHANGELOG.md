@@ -4,7 +4,11 @@ All notable changes to this project will be documented in this file. The format 
 
 ## [Unreleased](https://github.com/puppetlabs/puppetlabs-splunk_hec)
 
-[Current Diff](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v2.1.0..main)
+[Current Diff](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v2.2.0..main)
+
+## [2.2.0](https://github.com/puppetlabs/puppetlabs-splunk_hec/tree/v2.2.0) (2026-04-09)
+
+[Full Changelog](https://github.com/puppetlabs/puppetlabs-splunk_hec/compare/v2.1.0..v2.2.0)
 
 ### Added
 
