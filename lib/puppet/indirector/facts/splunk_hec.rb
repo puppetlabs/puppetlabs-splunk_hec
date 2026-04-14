@@ -60,7 +60,26 @@ class Puppet::Node::Facts::Splunk_hec < Puppet::Node::Facts::Yaml
                 final_block = block_list.reject { |k| hardcoded.include?(k) }
                 incoming_facts.reject { |k, _v| final_block.include?(k) }
               else
-                incoming_facts.select { |k, _v| allow_list.include?(k) }
+                selected = {}
+
+                allow_list.each do |path|
+                  parts    = path.split('.')
+                  top_key  = parts.first
+                  sub_keys = parts[1..]
+
+                  value = incoming_facts.dig(*parts)
+                  next if value.nil?
+
+                  nested = sub_keys.reverse.reduce(value) { |acc, k| { k => acc } }
+
+                  selected[top_key] = if selected.key?(top_key) && selected[top_key].is_a?(Hash)
+                                        selected[top_key].merge(nested)
+                                      else
+                                        nested
+                                      end
+                end
+
+                selected
               end
 
       facts['trusted'] = get_trusted_info(request.node)
