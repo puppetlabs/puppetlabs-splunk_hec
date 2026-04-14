@@ -10,6 +10,7 @@
 #   Note: The value of the token is converted to Puppet's Sensitive data type during catalog application.
 # @param [Array] facts_allowlist
 #   The list of facts that will be collected in the report. To collect all facts available add the special value 'all.facts'.
+#   Individual sub-keys of structured facts can be selected using dot-notation (e.g. 'networking.ip' instead of the full 'networking' fact).
 # @param [Boolean] enable_reports
 #   Adds splunk_hec to the list of report processors
 # @param [Boolean] record_event
