@@ -3,6 +3,8 @@ require 'puppet/node/facts'
 require 'puppet/indirector/facts/splunk_hec'
 
 describe Puppet::Node::Facts::Splunk_hec do
+  subject(:indirector) { described_class.new }
+
   let(:settings_hash) do
     {
       'url'             => 'https://splunk.example.com',
@@ -37,8 +39,6 @@ describe Puppet::Node::Facts::Splunk_hec do
     allow(req).to receive(:environment).and_return('production')
     req
   end
-
-  subject(:indirector) { described_class.new }
 
   before(:each) do
     allow(YAML).to receive(:load_file).with(%r{settings\.yaml}).and_return(settings_hash)
