@@ -60,6 +60,19 @@ jobs:
             puts "echo SPLUNK_URI=#{t.find { |x| x.dig("vars", "role") == "splunk_node" }["uri"]} >> $GITHUB_ENV"
           ' "$FILE")"
 
+      - name: Wait for SSH on both VMs
+        run: |
+          b() { bundle exec bolt --modulepath spec/fixtures/modules "$@" -i "./$INVENTORY_PATH"; }
+          for uri in "$SERVER_URI" "$SPLUNK_URI"; do
+            ready=no
+            for i in $(seq 1 24); do
+              if b command run 'true' --targets "$uri" >/dev/null 2>&1; then ready=yes; break; fi
+              echo "waiting for SSH on $uri (attempt $i)"; sleep 10
+            done
+            echo "SSH ready on $uri: $ready"
+            [ "$ready" = yes ] || exit 1
+          done
+
       - name: Record node identity (FQDN, private IP, resources)
         run: |
           b() { bundle exec bolt --modulepath spec/fixtures/modules "$@" -i "./$INVENTORY_PATH"; }
@@ -86,6 +99,9 @@ jobs:
             echo "::endgroup::"
             fqdn=$(b command run 'hostname -f' --targets "$uri" --format json | jq -r '.items[0].value.stdout' | tr -d '[:space:]')
             priv=$(b command run "curl -s -m 5 -H 'Metadata-Flavor: Google' http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/ip" --targets "$uri" --format json | jq -r '.items[0].value.stdout' | tr -d '[:space:]')
+            for v in "$fqdn" "$priv"; do
+              if [ -z "$v" ] || [ "$v" = null ]; then echo "missing FQDN or private IP for $role"; exit 1; fi
+            done
             echo "${role}_FQDN=$fqdn" >> "$GITHUB_ENV"
             echo "${role}_PRIV=$priv" >> "$GITHUB_ENV"
           done
@@ -102,12 +118,20 @@ jobs:
           }
           # Plain HTTP listeners on the Splunk node, detached so they outlive the bolt session.
           b command run 'for p in 8088 8089; do setsid nohup python3 -m http.server $p --bind 0.0.0.0 >/dev/null 2>&1 < /dev/null & done; sleep 2; ss -ltn | grep -E ":(8088|8089)"' --targets "$SPLUNK_URI"
-          check "PE server resolves Splunk FQDN ($SPLUNK_FQDN)" b command run "getent hosts $SPLUNK_FQDN" --targets "$SERVER_URI"
-          for port in 8088 8089; do
-            check "PE server -> Splunk FQDN :$port"       b command run "curl -sS -m 8 -o /dev/null -w '%{http_code}\n' http://$SPLUNK_FQDN:$port/" --targets "$SERVER_URI"
-            check "PE server -> Splunk private IP :$port" b command run "curl -sS -m 8 -o /dev/null -w '%{http_code}\n' http://$SPLUNK_PRIV:$port/" --targets "$SERVER_URI"
-            check "PE server -> Splunk public IP :$port"  b command run "curl -sS -m 8 -o /dev/null -w '%{http_code}\n' http://${SPLUNK_URI%%:*}:$port/" --targets "$SERVER_URI"
-          done
+          probe() { # phase label
+            check "[$1] PE server resolves Splunk FQDN ($SPLUNK_FQDN)" b command run "getent hosts $SPLUNK_FQDN" --targets "$SERVER_URI"
+            for port in 8088 8089; do
+              check "[$1] PE server -> Splunk FQDN :$port"       b command run "curl -sS -m 8 -o /dev/null -w '%{http_code}\n' http://$SPLUNK_FQDN:$port/" --targets "$SERVER_URI"
+              check "[$1] PE server -> Splunk private IP :$port" b command run "curl -sS -m 8 -o /dev/null -w '%{http_code}\n' http://$SPLUNK_PRIV:$port/" --targets "$SERVER_URI"
+              check "[$1] PE server -> Splunk public IP :$port"  b command run "curl -sS -m 8 -o /dev/null -w '%{http_code}\n' http://${SPLUNK_URI%%:*}:$port/" --targets "$SERVER_URI"
+            done
+          }
+          probe "firewalld as provisioned"
+          # If firewalld is running on the Splunk node, open the ports (runtime only) and probe again.
+          # A pass here that failed above means the host firewall, not the VPC, was blocking.
+          check "Splunk node firewalld state" b command run 'systemctl is-active firewalld; firewall-cmd --list-all 2>&1 | head -20' --targets "$SPLUNK_URI"
+          b command run 'command -v firewall-cmd >/dev/null && firewall-cmd --add-port=8088/tcp --add-port=8089/tcp || true' --targets "$SPLUNK_URI" || true
+          probe "ports opened in firewalld"
           b command run 'pkill -f "http.server" || true' --targets "$SPLUNK_URI" || true
 
       - name: Install PE on the server VM
