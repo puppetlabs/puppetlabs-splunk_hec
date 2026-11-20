@@ -20,3 +20,12 @@ splunk:
     port: 8088
     token: abcd1234
   smartstore: null
+  # Splunk refuses to run searches when the free space on the dispatch partition drops below
+  # minFreeSpace (default 5000 MB). The small CI VMs fall under that once the image is pulled.
+  conf:
+    - key: server
+      value:
+        directory: /opt/splunk/etc/system/local
+        content:
+          diskUsage:
+            minFreeSpace: 1000

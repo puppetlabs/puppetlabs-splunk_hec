@@ -143,6 +143,27 @@ jobs:
           b script run spec/support/acceptance/start_splunk_instance.sh --targets "$SPLUNK_URI"
           b command run 'curl -sk -m 15 https://localhost:8088/services/collector/health; echo' --targets "$SPLUNK_URI"
 
+      - name: Splunk sanity check (disk, HEC send, search)
+        run: |
+          b() { bundle exec bolt --modulepath spec/fixtures/modules "$@" -i "./$INVENTORY_PATH"; }
+          cat > sanity.sh <<'EOF'
+          #!/bin/bash
+          echo "--- host disk"; df -h / 2>&1; docker system df 2>&1
+          echo "--- container disk"; docker exec splunk-enterprise-1 df -h /opt/splunk/var/run/splunk/dispatch /opt/splunk/var/lib/splunk 2>&1
+          echo "--- minFreeSpace as Splunk sees it"
+          docker exec splunk-enterprise-1 /opt/splunk/bin/splunk btool server list diskUsage --debug 2>&1 | head -10
+          echo "--- send one event over HEC"
+          curl -sk -H 'Authorization: Splunk abcd1234' -d '{"event":"sanity","sourcetype":"puppet:summary","host":"sanity-host"}' https://localhost:8088/services/collector/event; echo
+          sleep 15
+          echo "--- search for it"
+          curl -sk -u admin:piepiepie https://localhost:8089/services/search/v2/jobs/export -d output_mode=json \
+            -d search='search index=* sourcetype="puppet:summary" host="sanity-host" earliest=-10m | stats count'; echo
+          EOF
+          chmod +x sanity.sh
+          out=$(b script run ./sanity.sh --targets "$SPLUNK_URI" --format json | jq -r '.items[0].value.stdout')
+          echo "$out"
+          echo "$out" | grep -q '"count":"1"' || { echo "Splunk search sanity check failed"; exit 1; }
+
       - name: Install PE on both server VMs
         run: |
           bundle exec bolt --modulepath spec/fixtures/modules plan run splunk_hec::acceptance::server_setup \
