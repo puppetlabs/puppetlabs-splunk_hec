@@ -1,28 +1,39 @@
-name: "Splunk CI Network Test"
+name: "Splunk CI End to End Test"
 
-# Temporary test workflow. Answers four questions about replacing the persistent Splunk
-# CI server with a Splunk container on a second provisioned VM:
-#   1. Can the two provisioned VMs reach each other on 8088 (HEC) and 8089 (mgmt)?
-#   2. What is each node's FQDN / private IP, and does the PE server resolve the Splunk node's FQDN?
-#   3. Does the Splunk container start on the VM size we get, and does the HEC cert
-#      (signed by the PE CA, issued for the Splunk node's FQDN) validate?
-#   4. Does an authenticated HEC event from the PE server succeed?
+# Temporary test workflow. Proves the acceptance suite can run against a Splunk
+# container on a freshly provisioned VM instead of the persistent Splunk CI server:
+#   - provisions two PE servers and one shared Splunk VM through provision_service
+#   - issues the Splunk HEC cert from a CA generated in this job, so every PE server
+#     can trust it (each PE server has its own CA, so a PE-CA-signed cert would only
+#     validate on one of them)
+#   - installs PE on both servers, installs the module, and runs the acceptance
+#     tests against each server using the same SPLUNK_CI_* settings CI already uses
 # Nothing here uses repository secrets.
 
 on:
   pull_request:
 
 jobs:
-  network_test:
-    name: "PE: ${{ matrix.pe_image }} / Splunk: ${{ matrix.splunk_image }}"
+  e2e:
+    name: "PE: ${{ matrix.pe_image_1 }} + ${{ matrix.pe_image_2 }} / Splunk: ${{ matrix.splunk_image }}"
     runs-on: ubuntu-latest
-    timeout-minutes: 75
+    timeout-minutes: 150
     strategy:
       fail-fast: false
       matrix:
         include:
-          - pe_image: almalinux-cloud/almalinux-8
+          - pe_image_1: almalinux-cloud/almalinux-8
+            pe_image_2: ubuntu-2204-lts
             splunk_image: rhel-9
+    env:
+      PE_VERSION: "2023.8.13-puppet_enterprise"
+      # Test settings consumed by spec/spec_helper_acceptance_local.rb. SPLUNK_CI_URL,
+      # SPLUNK_CI_HEC_CA and SPLUNK_CI_IP are added below once the Splunk VM exists.
+      SPLUNK_CI_USER: admin
+      SPLUNK_CI_PASS: piepiepie
+      SPLUNK_CI_HEC_TOKEN: abcd1234
+      # The container names its HEC input splunk_hec_token, not splunk_hec_ci.
+      SPLUNK_HEC_SOURCE: "http:splunk_hec_token"
 
     steps:
       - name: Checkout Source
@@ -37,11 +48,13 @@ jobs:
       - name: Create the fixtures directory
         run: bundle exec rake spec_prep
 
-      - name: Provision PE server VM and Splunk VM
+      - name: Provision two PE server VMs and one Splunk VM
         run: |
           set -x
           bundle exec bolt --modulepath spec/fixtures/modules task run provision::provision_service \
-            --targets localhost action=provision platform='${{ matrix.pe_image }}' vars='role: server'
+            --targets localhost action=provision platform='${{ matrix.pe_image_1 }}' vars='role: server'
+          bundle exec bolt --modulepath spec/fixtures/modules task run provision::provision_service \
+            --targets localhost action=provision platform='${{ matrix.pe_image_2 }}' vars='role: server'
           bundle exec bolt --modulepath spec/fixtures/modules task run provision::provision_service \
             --targets localhost action=provision platform='${{ matrix.splunk_image }}' vars='role: splunk_node'
           set +x
@@ -56,14 +69,19 @@ jobs:
           echo "INVENTORY_PATH=$FILE" >> "$GITHUB_ENV"
           eval "$(ruby -ryaml -e '
             t = YAML.load_file(ARGV[0])["groups"].find { |g| g["name"] == "ssh_nodes" }["targets"]
-            puts "echo SERVER_URI=#{t.find { |x| x.dig("vars", "role") == "server" }["uri"]} >> $GITHUB_ENV"
+            servers = t.select { |x| x.dig("vars", "role") == "server" }.map { |x| x["uri"] }
+            puts "echo SERVER1_URI=#{servers[0]} >> $GITHUB_ENV"
+            puts "echo SERVER2_URI=#{servers[1]} >> $GITHUB_ENV"
             puts "echo SPLUNK_URI=#{t.find { |x| x.dig("vars", "role") == "splunk_node" }["uri"]} >> $GITHUB_ENV"
           ' "$FILE")"
 
-      - name: Wait for SSH on both VMs
+      - name: Configure inventory
+        run: bundle exec rake acceptance:configure_inventory
+
+      - name: Wait for SSH on all VMs
         run: |
           b() { bundle exec bolt --modulepath spec/fixtures/modules "$@" -i "./$INVENTORY_PATH"; }
-          for uri in "$SERVER_URI" "$SPLUNK_URI"; do
+          for uri in "$SERVER1_URI" "$SERVER2_URI" "$SPLUNK_URI"; do
             ready=no
             for i in $(seq 1 24); do
               if b command run 'true' --targets "$uri" >/dev/null 2>&1; then ready=yes; break; fi
@@ -79,21 +97,15 @@ jobs:
           cat > node_info.sh <<'EOF'
           #!/bin/bash
           echo "hostname -f: $(hostname -f)"
-          echo "hostname -I: $(hostname -I 2>/dev/null)"
           MD=http://metadata.google.internal/computeMetadata/v1/instance
-          echo "metadata hostname: $(curl -s -m 5 -H 'Metadata-Flavor: Google' $MD/hostname)"
           echo "metadata private ip: $(curl -s -m 5 -H 'Metadata-Flavor: Google' $MD/network-interfaces/0/ip)"
-          echo "metadata network: $(curl -s -m 5 -H 'Metadata-Flavor: Google' $MD/network-interfaces/0/network)"
           echo "metadata machine-type: $(curl -s -m 5 -H 'Metadata-Flavor: Google' $MD/machine-type)"
           echo "nproc: $(nproc)"
-          free -m
-          df -h /
-          echo "firewalld: $(systemctl is-active firewalld 2>&1)"
-          echo "python3: $(command -v python3)"
+          free -m | sed -n 1,2p
           EOF
           chmod +x node_info.sh
-          for role in SERVER SPLUNK; do
-            uri_var="${role}_URI"; uri="${!uri_var}"
+          for pair in "SERVER1:$SERVER1_URI" "SERVER2:$SERVER2_URI" "SPLUNK:$SPLUNK_URI"; do
+            role="${pair%%:*}"; uri="${pair#*:}"
             echo "::group::=== $role node $uri ==="
             b script run ./node_info.sh --targets "$uri" || true
             echo "::endgroup::"
@@ -106,88 +118,62 @@ jobs:
             echo "${role}_PRIV=$priv" >> "$GITHUB_ENV"
           done
 
-      - name: "Check 1: raw connectivity (plain listeners, before any install)"
+      - name: Generate a test CA and a Splunk HEC cert for the Splunk FQDN
+        run: |
+          openssl genrsa -out ca.key 2048
+          openssl req -x509 -new -nodes -key ca.key -sha256 -days 2 -subj "/CN=splunk-hec-ci-test-ca" -out ca.pem
+          openssl genrsa -out splunk.key 2048
+          openssl req -new -key splunk.key -subj "/CN=$SPLUNK_FQDN" -out splunk.csr
+          printf 'subjectAltName=DNS:%s,IP:%s\nbasicConstraints=CA:FALSE\nkeyUsage=digitalSignature,keyEncipherment\nextendedKeyUsage=serverAuth\n' \
+            "$SPLUNK_FQDN" "$SPLUNK_PRIV" > ext.cnf
+          openssl x509 -req -in splunk.csr -CA ca.pem -CAkey ca.key -CAcreateserial -out splunk.crt -days 2 -sha256 -extfile ext.cnf
+          # Splunk's server.pem is the cert followed by the private key.
+          cat splunk.crt splunk.key > puppet_hec.pem
+          # Settings the acceptance tests read to reach and trust the Splunk instance.
+          echo "SPLUNK_CI_URL=https://$SPLUNK_FQDN" >> "$GITHUB_ENV"
+          echo "SPLUNK_CI_IP=$SPLUNK_PRIV" >> "$GITHUB_ENV"
+          echo "SPLUNK_CI_HEC_CA=$(base64 -w0 ca.pem)" >> "$GITHUB_ENV"
+
+      - name: Start Splunk in Docker on the Splunk VM
         run: |
           b() { bundle exec bolt --modulepath spec/fixtures/modules "$@" -i "./$INVENTORY_PATH"; }
-          : > results.txt
-          check() { # name, then the bolt command
-            local name="$1"; shift
-            echo "::group::$name"
-            if "$@"; then echo "PASS  $name" >> results.txt; else echo "FAIL  $name" >> results.txt; fi
-            echo "::endgroup::"
-          }
-          # Plain HTTP listeners on the Splunk node, detached so they outlive the bolt session.
-          b command run 'for p in 8088 8089; do setsid nohup python3 -m http.server $p --bind 0.0.0.0 >/dev/null 2>&1 < /dev/null & done; sleep 2; ss -ltn | grep -E ":(8088|8089)"' --targets "$SPLUNK_URI"
-          probe() { # phase label
-            check "[$1] PE server resolves Splunk FQDN ($SPLUNK_FQDN)" b command run "getent hosts $SPLUNK_FQDN" --targets "$SERVER_URI"
-            for port in 8088 8089; do
-              check "[$1] PE server -> Splunk FQDN :$port"       b command run "curl -sS -m 8 -o /dev/null -w '%{http_code}\n' http://$SPLUNK_FQDN:$port/" --targets "$SERVER_URI"
-              check "[$1] PE server -> Splunk private IP :$port" b command run "curl -sS -m 8 -o /dev/null -w '%{http_code}\n' http://$SPLUNK_PRIV:$port/" --targets "$SERVER_URI"
-              check "[$1] PE server -> Splunk public IP :$port"  b command run "curl -sS -m 8 -o /dev/null -w '%{http_code}\n' http://${SPLUNK_URI%%:*}:$port/" --targets "$SERVER_URI"
-            done
-          }
-          probe "firewalld as provisioned"
-          # If firewalld is running on the Splunk node, open the ports (runtime only) and probe again.
-          # A pass here that failed above means the host firewall, not the VPC, was blocking.
-          check "Splunk node firewalld state" b command run 'systemctl is-active firewalld; firewall-cmd --list-all 2>&1 | head -20' --targets "$SPLUNK_URI"
-          b command run 'command -v firewall-cmd >/dev/null && firewall-cmd --add-port=8088/tcp --add-port=8089/tcp || true' --targets "$SPLUNK_URI" || true
-          probe "ports opened in firewalld"
-          b command run 'pkill -f "http.server" || true' --targets "$SPLUNK_URI" || true
-
-      - name: Install PE on the server VM
-        run: |
-          bundle exec bolt --modulepath spec/fixtures/modules plan run splunk_hec::acceptance::server_setup \
-            puppet_version='2023.8.13-puppet_enterprise' -i "./$INVENTORY_PATH" --stream
-
-      - name: Start Splunk in Docker on the Splunk VM (cert issued for the Splunk FQDN)
-        run: |
-          b() { bundle exec bolt --modulepath spec/fixtures/modules "$@" -i "./$INVENTORY_PATH"; }
-          b script run spec/support/acceptance/generate_splunk_cert.sh "$SPLUNK_FQDN" --targets "$SERVER_URI" --format json \
-            | jq -r '.items[0].value.stdout' > puppet_hec.pem
-          test -s puppet_hec.pem
           b file upload ./spec/support/acceptance/splunk /tmp/splunk --targets "$SPLUNK_URI"
           b file upload ./puppet_hec.pem /tmp/splunk/puppet_hec.pem --targets "$SPLUNK_URI"
-          rm -f puppet_hec.pem
+          rm -f puppet_hec.pem splunk.key ca.key
           b script run spec/support/acceptance/start_splunk_instance.sh --targets "$SPLUNK_URI"
+          b command run 'curl -sk -m 15 https://localhost:8088/services/collector/health; echo' --targets "$SPLUNK_URI"
 
-      - name: "Check 2: Splunk + HEC reachable and cert valid from the PE server"
+      - name: Install PE on both server VMs
         run: |
-          b() { bundle exec bolt --modulepath spec/fixtures/modules "$@" -i "./$INVENTORY_PATH"; }
-          check() {
-            local name="$1"; shift
-            echo "::group::$name"
-            if "$@"; then echo "PASS  $name" >> results.txt; else echo "FAIL  $name" >> results.txt; fi
-            echo "::endgroup::"
-          }
-          CA='$(puppet config print localcacert)'
-          check "HEC health, FQDN, verified against PE CA" \
-            b command run "curl -sS -m 15 --cacert $CA https://$SPLUNK_FQDN:8088/services/collector/health" --targets "$SERVER_URI"
-          check "HEC health, private IP, -k (isolates DNS from firewall)" \
-            b command run "curl -sSk -m 15 https://$SPLUNK_PRIV:8088/services/collector/health" --targets "$SERVER_URI"
-          check "Mgmt API 8089, FQDN, admin login" \
-            b command run "curl -sSk -m 15 -u admin:piepiepie 'https://$SPLUNK_FQDN:8089/services/server/info?output_mode=json' | head -c 300; echo" --targets "$SERVER_URI"
-          check "HEC authenticated event send (token abcd1234)" \
-            b command run "curl -sS -m 15 --cacert $CA -H 'Authorization: Splunk abcd1234' -d '{\"event\":\"ci-network-test\"}' https://$SPLUNK_FQDN:8088/services/collector/event" --targets "$SERVER_URI"
+          bundle exec bolt --modulepath spec/fixtures/modules plan run splunk_hec::acceptance::server_setup \
+            puppet_version="$PE_VERSION" -i "./$INVENTORY_PATH" --stream
+
+      - name: Install the module on both PE servers
+        run: |
+          bundle exec rake "litmus:install_module[$SERVER1_URI]"
+          bundle exec rake "litmus:install_module[$SERVER2_URI]"
+
+      - name: Run acceptance tests against both PE servers
+        id: tests
+        run: bundle exec rake acceptance:ci_run_tests
 
       - name: Splunk container diagnostics
         if: ${{ always() }}
         continue-on-error: true
         run: |
           b() { bundle exec bolt --modulepath spec/fixtures/modules "$@" -i "./$INVENTORY_PATH"; }
-          b command run 'docker ps -a; docker stats --no-stream; free -m; docker logs --tail 40 splunk-enterprise-1 2>&1 || docker logs --tail 40 $(docker ps -aq | head -1) 2>&1' --targets "$SPLUNK_URI"
+          b command run 'docker ps -a; docker stats --no-stream; docker logs --tail 40 splunk-enterprise-1 2>&1 | tail -40' --targets "$SPLUNK_URI"
 
       - name: Summary
         if: ${{ always() }}
         run: |
           {
-            echo "### Splunk CI network test"
+            echo "### Splunk CI end to end test"
             echo ""
-            echo "PE server: \`$SERVER_FQDN\` (private \`$SERVER_PRIV\`)  "
-            echo "Splunk node: \`$SPLUNK_FQDN\` (private \`$SPLUNK_PRIV\`)"
-            echo ""
-            echo '```'
-            cat results.txt 2>/dev/null || echo "no results recorded"
-            echo '```'
+            echo "PE server 1: \`${SERVER1_FQDN:-unknown}\` (${{ matrix.pe_image_1 }})  "
+            echo "PE server 2: \`${SERVER2_FQDN:-unknown}\` (${{ matrix.pe_image_2 }})  "
+            echo "Splunk node: \`${SPLUNK_FQDN:-unknown}\` (${{ matrix.splunk_image }})  "
+            echo "Acceptance tests: **${{ steps.tests.outcome }}**"
           } | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Remove test environment

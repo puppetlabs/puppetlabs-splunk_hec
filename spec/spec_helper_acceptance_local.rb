@@ -211,6 +211,10 @@ def get_splunk_report(earliest, latest, sourcetype = 'puppet:summary', host: hos
 end
 
 def splunk_hec_source
+  # SPLUNK_HEC_SOURCE overrides the default so a Splunk container provisioned by CI
+  # (HEC input named splunk_hec_token) can be used through the SPLUNK_CI_* settings.
+  return ENV['SPLUNK_HEC_SOURCE'] unless ENV['SPLUNK_HEC_SOURCE'].to_s.empty?
+
   (ENV['SPLUNK_CI_URL'] && !ENV['SPLUNK_CI_URL'].empty?) ? 'http:splunk_hec_ci' : 'http:splunk_hec_token'
 end
 
