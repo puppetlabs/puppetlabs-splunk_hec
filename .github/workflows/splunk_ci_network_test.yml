@@ -157,6 +157,49 @@ jobs:
         id: tests
         run: bundle exec rake acceptance:ci_run_tests
 
+      - name: Diagnose missing events
+        if: ${{ always() && steps.tests.outcome == 'failure' }}
+        continue-on-error: true
+        run: |
+          b() { bundle exec bolt --modulepath spec/fixtures/modules "$@" -i "./$INVENTORY_PATH"; }
+          cat > diag_splunk.sh <<'EOF'
+          #!/bin/bash
+          S=https://localhost:8089
+          A='-u admin:piepiepie'
+          echo "--- date (host / container)"; date -u; docker exec splunk-enterprise-1 date -u
+          echo "--- everything indexed in the last 3h, by index/sourcetype/host/source"
+          curl -sk $A $S/services/search/v2/jobs/export -d output_mode=json -d search='search index=* earliest=-3h | stats count by index, sourcetype, host, source' | head -c 4000; echo
+          echo "--- last 3 raw events of any kind"
+          curl -sk $A $S/services/search/v2/jobs/export -d output_mode=json -d search='search index=* earliest=-3h | head 3 | table _time index sourcetype host source _raw' | head -c 3000; echo
+          echo "--- HEC inputs"
+          curl -sk $A "$S/services/data/inputs/http?output_mode=json&count=0" | head -c 3000; echo
+          echo "--- HEC lines in splunkd.log"
+          docker exec splunk-enterprise-1 bash -c "grep -i -E 'HttpInputDataHandler|HttpEventCollector|ExecProcessor.*hec' /opt/splunk/var/log/splunk/splunkd.log | tail -25"
+          EOF
+          cat > diag_pe.sh <<'EOF'
+          #!/bin/bash
+          echo "--- date: $(date -u)  fqdn: $(facter fqdn 2>/dev/null)"
+          echo "--- /etc/puppetlabs/puppet/splunk_hec.yaml"; cat /etc/puppetlabs/puppet/splunk_hec.yaml 2>&1 | head -40
+          echo "--- /etc/puppetlabs/puppet/splunk_hec/"; ls -l /etc/puppetlabs/puppet/splunk_hec/ 2>&1
+          echo "--- server reports setting"; puppet config print reports --section server 2>&1
+          echo "--- splunk lines in puppetserver.log"; grep -i splunk /var/log/puppetlabs/puppetserver/puppetserver.log | tail -30
+          echo "--- direct HEC send from this server with the module CLI"
+          cat /etc/puppetlabs/code/environments/production/modules/splunk_hec/examples/orchestrator_metrics.json | puppet splunk_hec --sourcetype puppet:summary --saved_report 2>&1 | tail -5; echo "exit=$?"
+          EOF
+          chmod +x diag_splunk.sh diag_pe.sh
+          echo "::group::=== Splunk node: what was indexed ==="
+          b script run ./diag_splunk.sh --targets "$SPLUNK_URI" || true
+          echo "::endgroup::"
+          for uri in "$SERVER1_URI" "$SERVER2_URI"; do
+            echo "::group::=== PE server $uri ==="
+            b script run ./diag_pe.sh --targets "$uri" || true
+            echo "::endgroup::"
+          done
+          echo "::group::=== Splunk node: indexed after the direct sends above ==="
+          sleep 10
+          b command run "curl -sk -u admin:piepiepie https://localhost:8089/services/search/v2/jobs/export -d output_mode=json -d search='search index=* sourcetype=\"puppet:summary\" earliest=-10m | stats count by index, host' | head -c 2000; echo" --targets "$SPLUNK_URI" || true
+          echo "::endgroup::"
+
       - name: Splunk container diagnostics
         if: ${{ always() }}
         continue-on-error: true
