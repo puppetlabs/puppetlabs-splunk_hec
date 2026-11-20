@@ -1,0 +1,249 @@
+name: "Splunk CI End to End Test"
+
+# Temporary test workflow. Proves the acceptance suite can run against a Splunk
+# container on a freshly provisioned VM instead of the persistent Splunk CI server:
+#   - provisions two PE servers and one shared Splunk VM through provision_service
+#   - issues the Splunk HEC cert from a CA generated in this job, so every PE server
+#     can trust it (each PE server has its own CA, so a PE-CA-signed cert would only
+#     validate on one of them)
+#   - installs PE on both servers, installs the module, and runs the acceptance
+#     tests against each server using the same SPLUNK_CI_* settings CI already uses
+# Nothing here uses repository secrets.
+
+on:
+  pull_request:
+
+jobs:
+  e2e:
+    name: "PE: ${{ matrix.pe_image_1 }} + ${{ matrix.pe_image_2 }} / Splunk: ${{ matrix.splunk_image }}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - pe_image_1: almalinux-cloud/almalinux-8
+            pe_image_2: ubuntu-2204-lts
+            splunk_image: rhel-9
+    env:
+      PE_VERSION: "2023.8.13-puppet_enterprise"
+      # Test settings consumed by spec/spec_helper_acceptance_local.rb. SPLUNK_CI_URL,
+      # SPLUNK_CI_HEC_CA and SPLUNK_CI_IP are added below once the Splunk VM exists.
+      SPLUNK_CI_USER: admin
+      SPLUNK_CI_PASS: piepiepie
+      SPLUNK_CI_HEC_TOKEN: abcd1234
+      # The container names its HEC input splunk_hec_token, not splunk_hec_ci.
+      SPLUNK_HEC_SOURCE: "http:splunk_hec_token"
+
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v6
+
+      - name: Activate Ruby 3.1
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.1"
+          bundler-cache: true
+
+      - name: Create the fixtures directory
+        run: bundle exec rake spec_prep
+
+      - name: Provision two PE server VMs and one Splunk VM
+        run: |
+          set -x
+          bundle exec bolt --modulepath spec/fixtures/modules task run provision::provision_service \
+            --targets localhost action=provision platform='${{ matrix.pe_image_1 }}' vars='role: server'
+          bundle exec bolt --modulepath spec/fixtures/modules task run provision::provision_service \
+            --targets localhost action=provision platform='${{ matrix.pe_image_2 }}' vars='role: server'
+          bundle exec bolt --modulepath spec/fixtures/modules task run provision::provision_service \
+            --targets localhost action=provision platform='${{ matrix.splunk_image }}' vars='role: splunk_node'
+          set +x
+          if [ -f spec/fixtures/litmus_inventory.yaml ]; then
+            FILE=spec/fixtures/litmus_inventory.yaml
+          else
+            FILE=inventory.yaml
+          fi
+          echo "::group::=== INVENTORY (redacted) ==="
+          sed -e 's/password: .*/password: "[redacted]"/' < "$FILE"
+          echo "::endgroup::"
+          echo "INVENTORY_PATH=$FILE" >> "$GITHUB_ENV"
+          eval "$(ruby -ryaml -e '
+            t = YAML.load_file(ARGV[0])["groups"].find { |g| g["name"] == "ssh_nodes" }["targets"]
+            servers = t.select { |x| x.dig("vars", "role") == "server" }.map { |x| x["uri"] }
+            puts "echo SERVER1_URI=#{servers[0]} >> $GITHUB_ENV"
+            puts "echo SERVER2_URI=#{servers[1]} >> $GITHUB_ENV"
+            puts "echo SPLUNK_URI=#{t.find { |x| x.dig("vars", "role") == "splunk_node" }["uri"]} >> $GITHUB_ENV"
+          ' "$FILE")"
+
+      - name: Configure inventory
+        run: bundle exec rake acceptance:configure_inventory
+
+      - name: Wait for SSH on all VMs
+        run: |
+          b() { bundle exec bolt --modulepath spec/fixtures/modules "$@" -i "./$INVENTORY_PATH"; }
+          for uri in "$SERVER1_URI" "$SERVER2_URI" "$SPLUNK_URI"; do
+            ready=no
+            for i in $(seq 1 24); do
+              if b command run 'true' --targets "$uri" >/dev/null 2>&1; then ready=yes; break; fi
+              echo "waiting for SSH on $uri (attempt $i)"; sleep 10
+            done
+            echo "SSH ready on $uri: $ready"
+            [ "$ready" = yes ] || exit 1
+          done
+
+      - name: Record node identity (FQDN, private IP, resources)
+        run: |
+          b() { bundle exec bolt --modulepath spec/fixtures/modules "$@" -i "./$INVENTORY_PATH"; }
+          cat > node_info.sh <<'EOF'
+          #!/bin/bash
+          echo "hostname -f: $(hostname -f)"
+          MD=http://metadata.google.internal/computeMetadata/v1/instance
+          echo "metadata private ip: $(curl -s -m 5 -H 'Metadata-Flavor: Google' $MD/network-interfaces/0/ip)"
+          echo "metadata machine-type: $(curl -s -m 5 -H 'Metadata-Flavor: Google' $MD/machine-type)"
+          echo "nproc: $(nproc)"
+          free -m | sed -n 1,2p
+          EOF
+          chmod +x node_info.sh
+          for pair in "SERVER1:$SERVER1_URI" "SERVER2:$SERVER2_URI" "SPLUNK:$SPLUNK_URI"; do
+            role="${pair%%:*}"; uri="${pair#*:}"
+            echo "::group::=== $role node $uri ==="
+            b script run ./node_info.sh --targets "$uri" || true
+            echo "::endgroup::"
+            fqdn=$(b command run 'hostname -f' --targets "$uri" --format json | jq -r '.items[0].value.stdout' | tr -d '[:space:]')
+            priv=$(b command run "curl -s -m 5 -H 'Metadata-Flavor: Google' http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/ip" --targets "$uri" --format json | jq -r '.items[0].value.stdout' | tr -d '[:space:]')
+            for v in "$fqdn" "$priv"; do
+              if [ -z "$v" ] || [ "$v" = null ]; then echo "missing FQDN or private IP for $role"; exit 1; fi
+            done
+            echo "${role}_FQDN=$fqdn" >> "$GITHUB_ENV"
+            echo "${role}_PRIV=$priv" >> "$GITHUB_ENV"
+          done
+
+      - name: Generate a test CA and a Splunk HEC cert for the Splunk FQDN
+        run: |
+          openssl genrsa -out ca.key 2048
+          openssl req -x509 -new -nodes -key ca.key -sha256 -days 2 -subj "/CN=splunk-hec-ci-test-ca" -out ca.pem
+          openssl genrsa -out splunk.key 2048
+          openssl req -new -key splunk.key -subj "/CN=$SPLUNK_FQDN" -out splunk.csr
+          printf 'subjectAltName=DNS:%s,IP:%s\nbasicConstraints=CA:FALSE\nkeyUsage=digitalSignature,keyEncipherment\nextendedKeyUsage=serverAuth\n' \
+            "$SPLUNK_FQDN" "$SPLUNK_PRIV" > ext.cnf
+          openssl x509 -req -in splunk.csr -CA ca.pem -CAkey ca.key -CAcreateserial -out splunk.crt -days 2 -sha256 -extfile ext.cnf
+          # Splunk's server.pem is the cert followed by the private key.
+          cat splunk.crt splunk.key > puppet_hec.pem
+          # Settings the acceptance tests read to reach and trust the Splunk instance.
+          echo "SPLUNK_CI_URL=https://$SPLUNK_FQDN" >> "$GITHUB_ENV"
+          echo "SPLUNK_CI_IP=$SPLUNK_PRIV" >> "$GITHUB_ENV"
+          echo "SPLUNK_CI_HEC_CA=$(base64 -w0 ca.pem)" >> "$GITHUB_ENV"
+
+      - name: Start Splunk in Docker on the Splunk VM
+        run: |
+          b() { bundle exec bolt --modulepath spec/fixtures/modules "$@" -i "./$INVENTORY_PATH"; }
+          b file upload ./spec/support/acceptance/splunk /tmp/splunk --targets "$SPLUNK_URI"
+          b file upload ./puppet_hec.pem /tmp/splunk/puppet_hec.pem --targets "$SPLUNK_URI"
+          rm -f puppet_hec.pem splunk.key ca.key
+          b script run spec/support/acceptance/start_splunk_instance.sh --targets "$SPLUNK_URI"
+          b command run 'curl -sk -m 15 https://localhost:8088/services/collector/health; echo' --targets "$SPLUNK_URI"
+
+      - name: Splunk sanity check (disk, HEC send, search)
+        run: |
+          b() { bundle exec bolt --modulepath spec/fixtures/modules "$@" -i "./$INVENTORY_PATH"; }
+          cat > sanity.sh <<'EOF'
+          #!/bin/bash
+          echo "--- host disk"; df -h / 2>&1; docker system df 2>&1
+          echo "--- container disk"; docker exec splunk-enterprise-1 df -h /opt/splunk/var/run/splunk/dispatch /opt/splunk/var/lib/splunk 2>&1
+          echo "--- minFreeSpace as Splunk sees it"
+          docker exec splunk-enterprise-1 /opt/splunk/bin/splunk btool server list diskUsage --debug 2>&1 | head -10
+          echo "--- send one event over HEC"
+          curl -sk -H 'Authorization: Splunk abcd1234' -d '{"event":"sanity","sourcetype":"puppet:summary","host":"sanity-host"}' https://localhost:8088/services/collector/event; echo
+          sleep 15
+          echo "--- search for it"
+          curl -sk -u admin:piepiepie https://localhost:8089/services/search/v2/jobs/export -d output_mode=json \
+            -d search='search index=* sourcetype="puppet:summary" host="sanity-host" earliest=-10m | stats count'; echo
+          EOF
+          chmod +x sanity.sh
+          out=$(b script run ./sanity.sh --targets "$SPLUNK_URI" --format json | jq -r '.items[0].value.stdout')
+          echo "$out"
+          echo "$out" | grep -q '"count":"1"' || { echo "Splunk search sanity check failed"; exit 1; }
+
+      - name: Install PE on both server VMs
+        run: |
+          bundle exec bolt --modulepath spec/fixtures/modules plan run splunk_hec::acceptance::server_setup \
+            puppet_version="$PE_VERSION" -i "./$INVENTORY_PATH" --stream
+
+      - name: Install the module on both PE servers
+        run: |
+          bundle exec rake "litmus:install_module[$SERVER1_URI]"
+          bundle exec rake "litmus:install_module[$SERVER2_URI]"
+
+      - name: Run acceptance tests against both PE servers
+        id: tests
+        run: bundle exec rake acceptance:ci_run_tests
+
+      - name: Diagnose missing events
+        if: ${{ always() && steps.tests.outcome == 'failure' }}
+        continue-on-error: true
+        run: |
+          b() { bundle exec bolt --modulepath spec/fixtures/modules "$@" -i "./$INVENTORY_PATH"; }
+          cat > diag_splunk.sh <<'EOF'
+          #!/bin/bash
+          S=https://localhost:8089
+          A='-u admin:piepiepie'
+          echo "--- date (host / container)"; date -u; docker exec splunk-enterprise-1 date -u
+          echo "--- everything indexed in the last 3h, by index/sourcetype/host/source"
+          curl -sk $A $S/services/search/v2/jobs/export -d output_mode=json -d search='search index=* earliest=-3h | stats count by index, sourcetype, host, source' | head -c 4000; echo
+          echo "--- last 3 raw events of any kind"
+          curl -sk $A $S/services/search/v2/jobs/export -d output_mode=json -d search='search index=* earliest=-3h | head 3 | table _time index sourcetype host source _raw' | head -c 3000; echo
+          echo "--- HEC inputs"
+          curl -sk $A "$S/services/data/inputs/http?output_mode=json&count=0" | head -c 3000; echo
+          echo "--- HEC lines in splunkd.log"
+          docker exec splunk-enterprise-1 bash -c "grep -i -E 'HttpInputDataHandler|HttpEventCollector|ExecProcessor.*hec' /opt/splunk/var/log/splunk/splunkd.log | tail -25"
+          EOF
+          cat > diag_pe.sh <<'EOF'
+          #!/bin/bash
+          echo "--- date: $(date -u)  fqdn: $(facter fqdn 2>/dev/null)"
+          echo "--- /etc/puppetlabs/puppet/splunk_hec.yaml"; cat /etc/puppetlabs/puppet/splunk_hec.yaml 2>&1 | head -40
+          echo "--- /etc/puppetlabs/puppet/splunk_hec/"; ls -l /etc/puppetlabs/puppet/splunk_hec/ 2>&1
+          echo "--- server reports setting"; puppet config print reports --section server 2>&1
+          echo "--- splunk lines in puppetserver.log"; grep -i splunk /var/log/puppetlabs/puppetserver/puppetserver.log | tail -30
+          echo "--- direct HEC send from this server with the module CLI"
+          cat /etc/puppetlabs/code/environments/production/modules/splunk_hec/examples/orchestrator_metrics.json | puppet splunk_hec --sourcetype puppet:summary --saved_report 2>&1 | tail -5; echo "exit=$?"
+          EOF
+          chmod +x diag_splunk.sh diag_pe.sh
+          echo "::group::=== Splunk node: what was indexed ==="
+          b script run ./diag_splunk.sh --targets "$SPLUNK_URI" || true
+          echo "::endgroup::"
+          for uri in "$SERVER1_URI" "$SERVER2_URI"; do
+            echo "::group::=== PE server $uri ==="
+            b script run ./diag_pe.sh --targets "$uri" || true
+            echo "::endgroup::"
+          done
+          echo "::group::=== Splunk node: indexed after the direct sends above ==="
+          sleep 10
+          b command run "curl -sk -u admin:piepiepie https://localhost:8089/services/search/v2/jobs/export -d output_mode=json -d search='search index=* sourcetype=\"puppet:summary\" earliest=-10m | stats count by index, host' | head -c 2000; echo" --targets "$SPLUNK_URI" || true
+          echo "::endgroup::"
+
+      - name: Splunk container diagnostics
+        if: ${{ always() }}
+        continue-on-error: true
+        run: |
+          b() { bundle exec bolt --modulepath spec/fixtures/modules "$@" -i "./$INVENTORY_PATH"; }
+          b command run 'docker ps -a; docker stats --no-stream; docker logs --tail 40 splunk-enterprise-1 2>&1 | tail -40' --targets "$SPLUNK_URI"
+
+      - name: Summary
+        if: ${{ always() }}
+        run: |
+          {
+            echo "### Splunk CI end to end test"
+            echo ""
+            echo "PE server 1: \`${SERVER1_FQDN:-unknown}\` (${{ matrix.pe_image_1 }})  "
+            echo "PE server 2: \`${SERVER2_FQDN:-unknown}\` (${{ matrix.pe_image_2 }})  "
+            echo "Splunk node: \`${SPLUNK_FQDN:-unknown}\` (${{ matrix.splunk_image }})  "
+            echo "Acceptance tests: **${{ steps.tests.outcome }}**"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Remove test environment
+        if: ${{ always() }}
+        continue-on-error: true
+        run: |
+          if [[ -f inventory.yaml || -f spec/fixtures/litmus_inventory.yaml ]]; then
+            bundle exec rake 'litmus:tear_down'
+          fi
