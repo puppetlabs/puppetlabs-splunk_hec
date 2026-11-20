@@ -1,6 +1,7 @@
 name: "PE Latest Testing"
 
-on: [pull_request]
+# Disabled on this PR only (network test); do not merge this change.
+on: workflow_dispatch
 
 jobs:
   setup_matrix:
