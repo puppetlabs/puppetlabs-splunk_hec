@@ -12,8 +12,6 @@
 #   puppet version collection name
 plan splunk_hec::acceptance::oss_server_setup(
   Optional[String] $collection = 'puppetcore8',
-  Optional[String] $splunk_url = undef,
-  Optional[String] $splunk_ip  = undef,
 ) {
   # get server
   $server = get_targets('*').filter |$n| { $n.vars['role'] == 'server' }
@@ -65,12 +63,6 @@ plan splunk_hec::acceptance::oss_server_setup(
 
   run_command('systemctl start puppetserver', $server, '_catch_errors' => true)
   run_command('systemctl enable puppetserver', $server, '_catch_errors' => true)
-
-  # pin the Splunk hostname in /etc/hosts so cert SAN validation works
-  if $splunk_url and $splunk_ip {
-    $splunk_host = regsubst($splunk_url, '^https?://', '')
-    run_command("echo '${splunk_ip} ${splunk_host}' >> /etc/hosts", $server)
-  }
 
   run_command('puppet agent -t', $server, '_catch_errors' => true)
 }

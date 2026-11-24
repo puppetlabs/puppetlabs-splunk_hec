@@ -13,8 +13,6 @@
 plan splunk_hec::acceptance::pe_server_setup(
   Optional[String] $version     = '2023.8.7',
   Optional[Hash]   $pe_settings = { password => 'puppetlabsPi3!', configure_tuning => false },
-  Optional[String] $splunk_url  = undef,
-  Optional[String] $splunk_ip   = undef,
 ) {
   # machines are not yet ready at time of installing the puppetserver, so we wait 15s
   $localhost = get_targets('localhost')
@@ -50,12 +48,6 @@ plan splunk_hec::acceptance::pe_server_setup(
         url              => $installer_url,
         console_password => $pe_settings['password'],
       )
-
-      # pin the Splunk hostname in /etc/hosts so cert SAN validation works
-      if $splunk_url and $splunk_ip {
-        $splunk_host = regsubst($splunk_url, '^https?://', '')
-        run_command("echo '${splunk_ip} ${splunk_host}' >> /etc/hosts", $server)
-      }
 
       run_command('puppet agent -t', $server, '_catch_errors' => true)
 

@@ -60,13 +60,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.setup_matrix.outputs.matrix) }}
-    env:
-      SPLUNK_CI_URL: ${{ secrets.SPLUNK_CI_URL }}
-      SPLUNK_CI_USER: ${{ secrets.SPLUNK_CI_USER }}
-      SPLUNK_CI_PASS: ${{ secrets.SPLUNK_CI_PASS }}
-      SPLUNK_CI_HEC_TOKEN: ${{ secrets.SPLUNK_CI_HEC_TOKEN }}
-      SPLUNK_CI_HEC_CA: ${{ secrets.SPLUNK_CI_HEC_CA }}
-      SPLUNK_CI_IP: ${{ secrets.SPLUNK_CI_IP }}
 
     steps:
     - name: Checkout Source
@@ -113,16 +106,24 @@ jobs:
         bundle exec rake acceptance:configure_inventory
     - name: Install server
       run: |
-        bundle exec bolt --modulepath spec/fixtures/modules plan run splunk_hec::acceptance::server_setup puppet_version='${{ matrix.collection }}' splunk_url="$SPLUNK_CI_URL" splunk_ip="$SPLUNK_CI_IP" -i ./$INVENTORY_PATH --stream
+        bundle exec bolt --modulepath spec/fixtures/modules plan run splunk_hec::acceptance::server_setup puppet_version='${{ matrix.collection }}' -i ./$INVENTORY_PATH --stream
     - name: Install module
       run: |
-        bundle exec rake 'litmus:install_module'
+        # Only the PE server gets the module, not the Splunk node in the same inventory.
+        SERVER_URI=$(ruby -ryaml -e 'puts YAML.load_file(ARGV[0])["groups"].find { |g| g["name"] == "ssh_nodes" }["targets"].find { |t| t.dig("vars", "role") == "server" }["uri"]' "$INVENTORY_PATH")
+        bundle exec rake "litmus:install_module[$SERVER_URI]"
     - name: Set up Splunk instance
       run: |
         bundle exec rake acceptance:setup_splunk_targets
     - name: Run acceptance tests
       run: |
         bundle exec rake acceptance:ci_run_tests
+    - name: Splunk container diagnostics
+      if: ${{ always() }}
+      continue-on-error: true
+      run: |
+        SPLUNK_URI=$(ruby -ryaml -e 'puts YAML.load_file(ARGV[0])["groups"].find { |g| g["name"] == "ssh_nodes" }["targets"].find { |t| t.dig("vars", "role") == "splunk_node" }["uri"]' "$INVENTORY_PATH")
+        bundle exec bolt --modulepath spec/fixtures/modules command run 'df -h /; docker ps -a; docker stats --no-stream; docker logs --tail 40 splunk-enterprise-1 2>&1 | tail -40' --targets "$SPLUNK_URI" -i "./$INVENTORY_PATH"
     - name: Remove test environment
       if: ${{ always() }}
       continue-on-error: true

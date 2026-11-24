@@ -2,6 +2,19 @@ namespace :acceptance do
   require_relative '../spec/support/acceptance/helpers'
   include TargetHelpers
 
+  def wait_for_ssh(target, attempts: 24, delay: 10)
+    attempts.times do |n|
+      begin
+        target.run_shell('true')
+        return
+      rescue StandardError => e
+        puts "Waiting for SSH on #{target.uri} (attempt #{n + 1}/#{attempts}): #{e.message.lines.first&.strip}"
+        sleep delay
+      end
+    end
+    raise "SSH never became available on #{target.uri}"
+  end
+
   desc 'Provisions the PE server VMs and a matching set of dedicated Splunk nodes'
   task :provision_vms do
     if File.exist?('spec/fixtures/litmus_inventory.yaml')
@@ -108,16 +121,15 @@ namespace :acceptance do
 
   desc 'Sets up the Splunk instance'
   task :setup_splunk_targets do
-    if ENV['SPLUNK_CI_URL']
-      puts 'Using persistent Splunk CI instance, skipping local setup'
-      next
-    end
-
     inventory_hash = LitmusHelpers.inventory_hash_from_inventory_file
     ssh_nodes = inventory_hash['groups'].detect { |g| g['name'] == 'ssh_nodes' }['targets']
     pe_server_nodes = ssh_nodes.select { |t| t.dig('vars', 'role') == 'server' }
+    splunk_nodes    = ssh_nodes.select { |t| t.dig('vars', 'role') == 'splunk_node' }
 
     pe_server_nodes.each_with_index do |pe_node, i|
+      # Pair each PE server with its dedicated Splunk node by index, unless
+      # provision_vms already did.
+      pe_node['vars']['splunk_target'] ||= splunk_nodes[i]&.dig('uri')
       splunk_uri = pe_node.dig('vars', 'splunk_target')
       unless splunk_uri
         puts "No splunk_target paired with #{pe_node['uri']}, skipping"
@@ -126,9 +138,19 @@ namespace :acceptance do
 
       pe_target     = Target.new(pe_node['uri'])
       splunk_target = Target.new(splunk_uri)
-      splunk_hostname = splunk_uri.split(':').first
 
-      puts "Setting up Splunk Enterprise on #{splunk_uri} for PE server #{pe_node['uri']}"
+      # Freshly provisioned VMs can refuse SSH for a short while.
+      wait_for_ssh(pe_target)
+      wait_for_ssh(splunk_target)
+
+      # The Splunk node is addressed by its FQDN: PE verifies the HEC cert against it,
+      # and it resolves from the PE server on the cloud network. The provisioned uri
+      # is a bare public IP, which is not a usable certificate name.
+      splunk_hostname = splunk_target.run_shell('hostname -f').stdout.strip
+      raise "Unable to determine the FQDN of Splunk node #{splunk_uri}" if splunk_hostname.empty?
+      pe_node['vars']['splunk_fqdn'] = splunk_hostname
+
+      puts "Setting up Splunk Enterprise on #{splunk_uri} (#{splunk_hostname}) for PE server #{pe_node['uri']}"
       splunk_target.bolt_upload_file('./spec/support/acceptance/splunk', '/tmp/splunk')
 
       # Generate a puppet-signed cert on the PE server for the Splunk node's hostname
@@ -149,6 +171,10 @@ namespace :acceptance do
       puts "Starting Splunk on #{splunk_uri}"
       result = splunk_target.bolt_run_script('spec/support/acceptance/start_splunk_instance.sh').stdout.chomp
       puts result
+
+      # Fail here, not an hour later in the specs, if Splunk cannot index and search.
+      puts "Checking that Splunk on #{splunk_uri} can index and search"
+      puts splunk_target.bolt_run_script('spec/support/acceptance/splunk_sanity_check.sh').stdout
 
       # HEC token is hard coded because it will always be the same in the splunk container
       instance  = "#{splunk_hostname}:8088"
