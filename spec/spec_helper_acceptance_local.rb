@@ -95,25 +95,20 @@ def local_splunk_host
   inventory_hash = LitmusHelpers.inventory_hash_from_inventory_file
   all_nodes = inventory_hash['groups'].find { |g| g['name'] == 'ssh_nodes' }['targets']
   current_node = all_nodes.find { |t| t['uri'] == ENV['TARGET_HOST'] }
-  splunk_target = current_node&.dig('vars', 'splunk_target')
-  splunk_target ? splunk_target.split(':').first : 'localhost'
+  # splunk_fqdn is the name the HEC cert was issued for; splunk_target is the provisioned uri.
+  splunk_host = current_node&.dig('vars', 'splunk_fqdn') || current_node&.dig('vars', 'splunk_target')
+  splunk_host ? splunk_host.split(':').first : 'localhost'
 rescue StandardError
   'localhost'
 end
 
 def setup_manifest(disabled: false, cert_store: false, ssl_ca: nil, url: nil, with_event_forwarding: false)
-  if url.nil?
-    url = if ENV['SPLUNK_CI_URL'] && !ENV['SPLUNK_CI_URL'].empty?
-            "#{ENV['SPLUNK_CI_URL']}:8088/services/collector"
-          else
-            "https://#{local_splunk_host}:8088/services/collector"
-          end
-  end
+  url = "https://#{local_splunk_host}:8088/services/collector" if url.nil?
 
   manifest = ''
   params = {
     url:                       url,
-    token:                     ENV.fetch('SPLUNK_CI_HEC_TOKEN', 'abcd1234'),
+    token:                     'abcd1234',
     enable_reports:            true,
     manage_routes:             true,
     facts_terminus:            'yaml',
@@ -156,16 +151,9 @@ def add_event_forwarding
 end
 
 def configure_ssl(cert_store: false)
-  ca_pem = if ENV['SPLUNK_CI_URL'] && !ENV['SPLUNK_CI_URL'].empty?
-             # CI mode: using the persistent Splunk instance — its CA cert must be provided.
-             ca_b64 = ENV.fetch('SPLUNK_CI_HEC_CA', nil)
-             raise 'SPLUNK_CI_HEC_CA env var not set — required for SSL tests against the CI Splunk instance' if ca_b64.nil? || ca_b64.empty?
-             Base64.decode64(ca_b64)
-           else
-             # Local mode: setup_hec_ssl in start_splunk_instance.sh signs Splunk's cert with
-             # the puppet CA, so use the puppet CA cert so splunk_hec can verify Splunk's cert.
-             TARGET_SERVER.run_shell('cat $(puppet config print localcacert)').stdout
-           end
+  # setup_splunk_targets signs Splunk's cert with the PE server's CA, so that CA
+  # is what splunk_hec has to trust.
+  ca_pem = TARGET_SERVER.run_shell('cat $(puppet config print localcacert)').stdout
 
   TARGET_SERVER.run_shell('mkdir -p /etc/puppetlabs/puppet/splunk_hec')
   TARGET_SERVER.write_file(ca_pem, '/etc/puppetlabs/puppet/splunk_hec/ca.pem')
@@ -196,10 +184,9 @@ def query_puppet_user
 end
 
 def get_splunk_report(earliest, latest, sourcetype = 'puppet:summary', host: host_name)
-  splunk_user = ENV.fetch('SPLUNK_CI_USER', 'admin')
-  splunk_pass = ENV.fetch('SPLUNK_CI_PASS', 'piepiepie')
-  splunk_host = (ENV['SPLUNK_CI_URL'] && !ENV['SPLUNK_CI_URL'].empty?) ? ENV['SPLUNK_CI_URL'] : "https://#{local_splunk_host}"
-  search_url  = "#{splunk_host}:8089/services/search/v2/jobs/export"
+  splunk_user = 'admin'
+  splunk_pass = 'piepiepie'
+  search_url  = "https://#{local_splunk_host}:8089/services/search/v2/jobs/export"
   start_time  = earliest.strftime('%m/%d/%Y:%H:%M:%S')
   end_time    = (latest + 2).strftime('%m/%d/%Y:%H:%M:%S')
   sleep 1
@@ -211,7 +198,7 @@ def get_splunk_report(earliest, latest, sourcetype = 'puppet:summary', host: hos
 end
 
 def splunk_hec_source
-  (ENV['SPLUNK_CI_URL'] && !ENV['SPLUNK_CI_URL'].empty?) ? 'http:splunk_hec_ci' : 'http:splunk_hec_token'
+  'http:splunk_hec_token'
 end
 
 def report_count(report)
